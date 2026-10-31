@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#9f13ee">
+<title>Калькулятор премии</title>
+<style>
+  :root {
+    --bg: #f4eff8;
+    --paper: #fffaff;
+    --ink: #211226;
+    --muted: #72657a;
+    --line: #e6d9ee;
+    --accent: #7a0fc0;
+    --accent-2: #9f13ee;
+    --accent-soft: #f2e4fd;
+    --red: #b3263a;
+    --radius: 18px;
+    --shadow: 0 18px 50px rgba(58, 18, 78, .10), 0 2px 8px rgba(58, 18, 78, .05);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--ink);
+    background:
+      radial-gradient(900px 520px at 10% -12%, rgba(159, 19, 238, .12), transparent 62%),
+      radial-gradient(820px 520px at 102% 0%, rgba(123, 15, 192, .10), transparent 58%),
+      var(--bg);
+    font-family: "Segoe UI", "Inter", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  button, input { font: inherit; }
+
+  .page {
+    width: min(1080px, 100%);
+    margin: 0 auto;
+    padding: 28px 20px 48px;
+  }
+
+  .hero {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .hero-mark {
+    width: 54px;
+    height: 54px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    border-radius: 16px;
+    background: var(--accent-2);
+    color: #fff;
+    font-size: 26px;
+    font-weight: 800;
+    box-shadow: 0 12px 26px rgba(123, 15, 192, .28);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(28px, 4vw, 40px);
+    line-height: 1.05;
+    letter-spacing: -.035em;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(300px, .65fr);
+    gap: 20px;
+    align-items: start;
+  }
+
+  .layout > * { min-width: 0; }
+
+  .card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: rgba(255, 250, 255, .94);
+    box-shadow: var(--shadow);
+  }
+
+  .form-card {
+    padding: 6px 26px 22px;
+  }
+
+  .step {
+    padding: 21px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .step:last-of-type { border-bottom: 0; }
+
+  .step-head {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 13px;
+  }
+
+  .step-head h2 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: .085em;
+    text-transform: uppercase;
+  }
+
+  .step-num {
+    width: 25px;
+    height: 25px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .direction-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .stage-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .option {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    padding: 13px 14px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #fff;
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color .16s ease, background .16s ease, box-shadow .16s ease;
+  }
+
+  .option:hover {
+    border-color: #cfb0e6;
+  }
+
+  .option:focus-visible {
+    outline: 3px solid rgba(159, 19, 238, .30);
+    outline-offset: 2px;
+  }
+
+  .option.active {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    box-shadow: inset 0 0 0 1px var(--accent);
+  }
+
+  .direction-grid .option {
+    gap: 10px;
+  }
+
+  .direction-grid .icon {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 auto;
+    color: var(--accent-2);
+  }
+
+  .direction-grid .icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .option .title {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .stage-grid .option {
+    justify-content: center;
+    padding: 12px 8px;
+    text-align: center;
+  }
+
+  .stage-grid .title { font-size: 13.5px; }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+  }
+
+  .field-label {
+    font-size: 13px;
+    font-weight: 650;
+  }
+
+  .input-wrap {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    transition: border-color .16s ease, box-shadow .16s ease;
+  }
+
+  .input-wrap:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(123, 15, 192, .10);
+  }
+
+  .input-wrap input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    padding: 11px 12px;
+    color: var(--ink);
+    font-size: 16px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .input-wrap input::placeholder {
+    color: #a99bb2;
+    font-size: 13px;
+  }
+
+  .input-wrap input.invalid {
+    color: var(--red);
+  }
+
+  .input-wrap:has(input.invalid) {
+    border-color: var(--red);
+    box-shadow: 0 0 0 4px rgba(179, 38, 58, .08);
+  }
+
+  .input-wrap .unit {
+    flex: 0 0 auto;
+    padding: 0 12px 0 0;
+    color: var(--muted);
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+
+  .salary-field .input-wrap input {
+    padding: 13px 12px;
+    font-size: 18px;
+    font-weight: 650;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 18px;
+  }
+
+  .btn-ghost {
+    padding: 9px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 12.5px;
+    cursor: pointer;
+    transition: border-color .16s ease, color .16s ease, background .16s ease;
+  }
+
+  .btn-ghost:hover {
+    border-color: #cfb0e6;
+    background: #fff;
+    color: var(--ink);
+  }
+
+  .btn-ghost:focus-visible {
+    outline: 3px solid rgba(159, 19, 238, .30);
+    outline-offset: 2px;
+  }
+
+  .result-column { min-width: 0; }
+
+  .result-card {
+    position: sticky;
+    top: 20px;
+    padding: 24px;
+    border-color: transparent;
+    background:
+      radial-gradient(420px 240px at 100% 0%, rgba(214, 120, 255, .28), transparent 70%),
+      linear-gradient(155deg, #8a17d8 0%, #5a0a8c 62%, #34064f 100%);
+    color: #fff;
+    box-shadow: 0 22px 55px rgba(58, 8, 88, .30);
+  }
+
+  .result-label {
+    margin: 0;
+    color: #f1e6fa;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+
+  .result-amount {
+    margin: 12px 0 8px;
+    font-size: clamp(40px, 5.5vw, 54px);
+    font-weight: 800;
+    letter-spacing: -.045em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .result-amount.is-empty { color: #dcc8ec; }
+
+  .result-amount.is-zero { color: #ffd0d9; }
+
+  .result-sub {
+    min-height: 19px;
+    margin: 0;
+    color: #f0e4fa;
+    font-size: 12.5px;
+    line-height: 1.45;
+  }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .result-card { position: static; }
+  }
+
+  @media (max-width: 640px) {
+    .page { padding: 18px 12px 36px; }
+    .hero { gap: 13px; }
+    .hero-mark { width: 46px; height: 46px; border-radius: 14px; font-size: 23px; }
+    .form-card { padding: 4px 16px 18px; }
+    .step { padding: 18px 0; }
+    .direction-grid { grid-template-columns: 1fr; }
+    .stage-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .metrics { grid-template-columns: 1fr; }
+    .result-card { padding: 20px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition-duration: .01ms !important;
+      animation-duration: .01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="hero">
+    <div class="hero-mark" aria-hidden="true">₽</div>
+    <h1>Калькулятор премии</h1>
+  </header>
+
+  <main class="layout">
+
+    <section class="card form-card" aria-label="Данные">
+
+      <div class="step">
+        <div class="step-head">
+          <span class="step-num">1</span>
+          <h2>Направление</h2>
+        </div>
+        <div class="direction-grid" id="direction" role="group" aria-label="Направление">
+          <button type="button" class="option active" data-direction="chat" aria-pressed="true">
+            <span class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4.5 5.5h15v10.2h-8.2L7 19.2v-3.5H4.5z"/>
+                <path d="M8.2 9.2h7.6M8.2 12.2h5.2"/>
+              </svg>
+            </span>
+            <span class="title">Чаты</span>
+          </button>
+          <button type="button" class="option" data-direction="voice" aria-pressed="false">
+            <span class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7.2 4.8l2.1-.5 1.3 4-1.9 1.2a12.2 12.2 0 0 0 5.8 5.8l1.2-1.9 4 1.3-.5 2.1a2 2 0 0 1-2.2 1.6C10.6 18 6 13.4 5.4 7A2 2 0 0 1 7.2 4.8z"/>
+              </svg>
+            </span>
+            <span class="title">Звонки</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-head">
+          <span class="step-num">2</span>
+          <h2>Стаж</h2>
+        </div>
+        <div class="stage-grid" id="stage" role="group" aria-label="Стаж">
+          <button type="button" class="option active" data-stage="1" aria-pressed="true">
+            <span class="title">1 месяц</span>
+          </button>
+          <button type="button" class="option" data-stage="2" aria-pressed="false">
+            <span class="title">2 месяца</span>
+          </button>
+          <button type="button" class="option" data-stage="3" aria-pressed="false">
+            <span class="title">3 месяца</span>
+          </button>
+          <button type="button" class="option" data-stage="3plus" aria-pressed="false">
+            <span class="title">3+</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-head">
+          <span class="step-num">3</span>
+          <h2>Показатели</h2>
+        </div>
+        <div class="metrics">
+
+          <label class="field" for="fact-vyrabotka">
+            <span class="field-label">Выработка</span>
+            <span class="input-wrap">
+              <input id="fact-vyrabotka" type="text" inputmode="decimal" placeholder="0" autocomplete="off" spellcheck="false">
+            </span>
+          </label>
+
+          <label class="field" for="fact-rating">
+            <span class="field-label">Рейтинг</span>
+            <span class="input-wrap">
+              <input id="fact-rating" type="text" inputmode="decimal" placeholder="0" autocomplete="off" spellcheck="false">
+              <span class="unit">балл</span>
+            </span>
+          </label>
+
+          <label class="field" for="fact-ant">
+            <span class="field-label">АНТ</span>
+            <span class="input-wrap">
+              <input id="fact-ant" type="text" inputmode="decimal" placeholder="0" autocomplete="off" spellcheck="false">
+              <span class="unit" id="ant-unit">мин</span>
+            </span>
+          </label>
+
+          <label class="field" for="fact-ops">
+            <span class="field-label">Зарегистрированные операции</span>
+            <span class="input-wrap">
+              <input id="fact-ops" type="text" inputmode="decimal" placeholder="0" autocomplete="off" spellcheck="false">
+              <span class="unit">%</span>
+            </span>
+          </label>
+
+          <label class="field" for="fact-ko">
+            <span class="field-label">КО</span>
+            <span class="input-wrap">
+              <input id="fact-ko" type="text" inputmode="decimal" placeholder="0" autocomplete="off" spellcheck="false">
+              <span class="unit">%</span>
+            </span>
+          </label>
+
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-head">
+          <span class="step-num">4</span>
+          <h2>Зарплата</h2>
+        </div>
+        <label class="field salary-field" for="salary">
+          <span class="field-label">Зарплата</span>
+          <span class="input-wrap">
+            <input id="salary" type="text" inputmode="decimal" placeholder="0" autocomplete="off" spellcheck="false">
+            <span class="unit">₽</span>
+          </span>
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-ghost" id="reset">Сбросить</button>
+      </div>
+
+    </section>
+
+    <aside class="result-column" aria-label="Результат">
+      <section class="card result-card" aria-live="polite">
+        <p class="result-label">Премия</p>
+        <div class="result-amount is-empty" id="premium">0 ₽</div>
+        <p class="result-sub" id="premium-sub">Заполните показатели</p>
+      </section>
+    </aside>
+
+  </main>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var PLANS = {
+    chat: {
+      1: { output: 100, rating: 3.5, ant: 7.5, ops: 0.95 },
+      2: { output: 140, rating: 3.7, ant: 5.3, ops: 0.95 },
+      3: { output: 180, rating: 4.15, ant: 3.8, ops: 0.95 }
+    },
+    voice: {
+      1: { output: 50, rating: 4.2, ant: 360, ops: 0.95 },
+      2: { output: 60, rating: 4.5, ant: 335, ops: 0.95 },
+      3: { output: 70, rating: 4.7, ant: 300, ops: 0.95 }
+    }
+  };
+
+  var state = { direction: "chat", stage: "1" };
+  var EPS = 1e-9;
+
+  var money = new Intl.NumberFormat("ru-RU", {
+    style: "currency",
+    currency: "RUB",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  });
+
+  function $(id) { return document.getElementById(id); }
+
+  function currentPlan() {
+    var group = state.direction === "voice" ? "voice" : "chat";
+    var stage = state.stage === "3plus" ? 3 : Number(state.stage);
+    return PLANS[group][stage];
+  }
+
+  function isVoice() { return state.direction === "voice"; }
+  function antUnit() { return isVoice() ? "сек" : "мин"; }
+
+  function readNumber(id) {
+    var el = $(id);
+    var raw = el.value.trim()
+      .replace(/\s+/g, "")
+      .replace(/%/g, "")
+      .replace(/₽/g, "")
+      .replace(",", ".");
+    if (raw === "") {
+      el.classList.remove("invalid");
+      el.removeAttribute("aria-invalid");
+      return { value: null, valid: true };
+    }
+    var n = Number(raw);
+    var valid = Number.isFinite(n) && n >= 0;
+    el.classList.toggle("invalid", !valid);
+    if (valid) el.removeAttribute("aria-invalid");
+    else el.setAttribute("aria-invalid", "true");
+    return { value: valid ? n : null, valid: valid };
+  }
+
+  function scoreOutput(x, voice) {
+    if (!(x > 0)) return 0;
+    if (!voice && x < 0.9 - EPS) return 0;
+    if (x > 1.1 + EPS) return 1.2;
+    return Math.min(1.2, Math.max(0, x));
+  }
+
+  function scoreRating(x) {
+    if (!(x > 0)) return 0;
+    if (x < 0.9 - EPS) return 0;
+    if (x < 1 - EPS) return x;
+    if (x <= 1 + EPS) return 1;
+    if (x <= 1.05 + EPS) return 1.1;
+    return 1.2;
+  }
+
+  function scoreAnt(x) {
+    if (!(x > 0)) return 0;
+    if (x < 0.9 - EPS) return 0;
+    if (x > 1.1 + EPS) return 1.1;
+    return Math.min(1.1, Math.max(0, x));
+  }
+
+  function scoreOps(x) {
+    if (!(x > 0)) return 0;
+    if (x < 0.9 - EPS) return 0;
+    if (x < 1 - EPS) return x;
+    return 1;
+  }
+
+  function scoreKo(share) {
+    if (share === null) return 1.05;
+    if (share < 0.7 - EPS) return 0;
+    if (share < 1 - EPS) return share;
+    return 1.05;
+  }
+
+  function calculate() {
+    var plan = currentPlan();
+    var out = readNumber("fact-vyrabotka");
+    var rat = readNumber("fact-rating");
+    var ant = readNumber("fact-ant");
+    var ops = readNumber("fact-ops");
+    var ko = readNumber("fact-ko");
+    var salary = readNumber("salary");
+
+    var hasAny = [out.value, rat.value, ant.value, ops.value, ko.value].some(function (v) { return v !== null; });
+    var allFilled = out.value !== null && rat.value !== null && ant.value !== null && ops.value !== null;
+    var invalid = [out, rat, ant, ops, ko, salary].some(function (x) { return !x.valid; });
+
+    var vOut = out.value !== null ? out.value / plan.output : 0;
+    var vRat = rat.value !== null ? rat.value / plan.rating : 0;
+    var vAnt = ant.value !== null && ant.value > 0 ? plan.ant / ant.value : 0;
+    var vOps = ops.value !== null ? (ops.value / 100) / plan.ops : 0;
+    var koShare = ko.value !== null ? ko.value / 100 : null;
+
+    var sOut = out.value !== null ? scoreOutput(vOut, isVoice()) : 0;
+    var sRat = rat.value !== null ? scoreRating(vRat) : 0;
+    var sAnt = ant.value !== null ? scoreAnt(vAnt) : 0;
+    var sOps = ops.value !== null ? scoreOps(vOps) : 0;
+
+    var weighted = 0.30 * sOut + 0.35 * sRat + 0.20 * sAnt + 0.15 * sOps;
+    var coef = weighted * scoreKo(koShare);
+    var base = salary.value !== null ? salary.value * 0.15 : null;
+    var premium = base !== null && hasAny ? base * coef : null;
+
+    return {
+      hasAny: hasAny,
+      allFilled: allFilled,
+      invalid: invalid,
+      coef: coef,
+      premium: premium
+    };
+  }
+
+  function setActive(selector, datasetKey, value) {
+    var nodes = document.querySelectorAll(selector);
+    for (var i = 0; i < nodes.length; i++) {
+      var node = nodes[i];
+      var active = node.dataset[datasetKey] === value;
+      node.classList.toggle("active", active);
+      node.setAttribute("aria-pressed", active ? "true" : "false");
+    }
+  }
+
+  function render() {
+    var d = calculate();
+
+    setActive("[data-direction]", "direction", state.direction);
+    setActive("[data-stage]", "stage", state.stage);
+    $("ant-unit").textContent = antUnit();
+
+    var premiumEl = $("premium");
+    var subEl = $("premium-sub");
+
+    premiumEl.classList.toggle("is-empty", !d.hasAny);
+    premiumEl.classList.toggle("is-zero", d.hasAny && d.coef === 0);
+
+    if (d.invalid) {
+      premiumEl.textContent = "—";
+      subEl.textContent = "Проверьте числа";
+    } else if (!d.hasAny) {
+      premiumEl.textContent = money.format(0);
+      subEl.textContent = "Заполните показатели";
+    } else if (!d.allFilled) {
+      premiumEl.textContent = "—";
+      subEl.textContent = "Заполните все показатели";
+    } else if (d.premium === null) {
+      premiumEl.textContent = "—";
+      subEl.textContent = "Укажите зарплату";
+    } else {
+      premiumEl.textContent = money.format(Math.round(d.premium));
+      subEl.textContent = "К выплате";
+    }
+  }
+
+  function bind() {
+    var directionButtons = document.querySelectorAll("[data-direction]");
+    for (var i = 0; i < directionButtons.length; i++) {
+      directionButtons[i].addEventListener("click", function () {
+        var next = this.dataset.direction;
+        var wasVoice = state.direction === "voice";
+        var willVoice = next === "voice";
+        if (wasVoice !== willVoice) {
+          $("fact-ant").value = "";
+        }
+        state.direction = next;
+        render();
+      });
+    }
+
+    var stageButtons = document.querySelectorAll("[data-stage]");
+    for (var j = 0; j < stageButtons.length; j++) {
+      stageButtons[j].addEventListener("click", function () {
+        state.stage = this.dataset.stage;
+        render();
+      });
+    }
+
+    ["fact-vyrabotka", "fact-rating", "fact-ant", "fact-ops", "fact-ko", "salary"].forEach(function (id) {
+      $(id).addEventListener("input", render);
+    });
+
+    $("reset").addEventListener("click", function () {
+      ["fact-vyrabotka", "fact-rating", "fact-ant", "fact-ops", "fact-ko", "salary"].forEach(function (id) {
+        var el = $(id);
+        el.value = "";
+        el.classList.remove("invalid");
+        el.removeAttribute("aria-invalid");
+      });
+      state.direction = "chat";
+      state.stage = "1";
+      render();
+    });
+  }
+
+  bind();
+  render();
+})();
+</script>
+</body>
+</html>
