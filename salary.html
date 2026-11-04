@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Шпаргалка · Группа 11 · Смена 1 ночь</title>
+<style>
+:root{--bg:#f6f4fb;--card:#fff;--ink:#1d1730;--muted:#6b6480;--line:#e6e1f2;--accent:#7b2cbf;--accent2:#cb11ab;--soft:#f1e8fb;--ok:#1f9d6b;--warn:#d9480f}
+@media (prefers-color-scheme:dark){:root{--bg:#141020;--card:#1e182d;--ink:#eee9f8;--muted:#a59cbd;--line:#30284a;--accent:#b57bee;--accent2:#ee5fd2;--soft:#2a2140;--ok:#4cd39b;--warn:#ff8a5c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{background:linear-gradient(120deg,var(--accent),var(--accent2));color:#fff;padding:28px 16px 22px}
+header .w{max-width:960px;margin:0 auto}
+header h1{margin:0 0 4px;font-size:26px}
+header p{margin:0;opacity:.9}
+nav{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
+nav .w{max-width:960px;margin:0 auto;display:flex;gap:6px;overflow-x:auto;padding:10px 16px}
+nav a{white-space:nowrap;text-decoration:none;color:var(--accent);background:var(--soft);padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600}
+main{max-width:960px;margin:0 auto;padding:20px 16px 60px}
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px}
+h2{margin:0 0 14px;font-size:20px;display:flex;align-items:center;gap:8px}
+h3{margin:18px 0 8px;font-size:15px;color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.link{display:block;text-decoration:none;color:inherit;border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--soft);transition:.15s}
+.link:hover{border-color:var(--accent);transform:translateY(-1px)}
+.link b{display:block;color:var(--accent)}
+.hub{font-size:14px}.hub b{font-size:17px;margin-bottom:4px}.warnc{border-color:var(--warn)}
+.link small{color:var(--muted);word-break:break-all}
+.time{display:inline-block;background:var(--accent);color:#fff;border-radius:8px;padding:2px 8px;font-weight:700;font-size:13px}
+ul.rules{list-style:none;padding:0;margin:0}
+ul.rules li{padding:10px 0;border-bottom:1px dashed var(--line)}
+ul.rules li:last-child{border:0}
+.tpl{position:relative;border-left:4px solid var(--accent);background:var(--soft);border-radius:10px;padding:12px 14px 12px 14px;margin:10px 0;white-space:pre-wrap}
+.tpl .lbl{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px;padding-right:96px}
+.copy{position:absolute;top:8px;right:8px;border:0;background:var(--accent);color:#fff;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer}
+.copy.done{background:var(--ok)}
+.note{border-radius:10px;padding:10px 14px;background:var(--soft);border:1px solid var(--line);margin:10px 0}
+.note.warn{border-color:var(--warn)}
+code{background:var(--soft);padding:1px 6px;border-radius:6px}
+footer{text-align:center;color:var(--muted);font-size:12px}
+table{width:100%;border-collapse:collapse}
+td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+td:first-child{font-weight:700;width:38%;color:var(--accent)}
+.gl{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px}
+.gl div{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--soft)}
+.gl b{color:var(--accent)}
+#glq{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit;margin-bottom:10px}
+main a:not(.link){color:var(--accent);font-weight:600}
+.calc{display:grid;gap:14px}
+.calc label{display:block;font-weight:700;margin-bottom:6px}
+.calc small{display:block;color:var(--muted);font-weight:400;margin-top:4px}
+.calc input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit;font-size:18px}
+.calc input:focus{outline:2px solid var(--accent);border-color:transparent}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.row{grid-template-columns:1fr}}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.steps button{border:1px solid var(--line);background:var(--soft);color:var(--accent);border-radius:10px;padding:6px 12px;font:inherit;font-weight:700;cursor:pointer}
+.res{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:6px}
+.res div{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--soft)}
+.res span{display:block;color:var(--muted);font-size:13px}
+.res b{display:block;font-size:24px;color:var(--accent);margin-top:4px}
+.res .main{background:linear-gradient(120deg,var(--accent),var(--accent2));border:0}
+.res .main span,.res .main b{color:#fff}
+.formula{font-family:ui-monospace,Consolas,monospace;background:var(--soft);border-radius:10px;padding:10px 14px;margin:10px 0}
+main a:not(.link){color:var(--accent);font-weight:600}
+</style>
+</head>
+<body>
+<header><div class="w">
+<h1>💵 Калькулятор зарплаты</h1>
+<p>Сколько придёт 10 числа по ГПХ — до вычета НДФЛ · Группа 11</p>
+</div></header>
+<nav><div class="w">
+<a href="index.html">← Шпаргалка</a><a href="zp.html">💰 Как вывести зарплату</a><a href="calc.html">🧮 Калькулятор премии</a><a href="templates.html">📋 Шаблоны</a>
+</div></nav>
+<main>
+
+<section>
+<h2>🧮 Посчитать</h2>
+<div class="calc">
+<div class="row">
+<div><label for="gph">Сумма по договору ГПХ, ₽<small>Возьмите из личного кабинета <a href="https://myteam.rwb.ru/finances" target="_blank">MyTeam</a></small></label>
+<input id="gph" type="number" inputmode="decimal" min="0" step="any" placeholder="например, 60000"></div>
+<div><label for="sh">Отработано смен<small>Сколько смен вы отработали за месяц</small></label>
+<input id="sh" type="number" inputmode="numeric" min="0" max="31" step="1" placeholder="например, 15">
+<div class="steps"><button type="button" data-d="-1">−1</button><button type="button" data-d="1">+1</button><button type="button" data-v="15">15</button></div></div>
+</div>
+<div class="res">
+<div><span>Стоимость одной смены</span><b id="per">—</b></div>
+<div class="main"><span>Придёт 10 числа (до НДФЛ)</span><b id="tot">—</b></div>
+</div>
+</div>
+</section>
+
+<section>
+<h2>📐 Как считается</h2>
+<div class="formula">Стоимость смены = Сумма по ГПХ ÷ 15<br>Зарплата = Стоимость смены × Отработанные смены</div>
+<ul class="rules">
+<li>1️⃣ Берём сумму по договору ГПХ из кабинета MyTeam.</li>
+<li>2️⃣ Делим её на <b>15</b> — столько смен в месяце по графику 2/2. Получаем стоимость одной смены.</li>
+<li>3️⃣ Умножаем на количество отработанных смен.</li>
+<li>💳 Результат — сумма, которая придёт <b>10 числа</b>, <b>до вычета НДФЛ</b>.</li>
+</ul>
+<div class="note">Пример: ГПХ 60 000 ₽ → смена 4 000 ₽ → отработали 12 смен → 48 000 ₽ до НДФЛ.</div>
+</section>
+
+<footer>Расчёт ориентировочный · Премия считается отдельно — <a href="calc.html">калькулятор премии</a></footer>
+</main>
+<script>
+var g=document.getElementById('gph'),s=document.getElementById('sh');
+function rub(n){return n.toLocaleString('ru-RU',{minimumFractionDigits:0,maximumFractionDigits:2})+' ₽'}
+function calc(){var a=parseFloat(g.value),n=parseFloat(s.value);
+var per=a>0?a/15:NaN;document.getElementById('per').textContent=isNaN(per)?'—':rub(Math.round(per*100)/100);
+document.getElementById('tot').textContent=(isNaN(per)||!(n>=0))?'—':rub(Math.round(per*n*100)/100);
+try{localStorage.setItem('zp_gph',g.value)}catch(e){}}
+try{var v=localStorage.getItem('zp_gph');if(v)g.value=v}catch(e){}
+g.addEventListener('input',calc);s.addEventListener('input',calc);
+document.querySelectorAll('.steps button').forEach(function(b){b.onclick=function(){var n=parseInt(s.value)||0;
+if(b.dataset.v)n=+b.dataset.v;else n=Math.max(0,Math.min(31,n+ +b.dataset.d));s.value=n;calc()}});
+calc();
+</script>
+</body>
+</html>
