@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Отпуск 2027 · Группа 11</title>
+<style>
+:root{--bg:#f6f4fb;--card:#fff;--ink:#1d1730;--muted:#6b6480;--line:#e6e1f2;--accent:#7b2cbf;--accent2:#cb11ab;--soft:#f1e8fb;--ok:#1f9d6b;--warn:#d9480f}
+@media (prefers-color-scheme:dark){:root{--bg:#141020;--card:#1e182d;--ink:#eee9f8;--muted:#a59cbd;--line:#30284a;--accent:#b57bee;--accent2:#ee5fd2;--soft:#2a2140;--ok:#4cd39b;--warn:#ff8a5c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{background:linear-gradient(120deg,var(--accent),var(--accent2));color:#fff;padding:28px 16px 22px}
+header .w{max-width:960px;margin:0 auto}
+header h1{margin:0 0 4px;font-size:26px}
+header p{margin:0;opacity:.9}
+nav{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
+nav .w{max-width:960px;margin:0 auto;display:flex;gap:6px;overflow-x:auto;padding:10px 16px}
+nav a{white-space:nowrap;text-decoration:none;color:var(--accent);background:var(--soft);padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600}
+main{max-width:960px;margin:0 auto;padding:20px 16px 60px}
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px}
+h2{margin:0 0 14px;font-size:20px;display:flex;align-items:center;gap:8px}
+h3{margin:18px 0 8px;font-size:15px;color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.link{display:block;text-decoration:none;color:inherit;border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--soft);transition:.15s}
+.link:hover{border-color:var(--accent);transform:translateY(-1px)}
+.link b{display:block;color:var(--accent)}
+.hub{font-size:14px}.hub b{font-size:17px;margin-bottom:4px}.warnc{border-color:var(--warn)}
+.link small{color:var(--muted);word-break:break-all}
+.time{display:inline-block;background:var(--accent);color:#fff;border-radius:8px;padding:2px 8px;font-weight:700;font-size:13px}
+ul.rules{list-style:none;padding:0;margin:0}
+ul.rules li{padding:10px 0;border-bottom:1px dashed var(--line)}
+ul.rules li:last-child{border:0}
+.tpl{position:relative;border-left:4px solid var(--accent);background:var(--soft);border-radius:10px;padding:12px 14px 12px 14px;margin:10px 0;white-space:pre-wrap}
+.tpl .lbl{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px;padding-right:96px}
+.copy{position:absolute;top:8px;right:8px;border:0;background:var(--accent);color:#fff;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer}
+.copy.done{background:var(--ok)}
+.note{border-radius:10px;padding:10px 14px;background:var(--soft);border:1px solid var(--line);margin:10px 0}
+.note.warn{border-color:var(--warn)}
+code{background:var(--soft);padding:1px 6px;border-radius:6px}
+footer{text-align:center;color:var(--muted);font-size:12px}
+table{width:100%;border-collapse:collapse}
+td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+td:first-child{font-weight:700;width:38%;color:var(--accent)}
+.gl{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px}
+.gl div{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--soft)}
+.gl b{color:var(--accent)}
+#glq{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit;margin-bottom:10px}
+main a:not(.link){color:var(--accent);font-weight:600}
+main a:not(.link){color:var(--accent);font-weight:600}
+.rulesbox{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.rulesbox div{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--soft);font-size:14px}
+.rulesbox b{display:block;color:var(--accent);margin-bottom:2px}
+.rulesbox .w2{border-color:var(--warn)}.rulesbox .w2 b{color:var(--warn)}
+.calhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.calhead h3{margin:0;font-size:18px;color:var(--ink);text-transform:capitalize}
+.calhead button,.btn{border:0;background:var(--accent);color:#fff;border-radius:10px;padding:8px 14px;font:inherit;font-weight:700;cursor:pointer}
+.calhead button{background:var(--soft);color:var(--accent);border:1px solid var(--line);min-width:44px}
+.btn:disabled{opacity:.55;cursor:wait}
+.btn.ghost{background:var(--soft);color:var(--accent);border:1px solid var(--line)}
+.btn.danger{background:var(--warn)}
+.months{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:4px}
+.months button{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:999px;padding:4px 10px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
+.months button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.months button.hint{border-color:var(--ok)}
+.grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.dow{text-align:center;font-size:12px;color:var(--muted);font-weight:700;padding:4px 0}
+.day{position:relative;min-height:54px;border:1px solid var(--line);border-radius:10px;background:var(--card);padding:4px 5px;cursor:pointer;font:inherit;color:var(--ink);text-align:left;overflow:hidden}
+.day .n{font-weight:700;font-size:14px}
+.day .who{display:block;font-size:10px;line-height:1.15;color:#fff;margin-top:2px;word-break:break-word}
+.day.empty{visibility:hidden}
+.day.busy{background:#c2410c;border-color:#c2410c;color:#fff;cursor:not-allowed}
+.day.mine{background:var(--ok);border-color:var(--ok);color:#fff}
+.day.sel{background:var(--accent);border-color:var(--accent);color:#fff}
+.day.range{background:var(--soft);border-color:var(--accent)}
+.day.we .n{color:var(--accent2)}.day.busy .n,.day.sel .n,.day.mine .n{color:#fff}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:5px}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:6px}
+.form label{font-weight:700;font-size:14px;display:block;margin-bottom:5px}
+.form input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+.form input:focus{outline:2px solid var(--accent);border-color:transparent}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.sum{color:var(--muted);font-size:14px}
+.msg{display:none;border-radius:12px;padding:12px 14px;margin-top:14px;font-weight:600}
+.msg.ok{display:block;background:rgba(31,157,107,.12);border:1px solid var(--ok)}
+.msg.err{display:block;background:rgba(217,72,15,.10);border:1px solid var(--warn)}
+.msg.info{display:block;background:var(--soft);border:1px solid var(--line)}
+table.list td:first-child{width:auto;color:var(--ink)}
+table.list td{vertical-align:middle}
+table.list .b{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+table.list .b button{padding:6px 10px;font-size:13px}
+.modebar{display:none;background:var(--soft);border:1px solid var(--accent);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-weight:600}
+.loading{color:var(--muted);font-size:14px}
+@media(max-width:520px){.day{min-height:46px;padding:3px}.day .who{font-size:9px}}
+</style>
+</head>
+<body>
+<header><div class="w">
+<h1>🌴 Отпуск 2027</h1>
+<p>Бронирование отпусков Группы 11 · даты сразу попадают в общую таблицу</p>
+</div></header>
+<nav><div class="w">
+<a href="index.html">← Шпаргалка</a><a href="#cal">📅 Календарь</a><a href="#book">✍️ Забронировать</a><a href="#list">📋 Все брони</a><a href="salary.html">💵 Калькулятор зарплаты</a>
+</div></nav>
+<main>
+
+<section>
+<h2>📌 Правила</h2>
+<div class="rulesbox">
+<div class="w2"><b>💸 Только за свой счёт</b>Отпуск берётся только за свой счёт.</div>
+<div class="w2"><b>🚫 Без премии</b>При уходе в отпуск премия не будет начислена.</div>
+<div><b>☀️ Желательно с июня</b>Бронировать можно весь 2027 год, но желательные даты — с июня.</div>
+<div><b>👤 Один человек</b>В отпуске одновременно может быть только один сотрудник группы.</div>
+<div><b>📏 До 14 дней</b>Один отпуск — не больше 14 дней подряд.</div>
+<div><b>🔐 ПИН-код</b>Придумайте 4 цифры при бронировании. Изменить или удалить бронь можно только с этим ПИН-кодом.</div>
+</div>
+</section>
+
+<section id="cal">
+<h2>📅 Календарь</h2>
+<div class="months" id="months"></div>
+<div class="calhead"><button type="button" id="prev" aria-label="Предыдущий месяц">‹</button><h3 id="mtitle"></h3><button type="button" id="next" aria-label="Следующий месяц">›</button></div>
+<div class="grid7" id="dows"></div>
+<div class="grid7" id="days"></div>
+<div class="legend"><span><i style="background:#c2410c"></i>занято</span><span><i style="background:var(--accent)"></i>ваш выбор</span><span><i style="background:var(--ok)"></i>редактируемая бронь</span><span><i style="border:1px solid var(--line);background:var(--card)"></i>свободно</span></div>
+<p class="loading" id="loading">⏳ Загружаем брони из таблицы… Первый раз это может занять до 20 секунд.</p>
+</section>
+
+<section id="book">
+<h2>✍️ <span id="ftitle">Забронировать отпуск</span></h2>
+<div class="modebar" id="modebar">✏️ Редактирование брони: <span id="modewho"></span> · <a href="#" id="cancelEdit">отменить</a></div>
+<p style="margin-top:0;color:var(--muted)">Нажмите в календаре на первый и последний день отпуска — или введите даты вручную.</p>
+<div class="form">
+<div><label for="fio">Фамилия и Имя</label><input id="fio" autocomplete="name" placeholder="Иванова Анна" maxlength="60"></div>
+<div><label for="from">С</label><input id="from" type="date" min="2027-01-01" max="2027-12-31"></div>
+<div><label for="to">По</label><input id="to" type="date" min="2027-01-01" max="2027-12-31"></div>
+<div><label for="pin">ПИН-код (4 цифры)</label><input id="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="••••"></div>
+</div>
+<div class="actions"><button class="btn" id="go" type="button">Забронировать</button><button class="btn ghost" id="clear" type="button">Сбросить</button><span class="sum" id="sum"></span></div>
+<div class="msg" id="msg"></div>
+</section>
+
+<section id="list">
+<h2>📋 Все брони</h2>
+<div id="listbox"><p class="loading">Загружаем…</p></div>
+</section>
+
+<footer>Данные хранятся в таблице «Группа 11», лист «Отпуск 2027» · Вопросы — к руководителю группы</footer>
+</main>
+<script>
+var API='https://script.google.com/macros/s/AKfycby3TmLzEyNubx9Of5FdTA5_Eqexb0d_7EVfac1Xng-maYeiH5LasNRmF3jR6r8H7PjL/exec';
+var YEAR=2027,MAXD=14,items=[],month=5,editId=null,busy=false;
+var MN=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+var $=function(i){return document.getElementById(i)};
+function iso(d){return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
+function pd(s){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||'');return m?new Date(+m[1],+m[2]-1,+m[3]):null}
+function ru(s){var d=pd(s);return d?('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear():''}
+function days(a,b){return Math.round((pd(b)-pd(a))/864e5)+1}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function short(n){var p=n.split(' ');return p[0]+(p[1]?' '+p[1][0]+'.':'')}
+function owner(ds){for(var i=0;i<items.length;i++){var it=items[i];if(it.id!==editId&&ds>=it.from&&ds<=it.to)return it}return null}
+function conflict(a,b){for(var i=0;i<items.length;i++){var it=items[i];if(it.id!==editId&&a<=it.to&&b>=it.from)return it}return null}
+function msg(t,c){var m=$('msg');m.className='msg '+c;m.textContent=t}
+
+function render(){
+  var mb=$('months');mb.innerHTML='';
+  MN.forEach(function(n,i){var b=document.createElement('button');b.type='button';b.textContent=n.slice(0,3);
+    b.className=(i===month?'on':'')+(i>=5?' hint':'');b.title=i>=5?'желательные месяцы':'';b.onclick=function(){month=i;render()};mb.appendChild(b)});
+  $('mtitle').textContent=MN[month]+' '+YEAR;
+  $('prev').disabled=month===0;$('next').disabled=month===11;
+  var f=$('from').value,t=$('to').value,box=$('days');box.innerHTML='';
+  var first=new Date(YEAR,month,1),off=(first.getDay()+6)%7,n=new Date(YEAR,month+1,0).getDate();
+  for(var k=0;k<off;k++){var e=document.createElement('div');e.className='day empty';box.appendChild(e)}
+  for(var d=1;d<=n;d++){
+    var dt=new Date(YEAR,month,d),ds=iso(dt),b=document.createElement('button');b.type='button';
+    var o=owner(ds),cls='day'+((dt.getDay()===0||dt.getDay()===6)?' we':'');
+    var html='<span class="n">'+d+'</span>';
+    if(o){cls+=' busy';html+='<span class="who">'+esc(short(o.name))+'</span>';b.title='Занято: '+o.name+' ('+ru(o.from)+' – '+ru(o.to)+')'}
+    else if(editId){var me=items.filter(function(x){return x.id===editId})[0];if(me&&ds>=me.from&&ds<=me.to&&!(f&&t))cls+=' mine'}
+    if(!o&&f&&(ds===f||ds===t))cls+=' sel';else if(!o&&f&&t&&ds>f&&ds<t)cls+=' range';
+    b.className=cls;b.innerHTML=html;b.dataset.d=ds;b.onclick=pick;box.appendChild(b)}
+  updSum()}
+function pick(){var ds=this.dataset.d,o=owner(ds);
+  if(o){msg('К сожалению, '+ru(ds)+' занято сотрудником '+o.name+' ('+ru(o.from)+' – '+ru(o.to)+'). Выберите другие даты или договоритесь с ним/ней, чтобы поменяться датами.','err');return}
+  var f=$('from').value,t=$('to').value;
+  if(!f||(f&&t)){$('from').value=ds;$('to').value=''}
+  else if(ds<f){$('to').value=f;$('from').value=ds}else{$('to').value=ds}
+  $('msg').className='msg';render()}
+function updSum(){var f=$('from').value,t=$('to').value,s=$('sum');
+  if(f&&t&&t>=f){var n=days(f,t),c=conflict(f,t);s.textContent='Выбрано: '+ru(f)+' – '+ru(t)+' · '+n+' дн.'+(n>MAXD?' ⚠️ больше '+MAXD:'')+(c?' ⚠️ пересекается с '+c.name:'')}
+  else if(f)s.textContent='Начало: '+ru(f)+' — теперь выберите последний день';else s.textContent=''}
+
+function api(body){
+  return fetch(API,{method:'POST',body:JSON.stringify(body)}).then(function(r){return r.json()})}
+function load(){
+  return fetch(API).then(function(r){return r.json()}).then(function(r){items=r.items||[];$('loading').style.display='none';render();list()})
+  .catch(function(){$('loading').textContent='⚠️ Не удалось загрузить брони. Обновите страницу через минуту.'})}
+function list(){
+  var lb=$('listbox');
+  if(!items.length){lb.innerHTML='<p style="color:var(--muted)">Пока никто не забронировал отпуск — будьте первым!</p>';return}
+  var h='<table class="list">';
+  items.forEach(function(it){h+='<tr><td><b>'+esc(it.name)+'</b><br><span style="color:var(--muted)">'+ru(it.from)+' – '+ru(it.to)+' · '+it.days+' дн.</span></td><td><div class="b"><button class="btn ghost" data-e="'+it.id+'">✏️ Изменить</button><button class="btn danger" data-x="'+it.id+'">🗑 Удалить</button></div></td></tr>'});
+  lb.innerHTML=h+'</table>';
+  lb.querySelectorAll('[data-e]').forEach(function(b){b.onclick=function(){startEdit(b.dataset.e)}});
+  lb.querySelectorAll('[data-x]').forEach(function(b){b.onclick=function(){del(b.dataset.x)}})}
+function startEdit(id){var it=items.filter(function(x){return x.id===id})[0];if(!it)return;
+  editId=id;$('fio').value=it.name;$('from').value=it.from;$('to').value=it.to;$('pin').value='';
+  $('modebar').style.display='block';$('modewho').textContent=it.name+' ('+ru(it.from)+' – '+ru(it.to)+')';
+  $('ftitle').textContent='Изменить даты отпуска';$('go').textContent='Сохранить изменения';
+  month=pd(it.from).getMonth();msg('Выберите новые даты и введите ПИН-код, который указали при бронировании.','info');render();
+  $('book').scrollIntoView({behavior:'smooth'})}
+function stopEdit(){editId=null;$('modebar').style.display='none';$('ftitle').textContent='Забронировать отпуск';$('go').textContent='Забронировать'}
+function del(id){var it=items.filter(function(x){return x.id===id})[0];if(!it||busy)return;
+  var pin=prompt('Удалить бронь «'+it.name+'» ('+ru(it.from)+' – '+ru(it.to)+')?\nВведите ПИН-код, указанный при бронировании:');
+  if(pin===null)return;
+  send({action:'delete',id:id,pin:pin.trim()},true)}
+function send(body,isDel){
+  busy=true;$('go').disabled=true;msg('⏳ Сохраняем в таблицу…','info');
+  api(body).then(function(r){
+    if(r.items){items=r.items}
+    if(r.ok){msg((isDel?'🗑 ':'✅ ')+r.msg,'ok');if(!isDel){$('pin').value='';$('from').value='';$('to').value=''}if(!isDel||body.id===editId)stopEdit()}
+    else msg('❌ '+r.msg,'err');
+    render();list()})
+  .catch(function(){msg('❌ Не удалось связаться с таблицей. Проверьте интернет и попробуйте ещё раз.','err')})
+  .then(function(){busy=false;$('go').disabled=false;$('msg').scrollIntoView({behavior:'smooth',block:'nearest'})})}
+$('go').onclick=function(){
+  if(busy)return;
+  var name=$('fio').value.replace(/\s+/g,' ').trim(),f=$('from').value,t=$('to').value,pin=$('pin').value.trim();
+  if(name.split(' ').length<2)return msg('Укажите фамилию и имя.','err');
+  if(!f||!t)return msg('Выберите даты начала и конца отпуска.','err');
+  if(t<f)return msg('Дата окончания раньше даты начала.','err');
+  if(f.slice(0,4)!=='2027'||t.slice(0,4)!=='2027')return msg('Можно бронировать только даты 2027 года.','err');
+  if(days(f,t)>MAXD)return msg('Отпуск не больше '+MAXD+' дней подряд (выбрано '+days(f,t)+').','err');
+  if(!/^\d{4}$/.test(pin))return msg('ПИН-код — ровно 4 цифры.','err');
+  var c=conflict(f,t);
+  if(c)return msg('К сожалению, эти даты заняты сотрудником '+c.name+' (с '+ru(c.from)+' по '+ru(c.to)+'). Выберите другие даты или договоритесь с ним/ней, чтобы поменяться датами.','err');
+  try{localStorage.setItem('vac_fio',name)}catch(e){}
+  send(editId?{action:'edit',id:editId,name:name,from:f,to:t,pin:pin}:{action:'book',name:name,from:f,to:t,pin:pin})};
+$('clear').onclick=function(){$('from').value='';$('to').value='';$('msg').className='msg';render()};
+$('cancelEdit').onclick=function(e){e.preventDefault();stopEdit();$('from').value='';$('to').value='';$('msg').className='msg';render()};
+$('prev').onclick=function(){if(month>0){month--;render()}};
+$('next').onclick=function(){if(month<11){month++;render()}};
+['from','to'].forEach(function(i){$(i).addEventListener('change',function(){var v=$(i).value;if(v&&v.slice(0,4)==='2027')month=pd(v).getMonth();render()})});
+['пн','вт','ср','чт','пт','сб','вс'].forEach(function(d){var e=document.createElement('div');e.className='dow';e.textContent=d;$('dows').appendChild(e)});
+try{var sv=localStorage.getItem('vac_fio');if(sv)$('fio').value=sv}catch(e){}
+render();load();
+</script>
+</body>
+</html>
