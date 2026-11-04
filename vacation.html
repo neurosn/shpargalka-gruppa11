@@ -68,6 +68,8 @@ main a:not(.link){color:var(--accent);font-weight:600}
 .day .n{font-weight:700;font-size:14px}
 .day .who{display:block;font-size:10px;line-height:1.15;color:#fff;margin-top:2px;word-break:break-word}
 .day.empty{visibility:hidden}
+.day.hol{background:repeating-linear-gradient(135deg,var(--soft),var(--soft) 6px,var(--card) 6px,var(--card) 12px);cursor:not-allowed;border-style:dashed}
+.day.hol .who{color:var(--accent2)}
 .day.busy{background:#c2410c;border-color:#c2410c;color:#fff;cursor:not-allowed}
 .day.mine{background:var(--ok);border-color:var(--ok);color:#fff}
 .day.sel{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -111,6 +113,7 @@ table.list .b button{padding:6px 10px;font-size:13px}
 <div class="w2"><b>🚫 Без премии</b>При уходе в отпуск премия не будет начислена.</div>
 <div><b>☀️ Желательно с июня</b>Бронировать можно весь 2027 год, но желательные даты — с июня.</div>
 <div><b>👤 Один человек</b>В отпуске одновременно может быть только один сотрудник группы.</div>
+<div class="w2"><b>🎉 Не в праздники</b>В праздничные и нерабочие дни по календарю РФ отпуск брать нельзя: 1–8 янв, 22–23 фев, 8 мар, 1 и 3 мая, 9–10 мая, 12 и 14 июн, 4–5 ноя, 31 дек.</div>
 <div><b>📏 До 14 дней</b>Один отпуск — не больше 14 дней подряд.</div>
 <div><b>🔐 ПИН-код</b>Придумайте 4 цифры при бронировании. Изменить или удалить бронь можно только с этим ПИН-кодом.</div>
 </div>
@@ -122,7 +125,7 @@ table.list .b button{padding:6px 10px;font-size:13px}
 <div class="calhead"><button type="button" id="prev" aria-label="Предыдущий месяц">‹</button><h3 id="mtitle"></h3><button type="button" id="next" aria-label="Следующий месяц">›</button></div>
 <div class="grid7" id="dows"></div>
 <div class="grid7" id="days"></div>
-<div class="legend"><span><i style="background:#c2410c"></i>занято</span><span><i style="background:var(--accent)"></i>ваш выбор</span><span><i style="background:var(--ok)"></i>редактируемая бронь</span><span><i style="border:1px solid var(--line);background:var(--card)"></i>свободно</span></div>
+<div class="legend"><span><i style="background:#c2410c"></i>занято</span><span><i style="background:var(--accent)"></i>ваш выбор</span><span><i style="background:var(--ok)"></i>редактируемая бронь</span><span><i style="border:1px dashed var(--line);background:var(--soft)"></i>🎉 праздник — нельзя</span><span><i style="border:1px solid var(--line);background:var(--card)"></i>свободно</span></div>
 <p class="loading" id="loading">⏳ Загружаем брони из таблицы… Первый раз это может занять до 20 секунд.</p>
 </section>
 
@@ -149,6 +152,7 @@ table.list .b button{padding:6px 10px;font-size:13px}
 </main>
 <script>
 var API='https://script.google.com/macros/s/AKfycby3TmLzEyNubx9Of5FdTA5_Eqexb0d_7EVfac1Xng-maYeiH5LasNRmF3jR6r8H7PjL/exec';
+var HOL={'2027-01-01':'Новогодние каникулы','2027-01-02':'Новогодние каникулы','2027-01-03':'Новогодние каникулы','2027-01-04':'Новогодние каникулы','2027-01-05':'Новогодние каникулы','2027-01-06':'Новогодние каникулы','2027-01-07':'Рождество Христово','2027-01-08':'Новогодние каникулы','2027-02-22':'Выходной (перенос) — День защитника Отечества','2027-02-23':'День защитника Отечества','2027-03-08':'Международный женский день','2027-05-01':'Праздник Весны и Труда','2027-05-03':'Выходной (перенос) — 1 Мая','2027-05-09':'День Победы','2027-05-10':'Выходной (перенос) — День Победы','2027-06-12':'День России','2027-06-14':'Выходной (перенос) — День России','2027-11-04':'День народного единства','2027-11-05':'Выходной (перенос) — День народного единства','2027-12-31':'Выходной (перенос) — Новый год'};
 var YEAR=2027,MAXD=14,items=[],month=5,editId=null,busy=false;
 var MN=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
 var $=function(i){return document.getElementById(i)};
@@ -175,19 +179,22 @@ function render(){
     var dt=new Date(YEAR,month,d),ds=iso(dt),b=document.createElement('button');b.type='button';
     var o=owner(ds),cls='day'+((dt.getDay()===0||dt.getDay()===6)?' we':'');
     var html='<span class="n">'+d+'</span>';
+    if(HOL[ds]&&!o){cls+=' hol';html+='<span class="who">🎉</span>';b.title='Праздник: '+HOL[ds]+' — отпуск брать нельзя'}
     if(o){cls+=' busy';html+='<span class="who">'+esc(short(o.name))+'</span>';b.title='Занято: '+o.name+' ('+ru(o.from)+' – '+ru(o.to)+')'}
     else if(editId){var me=items.filter(function(x){return x.id===editId})[0];if(me&&ds>=me.from&&ds<=me.to&&!(f&&t))cls+=' mine'}
     if(!o&&f&&(ds===f||ds===t))cls+=' sel';else if(!o&&f&&t&&ds>f&&ds<t)cls+=' range';
     b.className=cls;b.innerHTML=html;b.dataset.d=ds;b.onclick=pick;box.appendChild(b)}
   updSum()}
+function holIn(a,b){for(var x=pd(a);iso(x)<=b;x.setDate(x.getDate()+1)){if(HOL[iso(x)])return iso(x)}return null}
 function pick(){var ds=this.dataset.d,o=owner(ds);
+  if(HOL[ds]){msg('В праздничные дни отпуск брать нельзя: '+ru(ds)+' — '+HOL[ds]+'.','err');return}
   if(o){msg('К сожалению, '+ru(ds)+' занято сотрудником '+o.name+' ('+ru(o.from)+' – '+ru(o.to)+'). Выберите другие даты или договоритесь с ним/ней, чтобы поменяться датами.','err');return}
   var f=$('from').value,t=$('to').value;
   if(!f||(f&&t)){$('from').value=ds;$('to').value=''}
   else if(ds<f){$('to').value=f;$('from').value=ds}else{$('to').value=ds}
   $('msg').className='msg';render()}
 function updSum(){var f=$('from').value,t=$('to').value,s=$('sum');
-  if(f&&t&&t>=f){var n=days(f,t),c=conflict(f,t);s.textContent='Выбрано: '+ru(f)+' – '+ru(t)+' · '+n+' дн.'+(n>MAXD?' ⚠️ больше '+MAXD:'')+(c?' ⚠️ пересекается с '+c.name:'')}
+  if(f&&t&&t>=f){var n=days(f,t),c=conflict(f,t);s.textContent='Выбрано: '+ru(f)+' – '+ru(t)+' · '+n+' дн.'+(n>MAXD?' ⚠️ больше '+MAXD:'')+(c?' ⚠️ пересекается с '+c.name:'')+(holIn(f,t)?' ⚠️ попадает на праздник':'')}
   else if(f)s.textContent='Начало: '+ru(f)+' — теперь выберите последний день';else s.textContent=''}
 
 function api(body){
@@ -232,6 +239,8 @@ $('go').onclick=function(){
   if(f.slice(0,4)!=='2027'||t.slice(0,4)!=='2027')return msg('Можно бронировать только даты 2027 года.','err');
   if(days(f,t)>MAXD)return msg('Отпуск не больше '+MAXD+' дней подряд (выбрано '+days(f,t)+').','err');
   if(!/^\d{4}$/.test(pin))return msg('ПИН-код — ровно 4 цифры.','err');
+  var h=holIn(f,t);
+  if(h)return msg('В праздничные дни отпуск брать нельзя: '+ru(h)+' — '+HOL[h]+'. Выберите даты без праздников.','err');
   var c=conflict(f,t);
   if(c)return msg('К сожалению, эти даты заняты сотрудником '+c.name+' (с '+ru(c.from)+' по '+ru(c.to)+'). Выберите другие даты или договоритесь с ним/ней, чтобы поменяться датами.','err');
   try{localStorage.setItem('vac_fio',name)}catch(e){}
