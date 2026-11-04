@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Шпаргалка · Группа 11 · Смена 1 ночь</title>
+<style>
+:root{--bg:#f6f4fb;--card:#fff;--ink:#1d1730;--muted:#6b6480;--line:#e6e1f2;--accent:#7b2cbf;--accent2:#cb11ab;--soft:#f1e8fb;--ok:#1f9d6b;--warn:#d9480f}
+@media (prefers-color-scheme:dark){:root{--bg:#141020;--card:#1e182d;--ink:#eee9f8;--muted:#a59cbd;--line:#30284a;--accent:#b57bee;--accent2:#ee5fd2;--soft:#2a2140;--ok:#4cd39b;--warn:#ff8a5c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{background:linear-gradient(120deg,var(--accent),var(--accent2));color:#fff;padding:28px 16px 22px}
+header .w{max-width:960px;margin:0 auto}
+header h1{margin:0 0 4px;font-size:26px}
+header p{margin:0;opacity:.9}
+nav{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
+nav .w{max-width:960px;margin:0 auto;display:flex;gap:6px;overflow-x:auto;padding:10px 16px}
+nav a{white-space:nowrap;text-decoration:none;color:var(--accent);background:var(--soft);padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600}
+main{max-width:960px;margin:0 auto;padding:20px 16px 60px}
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px}
+h2{margin:0 0 14px;font-size:20px;display:flex;align-items:center;gap:8px}
+h3{margin:18px 0 8px;font-size:15px;color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.link{display:block;text-decoration:none;color:inherit;border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--soft);transition:.15s}
+.link:hover{border-color:var(--accent);transform:translateY(-1px)}
+.link b{display:block;color:var(--accent)}
+.link small{color:var(--muted);word-break:break-all}
+.time{display:inline-block;background:var(--accent);color:#fff;border-radius:8px;padding:2px 8px;font-weight:700;font-size:13px}
+ul.rules{list-style:none;padding:0;margin:0}
+ul.rules li{padding:10px 0;border-bottom:1px dashed var(--line)}
+ul.rules li:last-child{border:0}
+.tpl{position:relative;border-left:4px solid var(--accent);background:var(--soft);border-radius:10px;padding:12px 14px 12px 14px;margin:10px 0;white-space:pre-wrap}
+.tpl .lbl{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px;padding-right:96px}
+.copy{position:absolute;top:8px;right:8px;border:0;background:var(--accent);color:#fff;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer}
+.copy.done{background:var(--ok)}
+.note{border-radius:10px;padding:10px 14px;background:var(--soft);border:1px solid var(--line);margin:10px 0}
+.note.warn{border-color:var(--warn)}
+code{background:var(--soft);padding:1px 6px;border-radius:6px}
+footer{text-align:center;color:var(--muted);font-size:12px}
+table{width:100%;border-collapse:collapse}
+td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+td:first-child{font-weight:700;width:38%;color:var(--accent)}
+.gl{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px}
+.gl div{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--soft)}
+.gl b{color:var(--accent)}
+#glq{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit;margin-bottom:10px}
+.cats{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
+.cats .w{max-width:960px;margin:0 auto;padding:10px 16px}
+#q{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;margin-bottom:8px}
+.chips{display:flex;gap:6px;overflow-x:auto}
+.chips a{white-space:nowrap;text-decoration:none;color:var(--accent);background:var(--soft);padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600}
+.chips a.back{background:var(--accent);color:#fff}
+section{scroll-margin-top:110px}
+.empty{display:none;text-align:center;color:var(--muted);padding:30px}
+</style>
+</head>
+<body>
+<header><div class="w">
+<h1>📋 Шаблоны ответов · Группа 11</h1>
+<p>Все шаблоны по категориям. Нажмите «Копировать», чтобы взять текст · обновлено 05.11.2026</p>
+</div></header>
+<div class="cats"><div class="w">
+<input id="q" type="search" placeholder="🔍 Поиск по шаблонам: возврат, ПВЗ, оценка, банк…">
+<div class="chips"><a class="back" href="index.html">← Шпаргалка</a><a href="#rate">⭐ Запрос оценки</a><a href="#refund">💸 Возвраты и отмены</a><a href="#wait">⏳ Ожидание и уточнение</a><a href="#problem">🛠 Проблемы и сроки</a><a href="#delivery">📦 Доставка и ПВЗ</a><a href="#paid">🛡 Платные услуги и страховки</a><a href="#redirect">↪️ Другие поддержки</a><a href="#app">📱 Мобильное приложение</a><a href="#listen">👂 Активное слушание</a><a href="#forms">📝 Формы для коллег</a></div>
+</div></div>
+<main>
+<section id="rate">
+<h2>⭐ Запрос оценки</h2>
+<div class="note">Запрашивайте оценку, если клиент написал «Спасибо», если оператор помог ранее, или если вы уверены, что вопрос решён на 100%. После — кнопка <b>«Завершить чат и запросить оценку»</b>. Формулировки можно адаптировать и наблюдать, какие дают лучшие оценки.</div>
+<div class="tpl"><span class="lbl">Вариант 1</span>Спасибо, что обратились к нам! Буду очень рада/рад, если поставите оценку моей консультации. В течение часа в чате появится опрос, где получится это сделать — это поможет нам стать лучше 💜</div>
+<div class="tpl"><span class="lbl">Вариант 2</span>Спасибо, что выбрали именно нашу компанию! Буду крайне признательна/признателен, если оцените мою консультацию. В течение 1 часа в чате появится опрос, где получится это сделать — это поможет нам стать лучше</div>
+</section>
+
+<section id="refund">
+<h2>💸 Возвраты и отмены</h2>
+<div class="note warn">После ответа обязательно закрыть чат кнопкой <b>«Завершить чат и запросить оценку»</b>.</div>
+<div class="tpl"><span class="lbl">Возврат за платную услугу</span>Я вернул(а) вам деньги за [услугу: доставку, обратную транспортировку, приоритетный заказ и другие]. Понимаю, как это важно, и надеюсь, что у вас останутся положительные эмоции. Деньги могут вернуться в WB Кошелёк, на карту, счёт или отобразиться на балансе Wildberries. Чаще всего они приходят сразу туда же, откуда вы платили, но иногда — в течение нескольких дней. Точный срок зависит от вашего банка.
+Если я решил(а) ваш вопрос, поставьте, пожалуйста, оценку. В чате появятся звёздочки, 5 — самая высокая оценка. Мне важно знать, что я смог(ла) вам помочь.</div>
+<div class="tpl"><span class="lbl">Отмена заказа</span>Я отменил(а) вам заказ с товаром [наименование товара]. Понимаю, как это важно, и надеюсь, что у вас останутся положительные эмоции. Статус заказа будет скорректирован в течение 24 часов. Просим подождать обновления информации.
+Если я решил(а) ваш вопрос, поставьте, пожалуйста, оценку. В чате появятся звёздочки, 5 — самая высокая оценка. Мне важно знать, что я смог(ла) вам помочь.</div>
+<div class="tpl"><span class="lbl">Обратная транспортировка (400 ₽)</span>Я вернула вам деньги за обратную транспортировку. Понимаю, как это важно, и надеюсь, что у вас останутся положительные эмоции. Деньги вернули на Баланс профиля, в размере 400 рублей.
+Если я решила ваш вопрос, поставьте, пожалуйста, оценку. В чате появятся звёздочки, 5 — самая высокая оценка. Мне важно знать, что я смогла вам помочь.</div>
+<div class="tpl"><span class="lbl">Обратная транспортировка — с извинением</span>Здравствуйте! Нам жаль, что произошла такая ситуация. Прекрасно понимаем, что вашей вины здесь нет. Поэтому я вернула вам деньги за обратную транспортировку. Понимаю, как это важно, и надеюсь, что у вас останутся положительные эмоции. Деньги вернули на Баланс профиля, в размере 400 рублей.
+Если я решила ваш вопрос, поставьте, пожалуйста, оценку. В чате появятся звёздочки, 5 — самая высокая оценка. Мне важно знать, что я смогла вам помочь.</div>
+</section>
+
+<section id="wait">
+<h2>⏳ Ожидание и уточнение</h2>
+<div class="tpl"><span class="lbl">Коллега уточняет информацию</span>Как только моя коллега уточнит информацию, она сразу же вернётся к вам с ответом. Ожидайте, пожалуйста.</div>
+<div class="tpl"><span class="lbl">Предупреждение об окне оценки — вариант 1</span>Пока мы уточняем информацию, система может автоматически предложить вам оценить консультацию. Не спешите ставить оценку, если вопрос ещё не решён до конца — это автоматическое окно, которое появляется при отсутствии новых сообщений, но мы всё ещё занимаемся вашей ситуацией.</div>
+<div class="tpl"><span class="lbl">Предупреждение об окне оценки — вариант 2</span>Мы уже уточняем информацию по вашему вопросу. В процессе ожидания система может автоматически прислать форму оценки — так происходит, когда в диалоге возникает пауза. Пожалуйста, не спешите её заполнять, если ещё нет решения: мы обязательно вернёмся с ответом позднее.</div>
+<div class="tpl"><span class="lbl">Долгий ответ продавца</span>Здравствуйте!
+Понимаем, как неприятно долго ждать ответа от продавца, особенно когда хочется как можно скорее получить решение по своему вопросу. Нам искренне жаль, что вам пришлось столкнуться с такой ситуацией и ожидать дольше, чем хотелось бы.
+Мы обязательно свяжемся с продавцом и дополнительно напомним ему о необходимости предоставить вам ответ в ближайшее время. Со своей стороны сделаем всё возможное, чтобы ускорить процесс и помочь сдвинуть ситуацию с места.
+Спасибо за ваше терпение и понимание.</div>
+</section>
+
+<section id="problem">
+<h2>🛠 Проблемы и сроки</h2>
+<div class="note">Отправляя клиенту номер проблемы, пишите, <b>для чего</b> создан запрос (то, что клиент хочет услышать — например, доставка товара), <b>срок рассмотрения</b> и <b>куда придёт уведомление</b> — чтобы клиент не возвращался в чат через пару минут.</div>
+<h3>Поддерживающие формулировки</h3>
+<div class="tpl"><span class="lbl">Вариант 1</span>Ваш вопрос получил внимание наших специалистов. Мы понимаем важность ситуации и постараемся сделать всё возможное, чтобы решить вопрос быстро и эффективно.</div>
+<div class="tpl"><span class="lbl">Вариант 2</span>Специалисты уже начали работу над вашим обращением. Для нас важно услышать вас и предложить наилучший выход из сложившейся ситуации.</div>
+<div class="tpl"><span class="lbl">Вариант 3</span>Подключили дополнительные ресурсы к решению вашего вопроса. Стараемся приложить максимум усилий, чтобы разобраться и дать вам своевременный ответ.</div>
+<h3>Длительное рассмотрение</h3>
+<div class="tpl"><span class="lbl">Повторное обращение</span>Я понимаю, как важно решить вопрос срочно. Мне бы очень хотелось помочь здесь и сейчас — это было бы идеальным решением.
+Для тщательного анализа требуется время, особенно если нужно согласовать детали с другими отделами.
+Ваш вопрос сейчас в работе: я зафиксировал(а) повторное обращение и передал(а) запрос коллегам для ускорения. Как только будет получена обновлённая информация, мы сразу сообщим вам.</div>
+</section>
+
+<section id="delivery">
+<h2>📦 Доставка и ПВЗ</h2>
+<h3>Перенос товара в другой ПВЗ</h3>
+<div class="tpl"><span class="lbl">Товары перенесли в другой ПВЗ</span>Здравствуйте!
+Извините за долгое ожидание ответа — сейчас к нам поступает очень много обращений, поэтому время ожидания может быть дольше, чем обычно.
+Действительно, пункт выдачи по адресу: [адрес] закрыт. И товар с артикулом [артикул] перевезли [дата перевоза] по другому адресу: [новый адрес].
+Можете получить его там до [дата].
+Если получить или отказаться от товара в данном пункте выдачи неудобно, напишите нам, пожалуйста.</div>
+<h3>Доставка из-за рубежа</h3>
+<div class="note warn">⚠️ Проблему по классу «Доставка из-за рубежа» оформляем <b>только если по трек-номеру нет движения</b> (например, последний скан «Собран продавцом» в Китае, а плановая дата доставки прошла). Если движение есть — задержку как проблему <b>не оформляем</b>. В чат «Европа» передаём только обращения по этому направлению; не уверены — уточните у наставника или Алёны Ткачёвой.</div>
+</section>
+
+<section id="paid">
+<h2>🛡 Платные услуги и страховки</h2>
+<h3>Списание за «Защиту товара»</h3>
+<div class="tpl"><span class="lbl">Списание за «Защиту товара»</span>Здравствуйте!
+Простите, что не получилось ответить сразу. Сейчас мы получаем гораздо больше обращений, чем обычно.
+Я уточнил(а) информацию: списание 149 рублей было за страховой полис «Защита товара».
+«Защита товара» — это страховка для покупок на Wildberries. У нас нет возможности подключать и отключать полисы. Её можно подключить только при оформлении заказа, нажав переключатель. Она помогает покрыть расходы на ремонт или компенсировать ущерб при краже товара, если страховой случай произошёл в период действия полиса.
+Если вы оформили защиту:
+— по подписке — после окончания текущего страхового периода стоимость следующего периода будет автоматически списываться с привязанного способа оплаты.
+На всякий случай отмечу, что полис работает с момента, когда вы получили заказанный товар. Если с ним что-то случится, когда он будет у вас, вы можете подать заявку на компенсацию.
+Отказаться от защиты товара можно в приложении Wildberries:
+— Профиль → Сервисы → WB Защита → Ваши страховки → Защита товара → Отказаться от подписки → Отказаться.
+Если нужны подробности или остались вопросы, пожалуйста, обращайтесь — я на связи!</div>
+<div class="note warn">⚠️ Если по этому пути нет кнопки — направляем в тот же раздел: <b>WB Защита → «Вопросы и ответы» → «Как отключить страхование и вернуть деньги»</b>. Там будет кнопка.</div>
+</section>
+
+<section id="redirect">
+<h2>↪️ Другие поддержки</h2>
+<div class="note">Не бойтесь переформулировать, добавлять эмпатию и присоединение при ответе клиенту.</div>
+<div class="tpl"><span class="lbl">Голосовая поддержка</span>В голосовую поддержку можно обратиться по номеру 8 800-770-1111.</div>
+<div class="tpl"><span class="lbl">Поддержка продавцов</span>В этом чате мы не сможем подсказать, потому что решаем вопросы именно покупателей. Пожалуйста, напишите в поддержку на портале для продавцов https://seller-auth.wildberries.ru/ru/. Там обязательно помогут во всём разобраться.</div>
+<div class="tpl"><span class="lbl">Поддержка ПВЗ</span>Напишите, пожалуйста, в поддержку ПВЗ на сайте https://my-pvz.wb.ru/, там обязательно помогут. Этот чат для покупателей Wildberries — здесь помогаем с вопросами о доставке товаров, их возврате или оплате.</div>
+<div class="tpl"><span class="lbl">WB Travel</span>По всем вопросам, которые связаны с путешествиями, напишите, пожалуйста, в поддержку WB Travel напрямую. Это можно сделать в разделе «WB Travel», нажав на значок чата в правом нижнем углу, или по ссылке: https://www.wildberries.ru/travel?chat=open.</div>
+<div class="tpl"><span class="lbl">WB Банк</span>Напишите, пожалуйста, в поддержку банка в приложении Wildberries. Для этого перейдите в раздел кошелька → нажмите на три точки справа вверху → Чат с поддержкой.</div>
+<div class="tpl"><span class="lbl">WB Job</span>Этот вопрос смогут решить коллеги из поддержки приложения WB Job. Чтобы связаться с ними, закажите обратный звонок через форму на сайте https://job.wb.ru/. Там обязательно помогут во всём разобраться.</div>
+<div class="tpl"><span class="lbl">WB Stream</span>Вы обратились в поддержку покупателей, здесь не сможем подсказать по этому вопросу. Напишите, пожалуйста, на почту поддержки WB Stream: support.stream@wildberries.ru. Там вам обязательно помогут во всём разобраться.</div>
+<div class="tpl"><span class="lbl">AliExpress</span>Напишите, пожалуйста, по этому вопросу в поддержку Aliexpress. Это можно сделать по ссылке: https://aliexpress.ru/chat?entry%5C_point=other&type=ChatBot&hastoolbar=false&currentFolder=Chat.
+Также получится связаться с поддержкой в приложении или на сайте Aliexpress: в разделе «Профиль» найдите пункт «Служба поддержки». Либо можете написать сразу по нужному заказу. Для этого:
+1. В профиле откройте раздел «Заказы».
+2. Выберите нужный заказ.
+3. На странице заказа нажмите кнопку «Помощь по заказу» и выберите пункт «Написать в поддержку».
+Там обязательно помогут разобраться.</div>
+</section>
+
+<section id="app">
+<h2>📱 Мобильное приложение</h2>
+<div class="tpl"><span class="lbl">Как посмотреть свою версию приложения</span>Чтобы посмотреть, какая версия приложения у вас установлена, нажмите на значок профиля в нижнем меню, пролистайте немного вниз и выберите раздел «Информация для клиентов» → «О приложении». Вся информация о приложении будет там.</div>
+</section>
+
+<section id="listen">
+<h2>👂 Активное слушание</h2>
+<div class="tpl"><span class="lbl">Фразы</span>«Я понимаю, что вы чувствуете себя так, потому что… (ваш товар задержали… курьер не позвонил вам… и т. д.)»
+«Спасибо, что подробно описали ситуацию, это поможет разобраться.»
+«Я вас понял(а). Вот что я предлагаю сделать…»
+«Понимаю, что это важно для вас, и сделаю всё возможное, чтобы помочь.»
+«Давайте вместе посмотрим, как лучше поступить в этой ситуации.»</div>
+<div class="note">Используйте, когда подтверждаете понимание или уточняете информацию. Не бойтесь переформулировать или повторить услышанное. Сочетайте с эмоциональной поддержкой и вниманием.</div>
+</section>
+
+<section id="forms">
+<h2>📝 Формы для коллег</h2>
+<h3>Передача обращения СВ</h3>
+<div class="note warn">⚠️ Сначала — к наставнику. Передаём только после того, как наставник <b>подтвердил</b> передачу. <a href="sv.html">Когда и как передавать →</a></div>
+<div class="tpl"><span class="lbl">Формат передачи СВ</span>ЛК:
+Рид:
+Суть обращения клиента:
+Шаблонный ответ:</div>
+<h3>Оспаривание отказа по возврату</h3>
+<table>
+<tr><td>ЛК</td><td>номер личного кабинета</td></tr>
+<tr><td>Заявка на возврат</td><td>номер заявки</td></tr>
+<tr><td>РИД</td><td>—</td></tr>
+<tr><td>ШК</td><td>—</td></tr>
+<tr><td>Оспор. отказ</td><td>копируем из заявки, например: <i>Оспаривание · Отказ · 21 июл 2026, 15:56</i></td></tr>
+<tr><td>Суть обращения</td><td>кратко описываем</td></tr>
+</table>
+<div class="tpl"><span class="lbl">Заготовка</span>ЛК:
+Заявка на возврат:
+РИД:
+ШК:
+Оспор. отказ:
+Суть обращения:</div>
+</section>
+
+<div class="empty" id="empty">Ничего не нашлось — попробуйте другое слово</div>
+<footer>Не бойтесь переформулировать и добавлять эмпатию · Вопросы по заявкам — сначала к наставникам</footer>
+</main>
+<script>
+document.querySelectorAll('.tpl').forEach(function(el){
+  var b=document.createElement('button');b.className='copy';b.textContent='Копировать';
+  b.onclick=function(){
+    var c=el.cloneNode(true);c.querySelectorAll('.lbl,.copy').forEach(function(x){x.remove()});
+    var t=c.textContent.trim();
+    function ok(){b.textContent='Скопировано ✓';b.classList.add('done');setTimeout(function(){b.textContent='Копировать';b.classList.remove('done')},1500)}
+    if(navigator.clipboard){navigator.clipboard.writeText(t).then(ok,function(){fb(t);ok()})}else{fb(t);ok()}
+  };
+  el.appendChild(b);
+});
+function fb(t){var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(e){}a.remove()}
+var q=document.getElementById('q');q.addEventListener('input',function(){var v=q.value.toLowerCase().trim(),any=false;
+document.querySelectorAll('main section').forEach(function(sec){var hit=0,secHit=sec.querySelector('h2').textContent.toLowerCase().indexOf(v)>-1;
+sec.querySelectorAll('.tpl,.note,table,h3').forEach(function(el){var ok=!v||secHit||el.textContent.toLowerCase().indexOf(v)>-1;el.style.display=ok?'':'none';if(ok&&el.matches('.tpl'))hit++;});
+var show=!v||secHit||hit>0;sec.style.display=show?'':'none';if(show)any=true;});
+document.getElementById('empty').style.display=any?'none':'block';});
+</script>
+</body>
+</html>
