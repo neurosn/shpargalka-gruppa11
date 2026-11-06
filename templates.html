@@ -138,11 +138,14 @@ mark{background:rgba(203,17,171,.16);color:inherit;border-radius:4px;padding:0 2
 <label><input type="checkbox" id="ecWork"> Вопрос ещё в работе (передали, ждём)</label>
 <label><input type="checkbox" id="ecOdd"> Ситуация нестандартная</label>
 <label><input type="checkbox" id="ecInc"> Массовый инцидент (нейтральный тон)</label>
+<label><input type="checkbox" id="ecSolved"> ⭐ Проблему решили — добавить запрос оценки</label>
+<label><input type="checkbox" id="ecPos"> ⭐ Клиент настроен позитивно — добавить запрос оценки</label>
 </div>
 <div class="ec-btns"><button type="button" class="btn" id="ecGen">✨ Собрать ответ</button><button type="button" class="btn alt" id="ecAgain">🔄 Другой вариант</button></div>
 <label class="ec-l">5. Готовый ответ — проверьте и при необходимости поправьте</label>
 <textarea id="ecOut" rows="8" placeholder="Здесь появится ответ. Можно кликать по фразам ниже — они вставятся туда, где стоит курсор."></textarea>
 <div id="ecWarn" class="ec-warn"></div>
+<div class="note" style="margin-bottom:0">⭐ Добавили в ответ запрос оценки — <b>не забудьте после отправки нажать в чате с клиентом кнопку «Завершить чат и запросить оценку»</b>. Иначе опрос клиенту не придёт.</div>
 <div class="ec-btns"><button type="button" class="btn" id="ecCopy">📋 Копировать ответ</button><button type="button" class="btn alt" id="ecClear">Очистить</button></div>
 </div>
 
@@ -407,7 +410,8 @@ var P={
  work:['Мы продолжаем работу по вашему вопросу, я вернусь с ответом, как только появится новая информация.','Я попросил{а} ускорить проверку.','Взял{а} ваше обращение на контроль.','Я передал{а} информацию с пометкой о срочности.'],
  endCalm:['Надеюсь, что мне удалось вам помочь. Хорошего дня.','Было приятно вам помочь! Хорошего дня.','Надеюсь, что эта информация была для вас полезной. Хорошего дня.','Надеюсь, мне удалось помочь разобраться с этим. Хорошего дня.'],
  endSoft:['Если нужно что-то подсказать дополнительно — напишите снова.','Надеюсь, мой ответ поможет вам. Если вдруг возникнут сложности, дайте знать.','Если у вас остались вопросы или что-то осталось непонятным, пожалуйста, напишите в ответном сообщении, мы поможем.'],
- incEnd:['Если у вас остались вопросы, пожалуйста, напишите в ответном сообщении.']
+ incEnd:['Если у вас остались вопросы, пожалуйста, напишите в ответном сообщении.'],
+ rate:['Спасибо, что обратились к нам! Буду очень рад{а}, если поставите оценку моей консультации. В течение часа в чате появится опрос, где получится это сделать — это поможет нам стать лучше 💜','Спасибо, что выбрали именно нашу компанию! Буду крайне признател{ьна|ен}, если оцените мою консультацию. В течение 1 часа в чате появится опрос, где получится это сделать — это поможет нам стать лучше.']
 };
 function pick(a){return g(a[(seed+a.length*7)%a.length])}
 function low(s){return s.charAt(0).toLowerCase()+s.slice(1)}
@@ -422,9 +426,10 @@ function gen(){
   if($('ecMist').checked)open.push(pick(P.mist));
  }else{
   if($('ecWait').checked)open.push(mood==='angry'||$('ecFault').checked?pick(P.waitSorry):pick(P.waitThx));
-  else if(mood==='calm'&&seed%2===0)open.push(pick(P.here));
+  else if(mood==='calm'&&seed%2===0&&!$('ecPos').checked)open.push(pick(P.here));
   if($('ecMist').checked)open.push(pick(P.mist));
   if($('ecOdd').checked)open.push(pick(P.odd));
+  else if($('ecPos').checked&&mood==='calm')open.push(pick(P.here));
   else open.push(pick(P[mood]));
   if($('ecFault').checked&&!$('ecMist').checked)open.push(pick(P.fault));
  }
@@ -438,7 +443,12 @@ function gen(){
   else{out.push(g(pick(P.linkCol))+'\n'+fact)}
  }
  if($('ecWork').checked)out.push(inc?'Мы продолжаем работу по вашему вопросу и сообщим, как только появится новая информация.':pick(P.work));
- out.push(inc?P.incEnd[0]:(mood==='calm'&&!$('ecFault').checked?pick(P.endCalm):pick(P.endSoft)));
+ var rate=$('ecSolved').checked||$('ecPos').checked;
+ if(rate&&$('ecWork').checked)w.push('⭐ Вопрос ещё в работе — оценку лучше запросить, когда проблема будет решена. Запрос не добавлен.');
+ if(rate&&mood==='angry'&&!$('ecSolved').checked)w.push('⭐ Клиент негативит — запрос оценки добавляем, только если проблему решили.');
+ var doRate=rate&&!$('ecWork').checked&&!(mood==='angry'&&!$('ecSolved').checked);
+ if(doRate){out.push(inc?P.incEnd[0]:pick(P.endSoft.concat(P.endCalm)));out.push(pick(P.rate));w.push('🔔 После отправки нажмите «Завершить чат и запросить оценку».')}
+ else out.push(inc?P.incEnd[0]:(mood==='calm'&&!$('ecFault').checked?pick(P.endCalm):pick(P.endSoft)));
  if(mood==='angry'&&!$('ecFault').checked&&!$('ecWait').checked&&!inc)w.push('💡 Клиент негативит: если есть вина компании — отметьте галочку, добавится извинение.');
  if(inc&&mood!=='calm')w.push('📰 Инцидент: эмоциональные фразы не добавлены — отвечаем нейтрально и по существу.');
  var txt=out.join('\n');if(inc)txt=noEmoji(txt);
