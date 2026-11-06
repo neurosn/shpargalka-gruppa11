@@ -67,6 +67,11 @@ h3[id]{scroll-margin-top:70px}
 .note,code,td{overflow-wrap:anywhere}
 .when{margin:0 0 6px;color:var(--muted)}.mini{margin:4px 0 0;padding-left:18px}.mini li{margin:2px 0}
 details.exm{margin:4px 0 12px}details.exm summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:13px}details.exm pre{white-space:pre-wrap;background:var(--bg);border:1px dashed var(--line);border-radius:10px;padding:10px 12px;margin:6px 0 0;font:inherit;font-size:14px;overflow-wrap:anywhere}
+/* chips: без полос прокрутки, на широком экране — в несколько строк */
+nav .w,.chips,.hot{scrollbar-width:none;-ms-overflow-style:none}
+nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{display:none}
+@media (min-width:700px){nav .w,.chips,.hot{flex-wrap:wrap;overflow:visible;white-space:normal}nav a,.chips a{padding:5px 11px}}
+@media (max-width:699px){nav .w,.chips,.hot{-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}}
 </style>
 </head>
 <body>
