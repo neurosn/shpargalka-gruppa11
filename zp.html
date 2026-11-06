@@ -51,6 +51,11 @@ footer{text-align:center;color:var(--muted);font-size:12px}
 @media (max-width:560px){.step{grid-template-columns:1fr}.num{width:34px;height:34px;font-size:16px}}
 .theme-btn{position:fixed;right:16px;bottom:16px;z-index:50;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--card,var(--paper));color:var(--ink);font-size:20px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.18);display:grid;place-items:center}
 .theme-btn:hover{border-color:var(--accent)}
+/* chips: без полос прокрутки, на широком экране — в несколько строк */
+nav .w,.chips,.hot{scrollbar-width:none;-ms-overflow-style:none}
+nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{display:none}
+@media (min-width:700px){nav .w,.chips,.hot{flex-wrap:wrap;overflow:visible;white-space:normal}nav a,.chips a{padding:5px 11px}}
+@media (max-width:699px){nav .w,.chips,.hot{-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}}
 </style>
 </head>
 <body>
