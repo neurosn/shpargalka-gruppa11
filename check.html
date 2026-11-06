@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Проверка связи · Группа 11</title>
+<script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<style>
+:root{--bg:#f6f4fb;--card:#fff;--ink:#1d1730;--muted:#6b6480;--line:#e6e1f2;--accent:#7b2cbf;--accent2:#cb11ab;--soft:#f1e8fb;--ok:#1f9d6b;--warn:#d9480f}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#141020;--card:#1e182d;--ink:#eee9f8;--muted:#a59cbd;--line:#30284a;--accent:#b57bee;--accent2:#ee5fd2;--soft:#2a2140;--ok:#4cd39b;--warn:#ff8a5c}}
+:root[data-theme=dark]{--bg:#141020;--card:#1e182d;--ink:#eee9f8;--muted:#a59cbd;--line:#30284a;--accent:#b57bee;--accent2:#ee5fd2;--soft:#2a2140;--ok:#4cd39b;--warn:#ff8a5c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{background:linear-gradient(120deg,var(--accent),var(--accent2));color:#fff;padding:28px 16px 22px}header .w{max-width:760px;margin:0 auto}header h1{margin:0 0 4px;font-size:24px}header p{margin:0;opacity:.9}
+main{max-width:760px;margin:0 auto;padding:20px 16px 60px}section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+.row{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}.row:last-child{border:0}.row small{color:var(--muted);display:block}
+.row>div{min-width:0}.st{font-weight:700;text-align:right;flex-shrink:0;max-width:45%}.ok{color:var(--ok)}.bad{color:var(--warn)}
+.btn{border:0;background:var(--accent);color:#fff;border-radius:10px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer;margin-top:14px}
+.note{border-radius:10px;padding:10px 14px;background:var(--soft);border:1px solid var(--line);margin:0 0 14px}
+</style></head>
+<body data-space="tools">
+<header><div class="w"><h1>📶 Проверка связи</h1><p>Работают ли сервисы шпаргалки у вас <b>без VPN</b></p></div></header>
+<main><section>
+<div class="note">Выключите VPN и откройте эту страницу. Проверка идёт сама 5–10 секунд. Потом нажмите «Скопировать результат» и отправьте Алёне в личку.</div>
+<div id="list"></div>
+<button class="btn" id="copy" type="button">📋 Скопировать результат</button>
+</section></main>
+<script>
+var T=[
+ ['Сайт шпаргалки (GitHub Pages)','https://neurosn.github.io/shpargalka-gruppa11/site.js','Сама шпаргалка'],
+ ['Google Apps Script','https://script.google.com/favicon.ico','Сервер личного кабинета и отпусков'],
+ ['Google Таблицы','https://docs.google.com/favicon.ico','Таблица «Группа 11»'],
+ ['Firebase: вход','https://identitytoolkit.googleapis.com/','Вход по ID и паролю (вариант)'],
+ ['Firebase: база Firestore','https://firestore.googleapis.com/','Материалы редакторов (вариант)'],
+ ['Firebase: библиотеки','https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js','Загрузка Firebase']
+];
+var res=[];
+function test(u){return new Promise(function(ok){var t0=Date.now(),done=false;var to=setTimeout(function(){if(!done){done=true;ok([false,'нет ответа за 10 с'])}},10000);
+ fetch(u+(u.indexOf('?')>-1?'&':'?')+'_='+t0,{mode:'no-cors',cache:'no-store'}).then(function(){if(!done){done=true;clearTimeout(to);ok([true,(Date.now()-t0)+' мс'])}},function(){if(!done){done=true;clearTimeout(to);ok([false,'ошибка соединения'])}})})}
+var L=document.getElementById('list');
+T.forEach(function(x,i){var d=document.createElement('div');d.className='row';d.innerHTML='<div><b>'+x[0]+'</b><small>'+x[2]+'</small></div><div class="st" id="s'+i+'">⏳ проверяю…</div>';L.appendChild(d);
+ test(x[1]).then(function(r){res[i]=x[0]+': '+(r[0]?'OK':'НЕТ')+' ('+r[1]+')';var s=document.getElementById('s'+i);s.textContent=(r[0]?'✅ работает':'❌ не работает')+' · '+r[1];s.className='st '+(r[0]?'ok':'bad')})});
+document.getElementById('copy').onclick=function(){var b=this,t='Проверка связи (без VPN), '+new Date().toLocaleString('ru-RU')+'\n'+res.filter(Boolean).join('\n')+'\n'+navigator.userAgent;
+ (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){b.textContent='Скопировано ✓'},function(){prompt('Скопируйте:',t)})};
+</script>
+<script src="site.js" defer></script>
+</body></html>

@@ -55,251 +55,45 @@ nav .w,.chips,.hot{scrollbar-width:none;-ms-overflow-style:none}
 nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{display:none}
 @media (min-width:700px){nav .w,.chips,.hot{flex-wrap:wrap;overflow:visible;white-space:normal}nav a,.chips a{padding:5px 11px}}
 @media (max-width:699px){nav .w,.chips,.hot{-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}}
+.space-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.space{display:block;text-decoration:none;color:inherit;border:1px solid var(--line);border-radius:16px;padding:18px;background:var(--card);transition:.15s}
+.space:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 24px rgba(123,44,191,.12)}
+.space .ic{font-size:30px;line-height:1}.space b{display:block;font-size:19px;margin:8px 0 4px;color:var(--accent)}
+.space ul{margin:8px 0 0;padding-left:18px;color:var(--muted);font-size:14px}.space li{margin:2px 0}
+.gsearch{display:flex;gap:8px}.gsearch input{flex:1;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit;min-width:0}
+.gsearch button{border:0;background:var(--accent);color:#fff;border-radius:12px;padding:0 16px;font:inherit;font-weight:600;cursor:pointer}
+.lead{color:var(--muted);margin:-6px 0 14px}
+.soon{display:inline-block;font-size:11px;font-weight:700;color:var(--muted);border:1px dashed var(--line);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:middle}
 </style>
 </head>
-<body>
+<body data-space="home">
 <header><div class="w">
 <h1>💜 Шпаргалка Группы 11 · Смена 1 (ночь)</h1>
-<p>Ссылки, правила смены и шаблоны ответов из чата группы. Собрано 28.10.2026 · обновлено 06.11.2026</p>
+<p>Рабочие шаблоны, правила и инструменты группы · обновлено 07.11.2026</p>
 </div></header>
-<nav><div class="w">
-<a href="templates.html">📋 Шаблоны</a><a href="sv.html">🧑‍💼 Передача СВ</a><a href="vacation.html">🌴 Отпуск 2027</a><a href="salary.html">💵 Калькулятор зарплаты</a><a href="zp.html">💰 Вывод зарплаты</a><a href="calc.html">🧮 Калькулятор премии</a><a href="#links">🔗 Ссылки</a><a href="#sd">🗂 СД и каналы</a><a href="#berries">🍓 Ягодки</a><a href="#cancel">🚫 Отмена РИДов</a><a href="#cert">🎁 Сертификаты</a><a href="#cache">🧹 Кеш Веб-КЦ</a><a href="#schedule">🕗 Перед сменой</a><a href="#rules">📢 Правила</a><a href="#apps">📱 Версии МП</a><a href="#faq">💬 Разборы кейсов</a><a href="#gloss">📖 Сокращения</a>
-</div></nav>
 <main>
-
-<section id="hub">
+<section id="start">
+<form class="gsearch" action="templates.html" method="get" role="search"><input name="q" type="search" placeholder="🔍 Найти шаблон: отмена заказа, госуслуги, обратная доставка…" autocomplete="off"><button type="submit">Найти</button></form>
+<div class="note warn">❓ <b>Есть вопросы по заявкам — в первую очередь идём к наставникам</b> (<a href="https://stream.wb.ru/room/strim_gruppa_11" target="_blank">стрим с наставниками</a> или <a href="https://band.wb.ru/cc/channels/9bec0cbcaf633e7d32ae4fe6f5b7eab6" target="_blank">«Флудилка»</a>). Перед передачей СВ — наставник должен подтвердить.</div>
+</section>
+<div class="space-cards">
+<a class="space" href="work.html"><span class="ic">💼</span><b>Работа</b>Всё для обращений клиентов
+<ul><li>Шаблоны ответов и генератор</li><li>Передача СВ и форматы</li><li>СД и каналы, ягодки, отмена РИДов</li><li>Разборы кейсов и сокращения</li></ul></a>
+<a class="space" href="tools.html"><span class="ic">🧰</span><b>Инструменты</b>Генераторы и калькуляторы
+<ul><li>Генератор ответа с эмпатией</li><li>Поиск по шаблонам</li><li>Калькуляторы премии и зарплаты</li><li>Проверка связи</li></ul></a>
+<a class="space" href="team.html"><span class="ic">👥</span><b>Команда</b>Внутренние процессы группы
+<ul><li>Перед сменой и правила смены</li><li>Стримы и обучение</li><li>Отпуск 2027 и выплаты</li><li>Личный кабинет <span class="soon">скоро</span></li></ul></a>
+</div>
+<section id="quick" style="margin-top:18px">
+<h2>⚡ Самое нужное</h2>
 <div class="grid">
-<a class="link hub" href="templates.html"><b>📋 Шаблоны ответов</b>Конструктор эмпатии с генератором ответа · все шаблоны по категориям с поиском: оценка, возвраты, ожидание, ПВЗ, другие поддержки, проблемы, формы</a>
-<a class="link hub warnc" href="sv.html"><b>🧑‍💼 Передача обращений СВ</b>Когда передаём и в каком формате. <u>Перед передачей — обязательно к наставнику, он должен подтвердить передачу СВ!</u></a>
-</div>
-<div class="note warn" style="margin-bottom:0">❓ <b>Есть вопросы по заявкам — в первую очередь идём к наставникам</b> (<a href="https://stream.wb.ru/room/strim_gruppa_11" target="_blank">стрим с наставниками</a> или <a href="https://band.wb.ru/cc/channels/9bec0cbcaf633e7d32ae4fe6f5b7eab6" target="_blank">«Флудилка»</a>).</div>
-</section>
-
-<section id="links">
-<h2>🔗 Полезные ссылки</h2>
-<h3>Стримы</h3>
-<div class="grid">
-<a class="link" href="https://stream.wb.ru/room/pered_smenoy" target="_blank"><b>Общий стрим «Перед сменой»</b>Новости и важные моменты для всей 1-й ночной смены<br><small>stream.wb.ru/room/pered_smenoy</small></a>
-<a class="link" href="https://stream.wb.ru/room/vstrecha_pered_nachalom_smeny" target="_blank"><b>Стрим Группы 11</b>Встреча перед началом смены — сразу после общего стрима<br><small>stream.wb.ru/room/vstrecha_pered_nachalom_smeny</small></a>
-<a class="link" href="https://stream.wb.ru/room/strim_gruppa_11" target="_blank"><b>Стрим с наставниками</b>Есть вопросы по заявкам — в первую очередь сюда, к наставникам<br><small>stream.wb.ru/room/strim_gruppa_11</small></a>
-</div>
-<h3>Обучение</h3>
-<div class="grid">
-<a class="link" href="https://edtech.rwb.ru/lms/ru/course?publicationid=3L5ngFPwKPw3F73kVlyBqbjrRGk&unitid=3L5ls6ko2C4CbqmJLrOAXsDG5if" target="_blank"><b>Курс в LMS</b>Обучающий курс для операторов<br><small>edtech.rwb.ru/lms</small></a>
-<a class="link" href="https://edtech.rwb.ru/lms/ru/courselist" target="_blank"><b>Список курсов LMS</b>Здесь же смотреть результаты пройденных тестов (их нужно внести в файл наставника)<br><small>edtech.rwb.ru/lms/ru/courselist</small></a>
-<a class="link" href="https://band.wb.ru/cc/pl/ywxr893mk7n9jex1hoahaqs3sr" target="_blank"><b>Тренажёр B2B для операторов</b>HTML-файл в сообщении наставника (вс, 00:57)<br><small>band.wb.ru → сообщение с файлом</small></a>
-<a class="link" href="https://band.wb.ru/cc/pl/yc8d66ah6fy1pbwm97w7xe8wxe" target="_blank"><b>Видео «Ожидаем заявку»</b>Видеоинструкция (сб, 05:13)<br><small>band.wb.ru → сообщение с видео</small></a>
-</div>
-<h3>Важные сообщения в чате</h3>
-<div class="grid">
-<a class="link" href="https://band.wb.ru/cc/channels/9bec0cbcaf633e7d32ae4fe6f5b7eab6" target="_blank"><b>💬 Флудилка</b>Чат группы для вопросов наставникам по заявкам и кейсам<br><small>band.wb.ru → канал «Флудилка»</small></a>
-<a class="link" href="https://band.wb.ru/cc/pl/zaj94kojojg68qouq495nd7aze" target="_blank"><b>📌 Правила присутствия и перерывов</b>Закреп от Алёны Ткачёвой</a>
-<a class="link" href="https://band.wb.ru/cc/pl/9zkk8oppypf6fro75rmojwj78y" target="_blank"><b>Шаблоны возврата денег</b>Платные услуги, отмена, обратная транспортировка</a>
-<a class="link" href="https://band.wb.ru/cc/pl/3ijbxp4gebrn5mktfbwk381iwo" target="_blank"><b>Оформление проблем</b>Поддерживающие формулировки и сроки</a>
-</div>
-<h3>Для работы с клиентом</h3>
-<div class="grid">
-<a class="link" href="https://www.wildberries.ru/services/kontakty" target="_blank"><b>Контакты WB (официальная почта)</b>Если клиент просит официальную почту / контакты<br><small>wildberries.ru/services/kontakty</small></a>
-<a class="link" href="https://sd.wb.ru/catalog/bezopasnost/wb-id--avtorizatsiya-i-profil-polzovatelya-/avtorizatsiya/sbros-ogranicheniya-na-otpravku-sms?catalogCategory=other" target="_blank"><b>СД: сброс лимита отправки SMS-кода</b>Безопасность → WB ID → Авторизация → Сброс ограничения на отправку SMS<br><small>sd.wb.ru</small></a>
-<a class="link" href="https://callcenter.wildberries.ru/KNOWLEDGE_BASE/PATH/base/ID/2582?lang=ru" target="_blank"><b>База знаний: версии приложения</b>Статья о версиях МП<br><small>callcenter.wildberries.ru</small></a>
-</div>
-<div class="note"><b>Как правильно задать вопрос в <a href="https://band.wb.ru/cc/channels/9bec0cbcaf633e7d32ae4fe6f5b7eab6" target="_blank">«Флудилке»</a>:</b> 1) номер ЛК клиента · 2) RID товара, если есть · 3) кратко суть вопроса. Если наставник не отвечает — тегайте <b>@Екатерина Минина</b>.</div>
-</section>
-
-<section id="sd">
-<h2>🗂 Куда нести вопрос: СД, каналы и методички</h2>
-<p style="margin-top:0;color:var(--muted)">Подборка ссылок от Валерии Белой. СД заводим только когда вопрос нельзя решить онлайн; при сомнениях — сначала к наставнику.</p>
-<h3>Заявки в СД (sd.wb.ru)</h3>
-<div class="grid">
-<a class="link" href="https://sd.wb.ru/catalog/wb-courier/wb-kurery/obrashcheniye-v-tekhpod--kliyentskiye-keysy-?catalogCategory=other" target="_blank"><b>🚚 Курьеры</b>Вернуть деньги за доставку по клику, жалоба на курьера<br><small>WB Курьеры → Обращение в техпод (клиентские кейсы)</small></a>
-<a class="link" href="https://sd.wb.ru/catalog/departament-kliyentskogo-servisa-i-opyta/podderzhka-banka---fiz-litsa?catalogCategory=office" target="_blank"><b>💳 WB Кошелёк</b>Вопросы по кошельку физлица<br><small>Поддержка банка — физ. лица</small></a>
-<a class="link" href="https://sd.wb.ru/catalog/it-backoffice/fiskalizatsiya/fiskalizatsiya--zapros-na-obsluzhivaniye?catalogCategory=it" target="_blank"><b>🧾 Чек</b>Разделить чек, вопросы по чекам<br><small>IT Backoffice → Фискализация</small></a>
-<a class="link" href="https://sd.wb.ru/catalog/bezopasnost/antifrod/razblokirovka-polzovateley--yesli-blokirovka-osushchestvlena-otdelom-bezopasnost-ploshchadki--po----antifrod--ba-?catalogCategory=it" target="_blank"><b>🛡 Антифрод</b>Есть блокировка в ЛК, но нет проблемы<br><small>Безопасность → Антифрод → Разблокировка пользователей</small></a>
-<a class="link" href="https://sd.wb.ru/catalog/departament-fintekha/ekspluatatsiya-tranzaktsionnogo-biznesa/komanda-podderzhki-prilozheniy/tekhnicheskiye-voprosy?catalogCategory=it" target="_blank"><b>💳 Привязка карты</b>Клиент не может привязать карту<br><small>Финтех → Команда поддержки приложений → Технические вопросы</small></a>
-<a class="link" href="https://sd.wb.ru/catalog/departament-razvitiya-komissionnogo-biznesa/podderzhka-po-voprosam-strakhovaniya/strakhovaniye-pokupateley?catalogCategory=other" target="_blank"><b>☂️ Страховка</b>Страхование покупателей («Защита товара» и др.)<br><small>Поддержка по вопросам страхования</small></a>
-<a class="link" href="https://sd.wb.ru/catalog/departament-kliyentskogo-servisa-i-opyta/podderzhka-pokupateley/finansy/balans" target="_blank"><b>💰 Баланс</b>Вопросы по балансу профиля<br><small>Поддержка покупателей → Финансы → Баланс</small></a>
-<a class="link" href="https://sd.wb.ru/catalog/departament-kliyentskogo-servisa-i-opyta/oshibki-prilozheniya--pokupateli-?catalogCategory=other" target="_blank"><b>📱 Ошибки приложения (SD МП)</b>Баги в мобильном приложении<br><small>Ошибки приложения (покупатели)</small></a>
-<a class="link" href="https://sd.wb.ru/catalog/departament-kliyentskogo-servisa-i-opyta/oshibki-sayta" target="_blank"><b>🌐 Ошибки сайта (SD Сайт)</b>Баги на сайте wildberries.ru<br><small>Ошибки сайта</small></a>
-<a class="link" href="https://sd.wb.ru/catalog/departament-kliyentskogo-servisa-i-opyta/podderzhka-pokupateley/finansy/rassrochka-i-zayem--chastyami-/bankrotstvo--annulirovaniye-rassrochek?catalogCategory=other" target="_blank"><b>🧩 Оплата частями</b>Рассрочка и заём, банкротство / аннулирование рассрочек («Другое»)<br><small>Финансы → Рассрочка и заём (Частями)</small></a>
-<a class="link" href="https://sd.wb.ru/catalog/departament-kliyentskogo-servisa-i-opyta/podderzhka-pokupateley/programma-loyalnosti?catalogCategory=other" target="_blank"><b>⭐ Программа лояльности</b>ВАУ-баллы, программа «Мой ВБ»<br><small>Поддержка покупателей → Программа лояльности</small></a>
-<a class="link" href="https://sd.wb.ru/catalog/departament-kliyentskogo-servisa-i-opyta/podderzhka-b2b" target="_blank"><b>🏢 Поддержка B2B</b>Вопросы юрлиц / бизнес-покупателей<br><small>Поддержка B2B</small></a>
-<a class="link" href="https://sd.wb.ru/catalog/departament-kliyentskogo-servisa-i-opyta/podderzhka-pokupateley/sertifikaty-wb--b2c-" target="_blank"><b>🎁 Сертификаты физ. лиц</b>Сертификаты WB (B2C)<br><small>Поддержка покупателей → Сертификаты WB</small></a>
-<a class="link" href="https://sd.wb.ru/catalog/servisy-zakazov--ordo-i-nnsz-/aktivnyye-zakazy/problema-so-statusom" target="_blank"><b>⛔ Не прошла автоотмена</b>Проблема со статусом заказа<br><small>Сервисы заказов → Активные заказы → Проблема со статусом</small></a>
-<a class="link" href="https://sd.wb.ru/catalog/servisy-zakazov--ordo-i-nnsz-/aktivnyye-zakazy/otmena-aktivnykh-ridov" target="_blank"><b>🚫 Отмена активных РИДов (ВБХ)</b>Если отмена в Веб-КЦ не прошла в течение суток (порядок — в разделе «Отмена РИДов» ниже)<br><small>Сервисы заказов → Активные заказы</small></a>
-</div>
-<h3>Каналы и методички</h3>
-<div class="grid">
-<a class="link" href="https://band.wb.ru/wb/channels/109a9662-e148-4044-abaa-115aca915b12" target="_blank"><b>🎁 Канал «Подарочные сертификаты»</b>Вопросы по сертификатам физ. и юр. лиц<br><small>band.wb.ru</small></a>
-<a class="link" href="https://band.wb.ru/files/x768ydntzpr6mym7ep5jjgdb6a/public?h=gWcK412UwWjxaiUCBeAlykdB5YkRdV1wdO0QUXitqkw" target="_blank"><b>⭐ Методичка «Мой ВБ»</b>Программа лояльности<br><small>band.wb.ru → файл</small></a>
-<a class="link" href="https://docs.google.com/document/d/196HR5-hTPm9sDdWaEvrOxhlbTJ_SjZrswaJcKVsKUDY/edit?tab=t.0#heading=h.7tv6drpsqbh7" target="_blank"><b>🎁 Частые ошибки с сертификатами</b>Ошибки оплаты и активации (кратко — в разделе «Сертификаты» ниже)<br><small>Google Docs</small></a>
-<a class="link" href="https://docs.google.com/spreadsheets/d/1OfbXuqwa4Kzv034EGpByvSfDk5vwiaO9mveEpI95vrc/edit?gid=978077328#gid=978077328" target="_blank"><b>🏷 Операции актуальные</b>Список актуальных операций для операторов: категория → подкатегория → операция + ссылка на БЗ<br><small>Google Sheets</small></a>
-<a class="link" href="sv.html#format"><b>✉️ Форматы передачи СВ</b>Все форматы, которые нельзя менять: ускорение, ягодки, WB Трек, Ресейл, кошелёк, ошибки ЛК и др.<br><small>страница «Передача СВ»</small></a>
-<a class="link" href="https://callcenter.wildberries.ru/KNOWLEDGE_BASE/PATH/base/ID/3654?lang=ru" target="_blank"><b>📵 БЗ: смена номера телефона</b>Нет доступа к старому номеру (шаблоны — на странице «Шаблоны»)<br><small>callcenter.wildberries.ru</small></a>
+<a class="link" href="templates.html"><b>📋 Шаблоны</b>Все шаблоны с поиском</a>
+<a class="link" href="sv.html#format"><b>✉️ Форматы передачи СВ</b>Скопировать в один клик</a>
+<a class="link" href="work.html#sd"><b>🗂 Куда нести вопрос</b>Все СД и каналы</a>
+<a class="link" href="team.html#rules"><b>📢 Правила смены</b>Перерывы и отметки в чате</a>
 </div>
 </section>
-
-<section id="track">
-<h2>📮 Чаты по ВБ Трек / ВБ Ресейл</h2>
-<div class="note warn">⚠️ Если оператору в чате выпало обращение по <b>ВБ Трек / ВБ Ресейл</b> — <b>отвечать нельзя</b>. Нужно внести номер ЛК в <a href="https://docs.google.com/spreadsheets/d/1QLxbbdGHADA1x2J985kouMnMtPSI1Ok4la0SuPEam7s/edit?gid=0#gid=0" target="_blank">таблицу «Вб трек/ресейл»</a> и <b>закрыть чат без ответа</b>.</div>
-</section>
-
-<section id="berries">
-<h2>🍓 Компенсация ягодками за задержку доставки</h2>
-<h3>КБТ — всегда 300 ягодок, если выполнены ВСЕ условия</h3>
-<ul class="rules">
-<li>📂 Тематика обращения — <b>«Задержка доставки КГТ, СГТ, СГТ+»</b>.</li>
-<li>🍓 Раньше покупателю <b>не начисляли</b> ягодки в качестве компенсации — ни за этот заказ, ни за другие.</li>
-<li>💸 Доставка была <b>платной</b> (проверить в оплате МПМ).</li>
-<li>🟢 Цвет репутации: <b>«Супер зелёный», «Зелёный» или «Жёлтый»</b>.</li>
-<li>💰 В задерживающейся части заказа есть хотя бы 1 товар <b>дороже 10 000 ₽, но дешевле 100 000 ₽</b>.</li>
-<li>⏰ Задержка <b>больше 24 часов и меньше 5 дней</b> от плановой даты доставки (смотрим по RID товара в Веб-КЦ).</li>
-</ul>
-<div class="note">✅ Компенсацию тоже начисляем, если:<br>— доставка была со склада продавца, но задержка на складе WB;<br>— пользователь уже получил или вернул товар, но в момент обращения была задержка по условиям со склада WB.</div>
-<h3>Обычная задержка — по стоимости товара</h3>
-<table>
-<tr><td>от 500 ₽ до 1 500 ₽</td><td>100 ягодок</td></tr>
-<tr><td>от 1 500 ₽ до 4 000 ₽</td><td>200 ягодок</td></tr>
-<tr><td>от 4 000 ₽ до 10 000 ₽</td><td>300 ягодок</td></tr>
-</table>
-<div class="note">Если начислить сами не можем, а клиент требует — передаём СВ по формату <a href="sv.html#f-berries">«Начисление ягодок»</a> (после подтверждения наставника).</div>
-</section>
-
-<section id="cancel">
-<h2>🚫 Отмена активных РИДов через СД</h2>
-<p style="margin-top:0;color:var(--muted)">По методичке <a href="https://docs.google.com/document/d/1GtkhH_UMEB4WKJup4xxUkQphzSk8ZkQ2DLGenEMG9SQ/edit?tab=t.0" target="_blank">«Как создать обращение „Отмена активных ридов“»</a>.</p>
-<h3>Перед созданием обращения проверьте</h3>
-<ul class="rules">
-<li>✅ RID отменили через админскую ручку в Веб-КЦ <b>или</b> покупатель сам отменил товар из-за задержки;</li>
-<li>⏰ с момента отмены прошло <b>24 часа</b>;</li>
-<li>📦 статус товара спустя сутки <b>не изменился</b>.</li>
-</ul>
-<h3>Если RID не отменили</h3>
-<ul class="rules">
-<li>1️⃣ Отмените RID сами ручкой в Веб-КЦ и подождите 24 часа.</li>
-<li>2️⃣ Не помогло — создайте обращение в <a href="https://sd.wb.ru/catalog/servisy-zakazov--ordo-i-nnsz-/aktivnyye-zakazy/otmena-aktivnykh-ridov" target="_blank">СД «Отмена активных ридов»</a>, заполните все обязательные поля.</li>
-<li>3️⃣ Дождитесь подтверждения обращения от руководителя. Рассматривают <b>до 3 рабочих дней</b> после взятия в работу.</li>
-</ul>
-<div class="note">ℹ️ Передавать информацию в группу ННСЗ больше <b>не нужно</b>. Если отмена не прошла через СД и просят обратиться в поддержку ПВЗ — см. <a href="https://sd.wb.ru/issue/PVZSUP-22210/description" target="_blank">PVZSUP-22210</a>.</div>
-<h3>Ошибки при отмене</h3>
-<table>
-<tr><td>«RID уже отменен или находится в процессе отмены»</td><td>Нажимали отмену чаще раза в 24 часа, предыдущий запрос не обработан. Подождите сутки с первой отмены и повторите.</td></tr>
-<tr><td>«not enough time has passed since…»</td><td>Отменяете из-за задержки, а задержки ещё нет. Сроки задержки — в таблице из методички.</td></tr>
-</table>
-<div class="note warn">⚠️ Нельзя отменить RID на <b>закрытые пункты выдачи</b> и доставку <b>в Израиль</b>.</div>
-</section>
-
-<section id="cert">
-<h2>🎁 Подарочные сертификаты: частые ошибки</h2>
-<p style="margin-top:0;color:var(--muted)">Кратко по документу <a href="https://docs.google.com/document/d/196HR5-hTPm9sDdWaEvrOxhlbTJ_SjZrswaJcKVsKUDY/edit?tab=t.0" target="_blank">«Частые ошибки в поддержке»</a>. Найти ID сертификата, дарителя и активатора можно самим: <b>Финансовые операции → Подарочные сертификаты → Поиск по коду активации</b> (нужен доступ, <a href="https://band.wb.ru/wb/pl/fnrn8y3xxidkfrruxz6kmk47ew" target="_blank">запись демо</a>).</p>
-<table>
-<tr><td>«Уже активирован» / «Такого сертификата не существует» у нескольких получателей</td><td>Это не сбой. Сверьте ID сертификатов по кодам — скорее всего, даритель подарил всем <b>один и тот же</b> сертификат. При каждом открытии генерируется новый код (активировать можно один раз), на 11-е открытие 1-й код затирается.</td></tr>
-<tr><td>Несколько разных кодов активированы в одно время у одного пользователя</td><td>Вероятно, это один сертификат. Проверьте ID по коду или на фото/скрине (ID внизу страницы).</td></tr>
-<tr><td>Пластиковый сертификат не пополнен</td><td>По инструкции на обороте карты («отсканируйте QR-код») или на странице <a href="https://www.wildberries.ru/gift/certificates/deposit" target="_blank">пополнения</a>.</td></tr>
-<tr><td>«Такого сертификата нет»</td><td>Проверьте ввод. Если верно — код мог «затереться» (открывали больше 10 раз): получатель просит у дарителя новый код.</td></tr>
-<tr><td>«Операция отклонена» / «Сервис временно недоступен»</td><td>Это всегда ограничения <b>антифрода</b> — заявка в <a href="https://sd.wb.ru/catalog/bezopasnost/antifrod/podarochnyye-sertifikaty--problemy-s-aktivatsiyey-deaktivatsiya-sertifikata-pri-pri-vyyavlennom-moshennichestve-?catalogCategory=it" target="_blank">СД Антифрод → Подарочные сертификаты</a>. См. <a href="https://callcenter.wildberries.ru/KNOWLEDGE_BASE/PATH/base/ID/1901?lang=ru" target="_blank">БЗ «Подарочный сертификат»</a>, п. 6.</td></tr>
-<tr><td>Ошибка при оплате (но не «Операция отклонена»)</td><td>Не относится к сервису сертификатов — обращение в <b>платёжный шлюз</b>.</td></tr>
-<tr><td>Деньги списались с карты/Кошелька, а не с подарочных</td><td>Не относится к сервису сертификатов — в <b>Кошелёк</b>.</td></tr>
-<tr><td>«Что-то пошло не так»</td><td>Попросите попробовать ещё раз. Ошибка сохраняется — уточните в антифроде (та же СД).</td></tr>
-</table>
-</section>
-
-<section id="cache">
-<h2>🧹 Веб-КЦ глючит: очистка кеша и куки</h2>
-<div class="note warn">Работаем только в <b>Google Chrome последней версии</b> — в других браузерах Веб-КЦ работает нестабильно, настройку в них не консультируют.</div>
-<ul class="rules">
-<li>1️⃣ Откройте консоль разработчика: <code>Ctrl+Shift+C</code> или <code>F12</code>.</li>
-<li>2️⃣ Вкладка <b>Application</b> → раскройте <b>Local storage</b>, <b>Session storage</b>, <b>Cookies</b>.</li>
-<li>3️⃣ В каждом правой кнопкой по пункту <code>https://portal-cc…</code> → <b>Clear</b>.</li>
-<li>4️⃣ Не закрывая консоль, правой кнопкой по значку перезагрузки страницы → <b>«Очистка кеша и жёсткая перезагрузка»</b>.</li>
-</ul>
-<p style="margin-bottom:0;color:var(--muted)">Источник: <a href="https://docs.google.com/document/d/1HgLjt1_6RRT2x-gH1NBbJpiudCMJ6WPxD9ATUbV8uv4/edit?tab=t.0" target="_blank">«Очистка куки и кэш»</a>.</p>
-</section>
-
-<section id="schedule">
-<h2>🕗 Перед каждой сменой</h2>
-<ul class="rules">
-<li>📰 Прочитать <b>новости</b> до начала смены.</li>
-<li><span class="time">20:40</span> Подключиться к <a href="https://stream.wb.ru/room/pered_smenoy" target="_blank">общему новостному стриму</a> — разбор новостей, важные моменты, ответы на вопросы.</li>
-<li>➡️ После общего стрима — в <a href="https://stream.wb.ru/room/vstrecha_pered_nachalom_smeny" target="_blank">стрим Группы 11</a> (встреча перед началом смены), затем приступаем к работе.</li>
-<li>❓ Во время смены есть вопросы по заявкам — <b>в первую очередь идём к наставникам</b> в <a href="https://stream.wb.ru/room/strim_gruppa_11" target="_blank">стрим с наставниками</a>.</li>
-<li>🧑‍💼 Нужно передать обращение СВ — <b>сначала к наставнику</b>, он должен подтвердить передачу. <a href="sv.html">Подробнее →</a></li>
-</ul>
-</section>
-
-<section id="rules">
-<h2>📢 Правила смены (закреп)</h2>
-<p style="margin-top:0;color:var(--muted)">Присутствие и перерывы отмечаем в основном чате — коротко и по факту.</p>
-<ul class="rules">
-<li>🟢 Начали смену → <code>Я на смене</code></li>
-<li>☕ Перед перерывом — напишите в чат и <b>дождитесь подтверждения</b>. Время указывать не нужно — оно отображается автоматически.</li>
-<li>⏱ Перерывы суммарно — <b>не более 75 минут</b> за смену (включая обед).</li>
-<li>🚫 В <b>первый и последний час</b> смены перерывы брать нельзя.</li>
-<li>🔙 Вернулись → <code>вернулся / вернулась</code></li>
-<li>🛠 Отключились из-за неполадки → после возвращения напишите, во сколько и почему вас не было, приложите подтверждение (например, скриншот переписки с провайдером). Если неполадка продолжается — сначала лично Алёне Ткачёвой.</li>
-<li>🔴 Закончили смену → <code>Ушёл / Ушла</code>. Изменились планы — отдельным сообщением.</li>
-</ul>
-</section>
-
-<section id="apps">
-<h2>📱 Актуальные версии приложения</h2>
-<p style="margin-top:0;color:var(--muted)">Актуальная версия на 29.10.2026 — <b>7.8.6001</b> во всех магазинах. Свежую версию смотрите в карточке приложения в магазине.</p>
-<div class="grid">
-<a class="link" href="https://www.rustore.ru/catalog/app/com.wildberries.ru" target="_blank"><b>RuStore · 7.8.6001</b><small>rustore.ru</small></a>
-<a class="link" href="https://appgallery.huawei.com/#/app/C101183325" target="_blank"><b>AppGallery · 7.8.6001</b><small>appgallery.huawei.com</small></a>
-<a class="link" href="https://play.google.com/store/apps/details?id=com.wildberries.ru&hl=ru" target="_blank"><b>Google Play · 7.8.6001</b><small>play.google.com</small></a>
-<a class="link" href="https://apps.apple.com/ru/app/wildberries/id597880187" target="_blank"><b>iOS · 7.8.6001</b><small>apps.apple.com</small></a>
-</div>
-<div class="note">Шаблон «Как посмотреть свою версию приложения» — на странице <a href="templates.html#app">Шаблоны</a>.</div>
-</section>
-
-<section id="faq">
-<h2>💬 Разборы кейсов из «Флудилки»</h2>
-<p style="margin-top:0;color:var(--muted)">Ответы наставника и старшего специалиста на вопросы группы в <a href="https://band.wb.ru/cc/channels/9bec0cbcaf633e7d32ae4fe6f5b7eab6" target="_blank">«Флудилке»</a>. Где написано «передать СВ» — сначала подтверждаем у наставника (<a href="sv.html">правила передачи</a>).</p>
-<table>
-<tr><td>Товар «списан», а клиент говорит, что получил</td><td>Оформляем <b>проблему</b> — «ПВЗ не провёл продажу/отказ».</td></tr>
-<tr><td>Клиент вернул товар («принят возврат от клиента»), следующий статус «списан»</td><td>Оформляем <b>проблему</b>. Ограничение «не прошло 10 дней» в этом случае можно не учитывать.</td></tr>
-<tr><td>В рассрочке непонятные RID с суффиксом <code>_dbs</code></td><td>Это оплата <b>за доставку DBS</b>. Если заказ отменён продавцом — передать СВ для возврата денег за доставку; после возврата рассрочка за неё аннулируется сама.</td></tr>
-<tr><td>Проблема не решается месяцами, ускорение уже запрашивали много раз</td><td>Больше ничего сделать не можем.</td></tr>
-<tr><td>Клиент перепутал реквизиты для платежа</td><td>По ответу СВ — направляем в банк (возможно СД «Поддержка B2B»; в спорных случаях уточняйте у СВ).</td></tr>
-<tr><td>Клиент спрашивает, можно ли вернуть пошлину</td><td><b>Не вернём.</b></td></tr>
-<tr><td>Запросили возврат за подписку клуба, в ответе «забрали»</td><td>Значит, возврат сделают.</td></tr>
-<tr><td>Не проходит оплата сертификата любым способом (переустановка не помогла)</td><td>Дать промежуточный ответ («передали вопрос старшему специалисту, ожидайте»), передать СВ — заводится СД (баг МП). Проверить, не включён ли VPN.</td></tr>
-<tr><td>Нужно сбросить лимит попыток отправки кода для входа</td><td>СД: Безопасность → WB ID → Авторизация → <a href="https://sd.wb.ru/catalog/bezopasnost/wb-id--avtorizatsiya-i-profil-polzovatelya-/avtorizatsiya/sbros-ogranicheniya-na-otpravku-sms?catalogCategory=other" target="_blank">Сброс ограничения на отправку SMS</a>.</td></tr>
-<tr><td>Нет движения по ШК из Китая, плановая дата прошла</td><td>Проблема «Доставка из-за рубежа».</td></tr>
-</table>
-</section>
-
-<section id="gloss">
-<h2>📖 Сокращения и термины</h2>
-<input id="glq" type="search" placeholder="Поиск по терминам…">
-<div class="gl">
-<div><b>Артикул</b> — присваивается Wildberries каждому товару продавца в каждом цвете (каждому варианту). Этот артикул видят покупатели. Состоит из цифр, генерируется один раз после того, как продавец создал карточку товара, для каждого цвета карточки (одного варианта).</div>
-<div><b>Веб-интерфейс (Веб-КЦ)</b> — основная рабочая программа, в которой оператор выполняет все свои функции по консультированию покупателей.</div>
-<div><b>КС</b> — коробочная сортировка.</div>
-<div><b>РБ</b> — Республика Беларусь.</div>
-<div><b>РИД (RID, sRid)</b> — уникальный идентификатор заказа, по которому можно посмотреть историю заказа. RID (sRid) можно найти по ШК товара на главной странице «История ШК».</div>
-<div><b>СЦ</b> — сортировочный центр.</div>
-<div><b>МП</b> — мобильное приложение.</div>
-<div><b>Операции</b> — сбор статистики от операторов по темам обращений. Фиксируется после каждого взаимодействия с покупателем с выбором затронутой темы.</div>
-<div><b>ОТ</b> — обратная транспортировка.</div>
-<div><b>СД</b> — Service Desk (sd.wb.ru), заявки во внутренние службы.</div>
-<div><b>СВ</b> — супервайзер / старший специалист.</div>
-<div><b>ЛК</b> — личный кабинет (номер профиля) клиента.</div>
-<div><b>DBS</b> — доставка силами продавца (Delivery by Seller).</div>
-<div><b>ПВЗ</b> — пункт выдачи заказов.</div>
-<div><b>ППВЗ</b> — партнёрский пункт выдачи заказов.</div>
-<div><b>Проблемы</b> — сбор данных о запросах покупателей, которые не могут быть решены в режиме диалога, требуют проверки и дополнительного ответа покупателю. После сбора данных оператор регистрирует заявку для отработки запроса второй линией поддержки.</div>
-<div><b>ШК</b> — штрихкод — графическая информация на поверхности, маркировке или упаковке изделий, которую можно считать техническими средствами. Последовательность чёрных и белых полос, а также цифры/знаки, зашифрованные внутри неё.</div>
-<div><b>QR-код</b> — зашифрованная оптическая метка с информацией об объекте, к которому она привязана. Аналог штрихкода из четырёх квадратов с другим принципом шифрования.</div>
-<div><b>КГТ</b> — крупногабаритный товар, который проходит сортировки на складах и направляется покупателю через пункт выдачи.</div>
-<div><b>КБТ</b> — крупногабаритный товар (крупная мебель и бытовая техника): собирается на складе, сразу отгружается и доставляется покупателю на дом — не проходит через сортировки и пункты выдачи.</div>
-<div><b>СГТ</b> — сверхгабаритные товары (крупные и тяжёлые).</div>
-<div><b>Карточка товара</b> — отдельная страница товара с его характеристиками, функциональными свойствами, фото, условиями покупки и сроками доставки.</div>
-<div><b>Продавец</b> — лицо, зарегистрированное на портале продавцов WB и продающее товары на площадке Wildberries.</div>
-</div>
-</section>
-
-<footer>Шаблоны — на <a href="templates.html">отдельной странице</a> · Наставник: Екатерина Минина</footer>
+<script>(function(){var h=location.hash.slice(1);if(!h)return;var W=['client','sd','berries','cancel','cert','track','cache','apps','faq','gloss','links'],T=['schedule','rules','streams','learn','msgs'];if(W.indexOf(h)>-1)location.replace('work.html#'+(h==='links'?'client':h));else if(T.indexOf(h)>-1)location.replace('team.html#'+h)})();</script>
 </main>
 <script>
 document.querySelectorAll('.tpl').forEach(function(el){
@@ -313,7 +107,7 @@ document.querySelectorAll('.tpl').forEach(function(el){
   el.appendChild(b);
 });
 function fb(t){var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(e){}a.remove()}
-document.getElementById('glq').addEventListener('input',function(){var q=this.value.toLowerCase();document.querySelectorAll('.gl div').forEach(function(d){d.style.display=d.textContent.toLowerCase().indexOf(q)>-1?'':'none'})});
+var _g=document.getElementById('glq');_g&&_g.addEventListener('input',function(){var q=this.value.toLowerCase();document.querySelectorAll('.gl div').forEach(function(d){d.style.display=d.textContent.toLowerCase().indexOf(q)>-1?'':'none'})});
 </script>
 <script>(function(){var r=document.documentElement,b=document.createElement('button');b.type='button';b.className='theme-btn';
 function dark(){var t=r.getAttribute('data-theme');return t?t==='dark':(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)}
@@ -321,5 +115,6 @@ function upd(){var d=dark();b.textContent=d?'☀️':'🌙';b.title=d?'Свет�
 b.onclick=function(){var n=dark()?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}upd()};
 if(window.matchMedia)matchMedia('(prefers-color-scheme: dark)').addEventListener('change',upd);
 document.body.appendChild(b);upd()})();</script>
+<script src="site.js" defer></script>
 </body>
 </html>
