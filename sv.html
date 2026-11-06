@@ -74,7 +74,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 @media (max-width:699px){nav .w,.chips,.hot{-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}}
 </style>
 </head>
-<body>
+<body data-space="work">
 <header><div class="w">
 <h1>🧑‍💼 Передача обращений СВ</h1>
 <p>Когда передаём обращение в чат к СВ / руководителю группы и в каком формате · Группа 11</p>
@@ -241,7 +241,7 @@ ID продавца: 56789
 Репутация: [зелёный]
 Кошелёк: [активен]
 Ягодки: не начисляли</div>
-<div class="note">Для КБТ дополнительно укажите, была ли доставка <b>платной</b> (смотрим в оплате МПМ). Условия и суммы — <a href="index.html#berries">на главной</a>.</div>
+<div class="note">Для КБТ дополнительно укажите, была ли доставка <b>платной</b> (смотрим в оплате МПМ). Условия и суммы — <a href="work.html#berries">на главной</a>.</div>
 <h3 id="f-track">📮 WB Трек</h3>
 <div class="tpl"><span class="lbl">WB Трек</span>Вопросы по WB Track
 ЛК:
@@ -263,7 +263,7 @@ ID получателя: 144303240
 ID ПВЗ отправителя: 168228
 ID ПВЗ получателя: 212858
 Суть вопроса: кл посещал ПВЗ, при сканировании отображается, что посылка в другом ПВЗ. Просим уточнить местонахождение посылки.</pre></details>
-<div class="note">⚠️ Если чат по ВБ Трек / Ресейл выпал вам в работу — не отвечаем, см. <a href="index.html#track">правило</a>.</div>
+<div class="note">⚠️ Если чат по ВБ Трек / Ресейл выпал вам в работу — не отвечаем, см. <a href="work.html#track">правило</a>.</div>
 <h3 id="f-resale">♻️ ВБ Ресейл</h3>
 <div class="tpl"><span class="lbl">ВБ Ресейл</span>Вопросы по ВБ Ресейл
 ЛК:
@@ -685,5 +685,6 @@ function upd(){var d=dark();b.textContent=d?'☀️':'🌙';b.title=d?'Свет�
 b.onclick=function(){var n=dark()?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}upd()};
 if(window.matchMedia)matchMedia('(prefers-color-scheme: dark)').addEventListener('change',upd);
 document.body.appendChild(b);upd()})();</script>
+<script src="site.js" defer></script>
 </body>
 </html>

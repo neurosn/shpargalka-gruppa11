@@ -58,7 +58,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 @media (max-width:699px){nav .w,.chips,.hot{-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}}
 </style>
 </head>
-<body>
+<body data-space="team">
 <header><div class="w">
 <h1>💰 Как получить зарплату через MyTeam</h1>
 <p>Пошаговая инструкция со скриншотами · Группа 11</p>
@@ -164,5 +164,6 @@ function upd(){var d=dark();b.textContent=d?'☀️':'🌙';b.title=d?'Свет�
 b.onclick=function(){var n=dark()?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}upd()};
 if(window.matchMedia)matchMedia('(prefers-color-scheme: dark)').addEventListener('change',upd);
 document.body.appendChild(b);upd()})();</script>
+<script src="site.js" defer></script>
 </body>
 </html>

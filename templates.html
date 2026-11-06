@@ -106,7 +106,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 section{scroll-margin-top:150px}
 </style>
 </head>
-<body>
+<body data-space="work">
 <header><div class="w">
 <h1>📋 Шаблоны ответов · Группа 11</h1>
 <p>Все шаблоны по категориям. Нажмите «Копировать», чтобы взять текст · обновлено 06.11.2026</p>
@@ -284,7 +284,7 @@ section{scroll-margin-top:150px}
 <div class="tpl"><span class="lbl">В пути, кнопка появится позже</span>Я всё проверил(а), вижу, что ваш заказ приедет [дата]. Простите за опоздание.
 Если доставка задержится до [дата], сможете отменить её в профиле. Кнопка для отмены появится в разделе «Заказы». В приложении и на сайте её можно будет найти, нажав на статус под фото товара.
 Отменить заказ в профиле получится только до того, как товар привезут в пункт выдачи. Если кнопка для отмены пропадёт, то сможете отказаться от товара, когда будете получать. Вместо вас это так же может сделать другой человек. Для этого передайте ему QR-код из раздела «Заказы».</div>
-<div class="note">Если в Веб-КЦ отмена не прошла за сутки — <a href="index.html#cancel">отмена активных РИДов через СД</a>. Товар доставляет продавец и клиент недоволен — проблема «Доставка силами продавца» или эксперту.</div>
+<div class="note">Если в Веб-КЦ отмена не прошла за сутки — <a href="work.html#cancel">отмена активных РИДов через СД</a>. Товар доставляет продавец и клиент недоволен — проблема «Доставка силами продавца» или эксперту.</div>
 <p class="src">Источник: <a href="https://callcenter.wildberries.ru/KNOWLEDGE_BASE/PATH/base/ID/3061?lang=ru" target="_blank">БЗ «Отмена заказа в России»</a></p>
 </section>
 
@@ -505,6 +505,7 @@ var show=!ws.length||hit>0||vis2;sec.style.display=show?'':'none';if(show)any=tr
 document.getElementById('empty').style.display=any?'none':'block';
 document.getElementById('qcount').textContent=ws.length?('Найдено шаблонов: '+total+' · очистите поиск, чтобы снова увидеть все разделы'):'';document.body.classList.toggle('searching-page',ws.length>0);}
 q.addEventListener('input',run);
+try{var _q=new URLSearchParams(location.search).get('q');if(_q){q.value=_q;run()}}catch(e){}
 var tt=document.getElementById('totop');window.addEventListener('scroll',function(){tt.classList.toggle('on',window.scrollY>600)},{passive:true});tt.onclick=function(){window.scrollTo({top:0,behavior:'smooth'})};
 document.getElementById('hot').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;q.value=b.textContent;run();q.focus();window.scrollTo({top:0})});
 </script>
@@ -633,5 +634,6 @@ function upd(){var d=dark();b.textContent=d?'☀️':'🌙';b.title=d?'Свет�
 b.onclick=function(){var n=dark()?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}upd()};
 if(window.matchMedia)matchMedia('(prefers-color-scheme: dark)').addEventListener('change',upd);
 document.body.appendChild(b);upd()})();</script>
+<script src="site.js" defer></script>
 </body>
 </html>
