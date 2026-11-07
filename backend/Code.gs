@@ -287,6 +287,9 @@ function personal_(id, m, kpi, disc) {
   const perShift = sal ? sal / SHIFTS_IN_GPH : null, perHour = perShift ? perShift / PAID_HOURS : null;
   // все смены месяца: по графику 2/2 + строки из «Дисциплины»
   const byDate = {}; d.forEach(function (x) { byDate[x.date.split('.').reverse().join('-')] = x; });
+  const who = findUser_(id), auto = !!(who && who.role === 'admin'); // руководителю все смены по графику засчитываются автоматически
+  if (auto) { Object.keys(byDate).forEach(function (k) { delete byDate[k]; });
+    scheduleDates_(m.key).forEach(function (k) { if (k < today) byDate[k] = { date: k.split('-').reverse().join('.'), came: '21:00', left: '09:00', breakMin: null, leftMin: null, worked: '12:00', hours: 12, status: '✅ засчитано автоматически', breaks: [], edge: '', comment: '', kind: 'ok', auto: true }; }); }
   const keys = {}; scheduleDates_(m.key).forEach(function (k) { keys[k] = 1; }); Object.keys(byDate).forEach(function (k) { keys[k] = 1; });
   const shifts = Object.keys(keys).sort().map(function (k) {
     const x = byDate[k] || { date: k.split('-').reverse().join('.'), came: '', left: '', breakMin: null, leftMin: null, worked: '', hours: null, status: '', breaks: [], edge: '', comment: '', kind: k >= today ? 'future' : 'absent', noRow: true };
@@ -296,12 +299,12 @@ function personal_(id, m, kpi, disc) {
       else if (x.kind === 'viol') { lost = Math.max(0, PAID_HOURS - (x.hours || 0)); pay = Math.max(0, perShift - lost * perHour); }
       else if (x.kind === 'future') pay = null; else pay = 0;
     } else if (x.kind === 'viol') lost = Math.max(0, PAID_HOURS - (x.hours || 0));
-    return Object.assign({}, x, { pay: pay === null ? null : Math.round(pay), lostHours: Math.round(lost * 100) / 100, scheduled: !!keys[k] && scheduleDates_(m.key).indexOf(k) > -1 });
+    return Object.assign({}, x, { pay: pay === null ? null : Math.round(pay), payExact: pay, lostHours: Math.round(lost * 100) / 100, scheduled: !!keys[k] && scheduleDates_(m.key).indexOf(k) > -1 });
   });
   const past = shifts.filter(function (x) { return x.kind !== 'future'; }), fut = shifts.filter(function (x) { return x.kind === 'future'; });
   const hours = past.reduce(function (a, x) { return a + (x.hours || 0); }, 0);
   const worked = past.filter(function (x) { return x.came; }).length;
-  const earned = perShift ? past.reduce(function (a, x) { return a + (x.pay || 0); }, 0) : null;
+  const earned = perShift ? past.reduce(function (a, x) { return a + (x.payExact || 0); }, 0) : null;
   const lostH = past.reduce(function (a, x) { return a + (x.lostHours || 0); }, 0);
   const prem = premium_(b, sal);
   return {
@@ -312,7 +315,7 @@ function personal_(id, m, kpi, disc) {
     pay: { salary: sal, perShift: perShift ? Math.round(perShift * 100) / 100 : null, perHour: perHour ? Math.round(perHour * 100) / 100 : null, paidHours: PAID_HOURS,
       shifts: worked, base: earned === null ? null : Math.round(earned), deduct: perShift ? Math.round(lostH * perHour) : null,
       projected: earned === null ? null : Math.round(earned + fut.length * perShift) },
-    premium: prem, tips: tips_(b, s, shifts)
+    premium: prem, tips: auto ? [['👑', 'Руководитель', 'Все смены по графику засчитываются автоматически — отмечаться не нужно.']] : tips_(b, s, shifts), auto: auto
   };
 }
 function monthsPub_(list) { return list.map(function (m) { return { key: m.key, title: m.title }; }); }
