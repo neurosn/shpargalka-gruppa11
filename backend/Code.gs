@@ -541,7 +541,7 @@ Object.assign(API, {
   contentSave: function (req) {
     const u = need_(req, ['editor', 'admin']).user, it = req.item || {};
     const type = ['template', 'link', 'news'].indexOf(it.type) > -1 ? it.type : fail_('Выберите тип');
-    const title = String(it.title || '').trim().slice(0, 200), text = String(it.text || '').trim().slice(0, 8000), url = String(it.url || '').trim().slice(0, 500), section = String(it.section || '').trim().slice(0, 40);
+    const title = String(it.title || '').trim().slice(0, 200), text = String(it.text || '').trim().slice(0, 20000), url = String(it.url || '').trim().slice(0, 500), section = String(it.section || '').trim().slice(0, 40);
     if (!title) fail_('Укажите заголовок');
     if (type === 'template' && !text) fail_('Вставьте текст шаблона');
     if (type === 'link' && !/^https?:\/\//.test(url)) fail_('Ссылка должна начинаться с http:// или https://');
@@ -559,6 +559,21 @@ Object.assign(API, {
     return { ok: true };
   },
   contentMine: function (req) { need_(req, ['editor', 'admin']); return { ok: true, items: contentAll_().filter(function (x) { return x.active; }).map(cpub_) }; }
+});
+
+/* ---------- очистка журнала входов: всё, кроме руководителя ---------- */
+function clearLogins_(keepAdmin) {
+  const admins = {}; users_().forEach(function (u) { if (u.role === 'admin') admins[u.id] = true; });
+  const L = logSheet_(), v = L.getDataRange().getValues(); let n = 0;
+  for (let i = v.length - 1; i >= 1; i--) if (!keepAdmin || !admins[String(v[i][1])]) { L.deleteRow(i + 1); n++; }
+  const S = sesSheet_(), sv = S.getDataRange().getValues(); let s = 0;
+  for (let i = sv.length - 1; i >= 1; i--) if (!admins[String(sv[i][1])]) { S.deleteRow(i + 1); s++; }
+  return { log: n, sessions: s };
+}
+// ▶ запустить из редактора: удаляет тестовые входы сотрудников и наставников (вход руководителя остаётся)
+function clearTestLogins() { const r = clearLogins_(true); Logger.log('Удалено записей журнала: ' + r.log + ', активных входов: ' + r.sessions); }
+Object.assign(API, {
+  adminClearLogins: function (req) { need_(req, ['admin']); return Object.assign({ ok: true }, clearLogins_(true)); }
 });
 
 function doGet() { return out_({ ok: true, service: 'g11-portal' }); }
