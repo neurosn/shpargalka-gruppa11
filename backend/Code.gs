@@ -163,6 +163,10 @@ const MONTHS = ['январь','февраль','март','апрель','ма�
 // планы для премии — как в калькуляторе премии на сайте (направление «чаты»)
 const PLANS = { 1: { output: 100, rating: 3.5, ant: 7.5, ops: 0.95 }, 2: { output: 140, rating: 3.7, ant: 5.3, ops: 0.95 }, 3: { output: 180, rating: 4.15, ant: 3.8, ops: 0.95 } };
 const NORM1 = { out: 100, csi: 3.5, aht: 7.5, ops: 95, ko: 90 }; // норма плана 1 — минимум для премии
+const PAY_FROM = '2026-11';            // расчёт зарплаты в кабинете — с 1 ноября 2026
+const SCHEDULE_ANCHOR = '2026-10-27';  // первая смена пары в графике 2/2 группы
+const SHIFTS_IN_GPH = 15;              // сумма по ГПХ ÷ 15 = оплата за смену
+const PAID_HOURS = 10.75;              // полная смена 21:00–09:00 минус разрешённые 75 мин перерыва
 
 function num_(s) { if (s === null || s === undefined) return null; s = String(s).replace(/\s/g, '').replace('%', '').replace(',', '.'); if (s === '' || isNaN(Number(s))) return null; return Number(s); }
 function pct_(s) { const n = num_(s); return n === null ? null : n / 100; }
@@ -180,7 +184,22 @@ function monthSheets_() {
     if (!year) year = new Date().getFullYear();
     res.push({ key: year + '-' + ('0' + (mi + 1)).slice(-2), name: s.getName(), title: m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase() + ' ' + year, values: v });
   });
+  const have = {}; res.forEach(function (m) { have[m.key] = true; });
+  const now = todayKey_().slice(0, 7); let k = PAY_FROM;
+  while (k <= now) { if (!have[k]) { const mi = Number(k.slice(5)) - 1; res.push({ key: k, name: '', title: MONTHS[mi].charAt(0).toUpperCase() + MONTHS[mi].slice(1) + ' ' + k.slice(0, 4), values: [] }); } k = nextMonth_(k); }
   res.sort(function (a, b) { return a.key < b.key ? -1 : 1; });
+  return res.filter(function (m) { return m.key >= PAY_FROM; });
+}
+function nextMonth_(k) { let y = Number(k.slice(0, 4)), m = Number(k.slice(5)) + 1; if (m > 12) { m = 1; y++; } return y + '-' + ('0' + m).slice(-2); }
+// график 2/2 всей группы: смены в даты, кратные циклу 4 дня от опорной даты (27.10.2026 — первая смена пары)
+function scheduleDates_(monthKey) {
+  const a = new Date(SCHEDULE_ANCHOR + 'T12:00:00Z'), res = [];
+  let d = new Date(monthKey + '-01T12:00:00Z');
+  while (Utilities.formatDate(d, 'UTC', 'yyyy-MM') === monthKey) {
+    const diff = Math.round((d - a) / 86400000), r = ((diff % 4) + 4) % 4;
+    if (r === 0 || r === 1) res.push(Utilities.formatDate(d, 'UTC', 'yyyy-MM-dd'));
+    d = new Date(d.getTime() + 86400000);
+  }
   return res;
 }
 function pickMonth_(list, key) {
@@ -264,19 +283,36 @@ function tips_(b, s, disc) {
   return t;
 }
 function personal_(id, m, kpi, disc) {
-  const s = kpi.sum[id] || null, b = kpi.bonus[id] || null, d = disc[id] || [], sal = salaryOf_(id);
-  const past = d.filter(function (x) { return x.kind !== 'future'; });
+  const s = kpi.sum[id] || null, b = kpi.bonus[id] || null, d = disc[id] || [], sal = salaryOf_(id), today = todayKey_();
+  const perShift = sal ? sal / SHIFTS_IN_GPH : null, perHour = perShift ? perShift / PAID_HOURS : null;
+  // все смены месяца: по графику 2/2 + строки из «Дисциплины»
+  const byDate = {}; d.forEach(function (x) { byDate[x.date.split('.').reverse().join('-')] = x; });
+  const keys = {}; scheduleDates_(m.key).forEach(function (k) { keys[k] = 1; }); Object.keys(byDate).forEach(function (k) { keys[k] = 1; });
+  const shifts = Object.keys(keys).sort().map(function (k) {
+    const x = byDate[k] || { date: k.split('-').reverse().join('.'), came: '', left: '', breakMin: null, leftMin: null, worked: '', hours: null, status: '', breaks: [], edge: '', comment: '', kind: k >= today ? 'future' : 'absent', noRow: true };
+    let pay = null, lost = 0;
+    if (perShift) {
+      if (x.kind === 'ok') pay = perShift;
+      else if (x.kind === 'viol') { lost = Math.max(0, PAID_HOURS - (x.hours || 0)); pay = Math.max(0, perShift - lost * perHour); }
+      else if (x.kind === 'future') pay = null; else pay = 0;
+    } else if (x.kind === 'viol') lost = Math.max(0, PAID_HOURS - (x.hours || 0));
+    return Object.assign({}, x, { pay: pay === null ? null : Math.round(pay), lostHours: Math.round(lost * 100) / 100, scheduled: !!keys[k] && scheduleDates_(m.key).indexOf(k) > -1 });
+  });
+  const past = shifts.filter(function (x) { return x.kind !== 'future'; }), fut = shifts.filter(function (x) { return x.kind === 'future'; });
   const hours = past.reduce(function (a, x) { return a + (x.hours || 0); }, 0);
-  const breakOver = past.reduce(function (a, x) { return a + (x.leftMin !== null && x.leftMin < 0 ? -x.leftMin : 0); }, 0);
   const worked = past.filter(function (x) { return x.came; }).length;
+  const earned = perShift ? past.reduce(function (a, x) { return a + (x.pay || 0); }, 0) : null;
+  const lostH = past.reduce(function (a, x) { return a + (x.lostHours || 0); }, 0);
   const prem = premium_(b, sal);
   return {
-    summary: s, bonus: b, kpiShifts: kpi.shifts[id] || [], discipline: d,
-    stats: { planned: d.length, past: past.length, worked: worked, hours: Math.round(hours * 10) / 10, ok: past.filter(function (x) { return x.kind === 'ok'; }).length,
+    summary: s, bonus: b, kpiShifts: kpi.shifts[id] || [], discipline: shifts,
+    stats: { planned: shifts.length, past: past.length, worked: worked, hours: Math.round(hours * 10) / 10, ok: past.filter(function (x) { return x.kind === 'ok'; }).length,
       viol: past.filter(function (x) { return x.kind === 'viol'; }).length, absent: past.filter(function (x) { return x.kind === 'absent'; }).length,
-      absentReason: past.filter(function (x) { return x.kind === 'absent_reason'; }).length, future: d.length - past.length, breakOverMin: breakOver },
-    pay: { salary: sal, perShift: sal ? Math.round(sal / 15 * 100) / 100 : null, shifts: worked, base: sal ? Math.round(sal / 15 * worked) : null },
-    premium: prem, tips: tips_(b, s, d)
+      absentReason: past.filter(function (x) { return x.kind === 'absent_reason'; }).length, future: fut.length, lostHours: Math.round(lostH * 100) / 100 },
+    pay: { salary: sal, perShift: perShift ? Math.round(perShift * 100) / 100 : null, perHour: perHour ? Math.round(perHour * 100) / 100 : null, paidHours: PAID_HOURS,
+      shifts: worked, base: earned === null ? null : Math.round(earned), deduct: perShift ? Math.round(lostH * perHour) : null,
+      projected: earned === null ? null : Math.round(earned + fut.length * perShift) },
+    premium: prem, tips: tips_(b, s, shifts)
   };
 }
 function monthsPub_(list) { return list.map(function (m) { return { key: m.key, title: m.title }; }); }
