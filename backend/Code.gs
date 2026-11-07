@@ -569,10 +569,11 @@ Object.assign(API, {
   },
   contentSave: function (req) {
     const u = need_(req, ['editor', 'admin']).user, it = req.item || {};
-    const type = ['template', 'link', 'news'].indexOf(it.type) > -1 ? it.type : fail_('Выберите тип');
-    const title = String(it.title || '').trim().slice(0, 200), text = String(it.text || '').trim().slice(0, 20000), url = String(it.url || '').trim().slice(0, 500), section = String(it.section || '').trim().slice(0, 40);
+    const type = ['template', 'link', 'news', 'article'].indexOf(it.type) > -1 ? it.type : fail_('Выберите тип');
+    const title = String(it.title || '').trim().slice(0, 200), text = String(it.text || '').trim().slice(0, it.type === 'article' ? 45000 : 20000), url = String(it.url || '').trim().slice(0, 500), section = String(it.section || '').trim().slice(0, 40);
     if (!title) fail_('Укажите заголовок');
     if (type === 'template' && !text) fail_('Вставьте текст шаблона');
+    if (type === 'article' && !text) fail_('Напишите текст статьи');
     if (type === 'link' && !/^https?:\/\//.test(url)) fail_('Ссылка должна начинаться с http:// или https://');
     const s = contentSheet_(), row = [null, type, section, title, text, url, u.name, new Date(), true];
     if (it.id) { const ex = contentAll_().filter(function (x) { return x.id === String(it.id); })[0]; if (!ex) fail_('Материал не найден'); row[0] = ex.id; s.getRange(ex.row, 1, 1, CCOLS.length).setValues([row]); }
