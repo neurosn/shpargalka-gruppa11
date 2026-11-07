@@ -21,4 +21,5 @@
   h+='<span class="sp"></span><span id="g11acc"></span></div>';
   bar.innerHTML=h;document.body.insertBefore(bar,document.body.firstChild);
   var a=document.createElement('script');a.src='auth.js?v=3';document.body.appendChild(a);
+  var cj=document.createElement('script');cj.src='content.js?v=1';document.body.appendChild(cj);
 })();
