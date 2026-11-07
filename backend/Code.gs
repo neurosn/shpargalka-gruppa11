@@ -52,7 +52,7 @@ function genPw_() {
 function out_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
 function fail_(msg, code) { const e = new Error(msg); e.code = code || 'error'; throw e; }
 
-function users_() { return memo_('users', users0_); }
+function users_() { return memo_('users', function () { const k = 'u_' + sesGen_(), c = cget_(k); if (c) return c; const r = users0_(); cput_(k, r, 600); return r; }); }
 function users0_() {
   const v = accSheet_().getDataRange().getValues(); const res = [];
   for (let i = 1; i < v.length; i++) if (v[i][0] !== '') res.push({ row: i + 1, id: String(v[i][0]).trim(), name: v[i][1], role: v[i][2], salt: v[i][3], hash: v[i][4], active: v[i][5] !== false && v[i][5] !== 'нет' });
@@ -123,7 +123,7 @@ const API = {
     const salt = rnd_(16);
     accSheet_().getRange(u.row, 4, 1, 2).setValues([[salt, hashPw_(salt, nw)]]);
     accSheet_().getRange(u.row, 7).setValue(new Date());
-    dropSessions_(u.id, se.row); // выходим на других устройствах, текущее оставляем
+    dropSessions_(u.id, se.row); bumpSes_(); // выходим на других устройствах, текущее оставляем
     return { ok: true };
   },
 
@@ -157,7 +157,7 @@ const API = {
     const se = need_(req, ['admin']);
     const u = findUser_(req.id); if (!u) fail_('Нет такого сотрудника');
     if (u.id === se.user.id) fail_('Нельзя отключить себя');
-    accSheet_().getRange(u.row, 6).setValue(!!req.active);
+    accSheet_().getRange(u.row, 6).setValue(!!req.active); bumpSes_();
     if (!req.active) dropSessions_(u.id);
     return { ok: true };
   },
@@ -168,7 +168,7 @@ const API = {
     if (!id || !name) fail_('Укажите ID и ФИО');
     if (findUser_(id)) fail_('Такой ID уже есть');
     const pw = genPw_(), salt = rnd_(16);
-    accSheet_().appendRow([id, name, role, salt, hashPw_(salt, pw), true, new Date()]);
+    accSheet_().appendRow([id, name, role, salt, hashPw_(salt, pw), true, new Date()]); bumpSes_();
     return { ok: true, password: pw };
   }
 };
@@ -236,7 +236,7 @@ function block_(v, label) { // строки после заголовка «ID»
 }
 function parseKpi_(m) {
   const ck = 'kpi_' + m.key, c = cget_(ck); if (c) return c;
-  const r = parseKpi0_(m); cput_(ck, r, 180); return r;
+  const r = parseKpi0_(m); cput_(ck, r, 600); return r;
 }
 function parseKpi0_(m) {
   const v = m.values || (m.sheet ? m.sheet.getDataRange().getDisplayValues() : []), sum = {}, bonus = {}, shifts = {};
@@ -257,7 +257,7 @@ function parseKpi0_(m) {
 function discValues_() { return memo_('disc', function () { const s = ss_().getSheetByName(DISC); return s ? { sheet: s, v: s.getDataRange().getDisplayValues() } : null; }); }
 function parseDisc_(monthKey) {
   const ck = 'disc_' + monthKey, c = cget_(ck); if (c) return c;
-  const r = parseDisc0_(monthKey); cput_(ck, r, 90); return r;
+  const r = parseDisc0_(monthKey); cput_(ck, r, 300); return r;
 }
 function parseDisc0_(monthKey) {
   const D = discValues_(); if (!D) return {};
@@ -289,7 +289,7 @@ function premium_(b, salary) {
   const coef = (0.30 * parts.out + 0.35 * parts.csi + 0.20 * parts.aht + 0.15 * parts.ops) * sKo(b.ko === null ? null : b.ko / 100);
   return { stage: stageOf_(b.stage), plan: P, parts: parts, coef: coef, amount: salary ? Math.round(salary * 0.15 * coef) : null };
 }
-function salaryOf_(id) { const map = memo_('pay', function () { const v = paySheet_().getDataRange().getValues(), o = {}; for (let i = 1; i < v.length; i++) o[String(v[i][0])] = Number(v[i][1]) || null; return o; }); return map[String(id)] || null; }
+function salaryOf_(id) { const map = memo_('pay', function () { const c = cget_('pay'); if (c) return c; const v = paySheet_().getDataRange().getValues(), o = {}; for (let i = 1; i < v.length; i++) o[String(v[i][0])] = Number(v[i][1]) || null; cput_('pay', o, 600); return o; }); return map[String(id)] || null; }
 function tips_(b, s, disc) {
   const t = [];
   if (b && !/Наставник/i.test(b.stage) && b.out !== null) {
@@ -357,6 +357,7 @@ Object.assign(API, {
     const u = need_(req).user, a = Number(String(req.amount || '').replace(/\s/g, '').replace(',', '.'));
     if (!(a > 0) || a > 1000000) fail_('Введите сумму по ГПХ числом');
     const s = paySheet_(), v = s.getDataRange().getValues();
+    cdel_('pay');
     for (let i = 1; i < v.length; i++) if (String(v[i][0]) === u.id) { s.getRange(i + 1, 2, 1, 2).setValues([[a, new Date()]]); return { ok: true }; }
     s.appendRow([u.id, a, new Date()]); return { ok: true };
   },
@@ -600,6 +601,10 @@ function clearLogins_(keepAdmin) {
 // ▶ запустить из редактора: удаляет тестовые входы сотрудников и наставников (вход руководителя остаётся)
 function clearTestLogins() { const r = clearLogins_(true); Logger.log('Удалено записей журнала: ' + r.log + ', активных входов: ' + r.sessions); }
 Object.assign(API, {
+  adminRefresh: function (req) { // сбросить кэш, если таблицу правили вручную
+    need_(req, ['admin']); const keys = ['pay']; monthSheets_().forEach(function (m) { keys.push('kpi_' + m.key, 'disc_' + m.key); });
+    cache_().removeAll(keys); bumpSes_(); return { ok: true };
+  },
   adminClearLogins: function (req) { need_(req, ['admin']); return Object.assign({ ok: true }, clearLogins_(true)); }
 });
 
@@ -624,7 +629,7 @@ function setup() {
   const s = accSheet_(); sesSheet_(); logSheet_(); paySheet_(); marksSheet_(); contentSheet_(); testsSheet_();
   const have = {}; users_().forEach(function (u) { have[u.id] = true; });
   SEED.forEach(function (r) { if (!have[r[0]]) s.appendRow([r[0], r[1], r[2], r[3], r[4], true, new Date()]); });
-  forget_(); Logger.log('Готово: аккаунтов ' + users_().length);
+  bumpSes_(); forget_(); Logger.log('Готово: аккаунтов ' + users_().length);
 }
 
 /* ---------- проверка из редактора: ▶ debugData (ничего не меняет) ---------- */
