@@ -151,7 +151,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 function $(i){return document.getElementById(i)}
 function whenReady(cb){if(window.G11)cb();else document.addEventListener('g11:ready',cb,{once:true})}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function show(){var u=G11.user();$('gate').hidden=!!u;$('app').hidden=!u;if(!u)return;if(!show.loaded){show.loaded=1;loadData();loadShift()}$('nm').textContent=u.name;$('uid').textContent=u.id;$('urole').textContent=G11.roleName(u.role)}
+function show(){var u=G11.user();$('gate').hidden=!!u;$('app').hidden=!u;if(!u)return;if(!show.loaded){show.loaded=1;loadData();if(u.role==='admin'){$('shift-sec').innerHTML='<h2>⏱ Смены</h2><p style="margin:0;color:var(--muted)">Руководителю отмечаться не нужно — все смены по графику с 1 ноября засчитываются автоматически как полные (21:00–09:00).</p>'}else loadShift()}$('nm').textContent=u.name;$('uid').textContent=u.id;$('urole').textContent=G11.roleName(u.role)}
 
 function plural(n,a,b,c){n=Math.abs(n)%100;var m=n%10;if(n>10&&n<20)return c;if(m===1)return a;if(m>1&&m<5)return b;return c}
 var rub=function(n){return n==null?'—':Math.round(n).toLocaleString('ru-RU')+' ₽'};
