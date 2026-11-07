@@ -84,6 +84,8 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 .loading{color:var(--muted);padding:12px 0}
 .sal{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}.sal input{width:180px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
 
+.headline{border-radius:16px;padding:16px 18px;margin-bottom:14px;background:linear-gradient(140deg,var(--accent),var(--accent2));color:#fff;font-size:16px;line-height:1.6}.headline b{font-size:20px}.headline .big{font-size:30px;font-weight:800;display:block;margin-top:4px}.headline small{opacity:.9;display:block;font-size:13px;margin-top:4px}
+.headline ul{margin:8px 0 0;padding-left:18px;font-size:14px}.pay0{color:var(--warn);font-weight:700}
 </style>
 </head>
 <body data-space="team">
@@ -102,6 +104,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 <div class="mbar"><select id="mon" aria-label="Месяц"></select><span id="mtitle" style="color:var(--muted)"></span></div>
 <div id="dload" class="loading">Загружаю данные из таблицы группы…</div>
 <div id="dwrap" hidden>
+<div class="headline" id="hl"></div>
 <div class="stat">
 <div class="good"><small>Смен отработано</small><b id="s-worked">—</b></div>
 <div><small>Часов</small><b id="s-hours">—</b></div>
@@ -119,18 +122,18 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 </div>
 </section>
 <section id="money-sec" hidden><h2>💰 Зарплата и премия</h2>
-<div class="money"><div><small>За смены (сумма ÷ 15 × смены)</small><b id="m-base">—</b><br><em id="m-base-d"></em></div><div><small>Премия по KPI (как в калькуляторе)</small><b id="m-prem">—</b><br><em id="m-prem-d"></em></div><div><small>Итого (до НДФЛ)</small><b id="m-tot">—</b><br><em>выплата 10-го числа</em></div></div>
+<div class="money"><div><small>За смены (с учётом нарушений)</small><b id="m-base">—</b><br><em id="m-base-d"></em></div><div><small>Премия по KPI (как в калькуляторе)</small><b id="m-prem">—</b><br><em id="m-prem-d"></em></div><div><small>Итого (до НДФЛ)</small><b id="m-tot">—</b><br><em>выплата 10-го числа</em></div></div>
 <div class="sal"><label for="sal" style="font-weight:600">Моя сумма по ГПХ:</label><input id="sal" inputmode="decimal" placeholder="например, 60000"><button class="btn" type="button" id="salb">Сохранить</button><span class="msg" id="salm" style="margin:0"></span></div>
-<p style="color:var(--muted);font-size:13px;margin:8px 0 0">Сумму видите только вы и руководитель. Премия = сумма по ГПХ × 15% × коэффициент KPI, план по стажу (не ниже плана 1).</p>
+<p style="color:var(--muted);font-size:13px;margin:8px 0 0">Сумму видите только вы и руководитель. Смена = сумма по ГПХ ÷ 15. Смена без нарушений оплачивается полностью; с нарушением — минус недоработанные часы (полная смена — 10 ч 45 мин работы: 12 ч минус 75 мин перерывов). Невыход — 0. Премия = сумма по ГПХ × 15% × коэффициент KPI.</p>
 </section>
 <section id="kpi-sec" hidden><h2>🎯 KPI за месяц</h2>
 <div class="scroll"><table class="mt"><thead><tr><th>Показатель</th><th>Мой средний</th><th>Норма плана 1</th><th>Коэффициент</th><th></th></tr></thead><tbody id="kpib"></tbody></table></div>
 <p id="kpist" style="margin:10px 0 0;font-weight:600"></p>
 </section>
 <section id="tips-sec" hidden><h2>💡 Над чем поработать</h2><ul class="tips" id="tips"></ul></section>
-<section id="sh-sec" hidden><h2>🗓 Смены и дисциплина</h2>
-<div class="scroll"><table class="mt"><thead><tr><th>Дата</th><th>Пришёл</th><th>Ушёл</th><th>Отработано</th><th>Перерывы</th><th>Статус</th></tr></thead><tbody id="shb"></tbody></table></div>
-<p style="color:var(--muted);font-size:13px;margin:8px 0 0">Данные из листа «Дисциплина». Если что-то не так — напишите руководителю.</p>
+<section id="sh-sec" hidden><h2>🗓 Все смены месяца</h2>
+<div class="scroll"><table class="mt"><thead><tr><th>Дата</th><th>Пришёл</th><th>Ушёл</th><th>Отработано</th><th>Перерывы</th><th>Статус</th><th>К оплате</th></tr></thead><tbody id="shb"></tbody></table></div>
+<p style="color:var(--muted);font-size:13px;margin:8px 0 0">График 2/2 группы и отметки из листа «Дисциплина». Если что-то не так — напишите руководителю.</p>
 </section>
 <section class="f"><h2>🔑 Сменить пароль</h2>
 <p style="margin-top:0;color:var(--muted)">Рекомендуем заменить выданный пароль на свой. После смены вход на других устройствах сбросится.</p>
@@ -150,6 +153,7 @@ function whenReady(cb){if(window.G11)cb();else document.addEventListener('g11:re
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function show(){var u=G11.user();$('gate').hidden=!!u;$('app').hidden=!u;if(!u)return;if(!show.loaded){show.loaded=1;loadData();loadShift()}$('nm').textContent=u.name;$('uid').textContent=u.id;$('urole').textContent=G11.roleName(u.role)}
 
+function plural(n,a,b,c){n=Math.abs(n)%100;var m=n%10;if(n>10&&n<20)return c;if(m===1)return a;if(m>1&&m<5)return b;return c}
 var rub=function(n){return n==null?'—':Math.round(n).toLocaleString('ru-RU')+' ₽'};
 var pc=function(x){return x==null?'—':Math.round(x*100)+'%'};
 function setT(id,v){$(id).textContent=v==null?'—':v}
@@ -159,10 +163,16 @@ G11.api('myData',{month:month||curMonth}).then(function(j){curMonth=j.month;
 $('mon').innerHTML=j.months.map(function(m){return '<option value="'+m.key+'"'+(m.key===j.month?' selected':'')+'>'+m.title+'</option>'}).join('');
 var d=j.data,s=d.stats,sm=d.summary||{};$('dload').hidden=true;$('dwrap').hidden=false;
 setT('s-worked',s.worked);setT('s-hours',String(s.hours).replace('.',','));setT('s-ok',s.ok);setT('s-viol',s.viol);setT('s-abs',s.absent+(s.absentReason?' (+'+s.absentReason+' с причиной)':''));setT('s-fut',s.future);
+var MN=(j.monthTitle||'').split(' ')[0].toLowerCase(),MP={'январь':'январе','февраль':'феврале','март':'марте','апрель':'апреле','май':'мае','июнь':'июне','июль':'июле','август':'августе','сентябрь':'сентябре','октябрь':'октябре','ноябрь':'ноябре','декабрь':'декабре'}[MN]||MN;
+var hp=d.pay,hh='В '+MP+' <b>'+s.planned+'</b> '+plural(s.planned,'смена','смены','смен')+' по графику · вы отработали <b>'+s.worked+'</b> '+plural(s.worked,'смену','смены','смен')+' и <b>'+String(s.hours).replace('.',',')+'</b> ч';
+if(hp.salary){hh+='<span class="big">'+(s.future?'Сейчас начислено: ':'По итогу месяца вам заплатят: ')+rub(hp.base+(d.premium&&d.premium.amount||0))+'</span>';
+hh+='<ul><li>'+(s.viol?'Смены с нарушениями: '+s.viol+' — вычтено '+String(s.lostHours).replace('.',',')+' ч ('+rub(hp.deduct)+')':'Смены без нарушений — оплачиваются полностью ✅')+'</li>'+(s.absent?'<li>Невыходы: '+s.absent+' — не оплачиваются</li>':'')+(d.premium&&d.premium.amount?'<li>Премия по KPI: '+rub(d.premium.amount)+'</li>':'')+(s.future?'<li>Впереди '+s.future+' '+plural(s.future,'смена','смены','смен')+' — если отработаете без нарушений, за месяц выйдет '+rub(hp.projected+(d.premium&&d.premium.amount||0))+'</li>':'')+'</ul><small>до НДФЛ · выплата 10-го числа следующего месяца</small>'}
+else hh+='<small>Укажите сумму по ГПХ в блоке «Зарплата и премия» ниже — и здесь появится, сколько вам заплатят.</small>';
+$('hl').innerHTML=hh;
 setT('s-over',sm.overBreak);setT('s-edge',sm.edgeBreak);setT('s-early',sm.early);setT('s-disc',sm.disc==null?null:pc(sm.disc));
 // money
 $('money-sec').hidden=false;var p=d.pay,pr=d.premium;if(p.salary&&!$('sal').value)$('sal').value=p.salary;
-$('m-base').textContent=rub(p.base);$('m-base-d').textContent=p.salary?(rub(p.perShift)+' × '+p.shifts+' смен'):'укажите сумму по ГПХ ниже';
+$('m-base').textContent=rub(p.base);$('m-base-d').textContent=p.salary?(p.shifts+' смен × '+rub(p.perShift)+(p.deduct?' − '+rub(p.deduct)+' за нарушения':'')):'укажите сумму по ГПХ ниже';
 $('m-prem').textContent=pr?rub(pr.amount):'—';$('m-prem-d').textContent=pr?('коэффициент '+pr.coef.toFixed(2).replace('.',',')+(p.salary?'':' · нужна сумма по ГПХ')):(d.bonus&&/Наставник/i.test(d.bonus.stage)?'наставник без чатов — не считается':'нет данных KPI');
 $('m-tot').textContent=(p.base!=null)?rub(p.base+(pr&&pr.amount||0)):'—';
 // kpi
@@ -174,7 +184,7 @@ $('kpist').textContent=b.status||''}else $('kpi-sec').hidden=true;
 $('tips-sec').hidden=false;$('tips').innerHTML=d.tips.map(function(x){return '<li><span class="i">'+x[0]+'</span><div><b>'+esc(x[1])+'</b>'+esc(x[2])+'</div></li>'}).join('');
 // shifts
 var L={ok:['t-ok','✅ OK'],viol:['t-bad',''],future:['t-mid','впереди'],absent:['t-bad','нет отметки'],absent_reason:['t-mid','отсутствие']};
-$('sh-sec').hidden=!d.discipline.length;$('shb').innerHTML=d.discipline.map(function(x){var l=L[x.kind];return '<tr><td>'+esc(x.date)+'</td><td>'+esc(x.came||'—')+'</td><td>'+esc(x.left||'—')+'</td><td>'+esc(x.worked||'—')+'</td><td>'+(x.breaks.length?esc(x.breaks.join(', '))+(x.breakMin!=null?' <small style="color:var(--muted)">('+x.breakMin+' мин)</small>':''):'—')+'</td><td><span class="tag '+l[0]+'">'+esc(l[1]||x.status)+'</span>'+(x.comment?'<br><small style="color:var(--muted)">'+esc(x.comment)+'</small>':'')+'</td></tr>'}).join('');
+$('sh-sec').hidden=!d.discipline.length;$('shb').innerHTML=d.discipline.map(function(x){var l=L[x.kind];return '<tr><td>'+esc(x.date)+'</td><td>'+esc(x.came||'—')+'</td><td>'+esc(x.left||'—')+'</td><td>'+esc(x.worked||'—')+'</td><td>'+(x.breaks.length?esc(x.breaks.join(', '))+(x.breakMin!=null?' <small style="color:var(--muted)">('+x.breakMin+' мин)</small>':''):'—')+'</td><td><span class="tag '+l[0]+'">'+esc(l[1]||x.status)+'</span>'+(x.comment?'<br><small style="color:var(--muted)">'+esc(x.comment)+'</small>':'')+'</td><td>'+(x.pay==null?(x.kind==='future'?'—':'<span style="color:var(--muted)">нет суммы</span>'):(x.pay===0?'<span class="pay0">0 ₽</span>':rub(x.pay)+(x.lostHours?'<br><small style="color:var(--warn)">−'+String(x.lostHours).replace('.',',')+' ч</small>':'')))+'</td></tr>'}).join('');
 }).catch(function(x){$('dload').hidden=false;$('dload').textContent='Не удалось загрузить: '+x.message})}
 $('mon').onchange=function(){loadData(this.value)};
 $('salb').onclick=function(){var m=$('salm');m.className='msg';G11.api('setSalary',{amount:$('sal').value}).then(function(){m.textContent='✅ Сохранено';m.classList.add('ok');loadData()}).catch(function(x){m.textContent=x.message;m.classList.add('bad')})};

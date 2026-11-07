@@ -1,0 +1,39 @@
+/* Поиск по всему порталу: страницы, разделы, шаблоны, ссылки, термины. Открыть: кнопка 🔍, «/» или Ctrl+K */
+(function(){
+  if(window.__g11search)return;window.__g11search=1;
+  var IDX=null,loading=false,sel=0,res=[];
+  var SYN={'отказ':['отмен','отказ'],'отмен':['отмен','отказ'],'деньг':['деньг','дс','возвр'],'вернут':['возвр','верн'],'возвр':['возвр','верн'],'обрат':['обратн'],'кошел':['кошел','wb банк'],'номер':['номер','телефон'],'телеф':['телефон','номер'],'клуб':['клуб','подписк'],'подпи':['подписк','клуб'],'рассро':['рассроч','частями','кредит'],'частям':['частями','рассроч'],'пвз':['пвз','пункт выдачи'],'пункт':['пункт','пвз'],'оцен':['оцен','звезд'],'паспор':['паспорт','госуслуг'],'госус':['госуслуг','паспорт'],'зарпл':['зарплат','выплат','зп','гпх'],'зп':['зп','зарплат','выплат'],'отпус':['отпуск'],'перерыв':['перерыв','обед'],'смен':['смен','график'],'св':['св','супервайзер','передач'],'передач':['передач','св'],'сд':['сд','service desk','заявк'],'кабин':['кабинет','лк'],'лк':['лк','кабинет','личн'],'преми':['преми','kpi'],'kpi':['kpi','преми','кпи'],'кпи':['kpi','кпи'],'шабл':['шаблон']};
+  function nz(s){return String(s||'').toLowerCase().replace(/ё/g,'е')}
+  function alts(w){var st=w.length>=6?w.slice(0,5):w;for(var k in SYN){if(st.indexOf(k)===0||(k.indexOf(st)===0&&st.length>=3))return SYN[k].concat([st])}return [st]}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  var css='.g11s{position:fixed;inset:0;z-index:120;background:rgba(20,16,32,.55);display:none;align-items:flex-start;justify-content:center;padding:8vh 12px 12px}.g11s.on{display:flex}'+
+  '.g11s .box{width:100%;max-width:640px;background:var(--card,#fff);color:var(--ink,#1d1730);border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.35);overflow:hidden;font:15px/1.45 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}'+
+  '.g11s input{width:100%;box-sizing:border-box;border:0;border-bottom:1px solid var(--line,#e6e1f2);padding:16px 18px;font:inherit;font-size:17px;background:transparent;color:inherit;outline:0}'+
+  '.g11s .list{max-height:60vh;overflow:auto;padding:6px}.g11s a{display:block;text-decoration:none;color:inherit;padding:10px 12px;border-radius:10px}.g11s a.on,.g11s a:hover{background:var(--soft,#f1e8fb)}'+
+  '.g11s a b{display:block;color:var(--accent,#7b2cbf);font-size:15px}.g11s a small{display:block;color:var(--muted,#6b6480);font-size:12px}.g11s a span{display:block;font-size:13px;margin-top:2px;color:var(--ink,#1d1730);opacity:.85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'+
+  '.g11s .hint{padding:10px 16px;color:var(--muted,#6b6480);font-size:12px;border-top:1px solid var(--line,#e6e1f2);display:flex;gap:12px;flex-wrap:wrap}.g11s .hint kbd{background:var(--soft,#f1e8fb);border-radius:5px;padding:1px 6px;font:inherit}'+
+  '.g11s .empty{padding:20px;text-align:center;color:var(--muted,#6b6480)}.g11s .chips{display:flex;flex-wrap:wrap;gap:6px;padding:12px}.g11s .chips button{border:1px solid var(--line,#e6e1f2);background:var(--soft,#f1e8fb);color:var(--accent,#7b2cbf);border-radius:999px;padding:5px 11px;font:inherit;font-size:13px;cursor:pointer}'+
+  '.g11sbtn{background:rgba(255,255,255,.1)!important;color:#fff!important;border:0;border-radius:9px;padding:7px 12px;font:600 13px/1 -apple-system,"Segoe UI",Roboto,Arial,sans-serif;cursor:pointer;margin-right:6px;white-space:nowrap}.g11sbtn kbd{opacity:.6;font:inherit;margin-left:6px}@media(max-width:520px){.g11sbtn kbd,.g11sbtn .t{display:none}}';
+  var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
+  var m=document.createElement('div');m.className='g11s';m.innerHTML='<div class="box" role="dialog" aria-label="Поиск по порталу"><input type="search" placeholder="🔍 Поиск по всему порталу: отмена заказа, отпуск, ягодки, формат СВ…" autocomplete="off"><div class="list"></div><div class="hint"><span><kbd>↑</kbd><kbd>↓</kbd> выбрать</span><span><kbd>Enter</kbd> открыть</span><span><kbd>Esc</kbd> закрыть</span></div></div>';
+  document.body.appendChild(m);var inp=m.querySelector('input'),list=m.querySelector('.list');
+  var HOT=['шаблоны отмена заказа','формат передачи СВ','ягодки','мой кабинет','отпуск','калькулятор премии','правила смены','госуслуги','кеш веб-кц','рассрочка'];
+  function extra(){try{var c=JSON.parse(localStorage.getItem('g11_content_cache')||'null');return (c&&c.items||[]).map(function(x){return {t:'✏️ '+x.title,p:x.type==='template'?'📋 Шаблоны → от наставников':x.type==='link'?'🔗 Ссылка от наставников':'📰 Новость',u:x.type==='template'?'templates.html#'+(x.section&&x.section!=='new'?x.section:'mentors'):x.type==='link'?x.url:'index.html#news',k:x.type==='template'?'tpl':'link',x:String(x.text||'').slice(0,140),w:String(x.text||''),ext:x.type==='link'}})}catch(e){return []}}
+  function load(cb){if(IDX)return cb();if(loading)return;loading=true;var s=document.createElement('script');s.src='search-index.js?v='+(window.G11_INDEX_V||1);s.onload=function(){IDX=window.G11_INDEX||[];cb()};s.onerror=function(){IDX=[];cb()};document.head.appendChild(s)}
+  var W={page:30,section:22,sub:14,tpl:12,link:10,term:8};
+  function search(q){var ws=nz(q).replace(/[«»"“”.,:;!?()]/g,' ').split(/\s+/).filter(Boolean);if(!ws.length)return [];var all=IDX.concat(extra()),out=[];
+    all.forEach(function(e){var t=nz(e.t),body=nz(e.p+' '+(e.x||'')+' '+(e.w||'')),sc=0,ok=ws.every(function(w){var A=alts(w),inT=A.some(function(a){return t.indexOf(a)>-1}),inB=inT||A.some(function(a){return body.indexOf(a)>-1});if(inT)sc+=10;else if(inB)sc+=2;return inB});
+      if(ok){if(t.indexOf(nz(q))===0)sc+=15;out.push({e:e,s:sc+(W[e.k]||0)})}});
+    out.sort(function(a,b){return b.s-a.s});return out.slice(0,40).map(function(x){return x.e})}
+  function draw(){var q=inp.value.trim();if(!q){list.innerHTML='<div class="chips">'+HOT.map(function(h){return '<button type="button">'+esc(h)+'</button>'}).join('')+'</div>';res=[];return}
+    res=search(q);sel=0;list.innerHTML=res.length?res.map(function(e,i){return '<a href="'+esc(e.u)+'"'+(e.ext?' target="_blank" rel="noopener"':'')+' data-i="'+i+'"'+(i===0?' class="on"':'')+'><b>'+esc(e.t)+(e.ext?' ↗':'')+'</b><small>'+esc(e.p)+'</small>'+(e.x?'<span>'+esc(e.x)+'</span>':'')+'</a>'}).join(''):'<div class="empty">Ничего не нашлось. Попробуйте другое слово или спросите в «Флудилке».</div>'}
+  function hi(){[].forEach.call(list.querySelectorAll('a'),function(a,i){a.classList.toggle('on',i===sel);if(i===sel)a.scrollIntoView({block:'nearest'})})}
+  function open(){m.classList.add('on');load(draw);setTimeout(function(){inp.focus();inp.select()},30)}
+  function close(){m.classList.remove('on')}
+  inp.addEventListener('input',function(){load(draw)});
+  inp.addEventListener('keydown',function(e){if(e.key==='ArrowDown'){sel=Math.min(res.length-1,sel+1);hi();e.preventDefault()}else if(e.key==='ArrowUp'){sel=Math.max(0,sel-1);hi();e.preventDefault()}else if(e.key==='Enter'){var a=list.querySelectorAll('a')[sel];if(a){a.click();close()}e.preventDefault()}else if(e.key==='Escape')close()});
+  m.addEventListener('click',function(e){if(e.target===m)close();var b=e.target.closest('.chips button');if(b){inp.value=b.textContent;draw();inp.focus()}var a=e.target.closest('a');if(a)setTimeout(close,50)});
+  document.addEventListener('keydown',function(e){var t=e.target,typing=t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable);if((e.key==='/'&&!typing)||((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k')){e.preventDefault();open()}if(e.key==='Escape'&&m.classList.contains('on'))close()});
+  var slot=document.getElementById('g11acc');if(slot){var b=document.createElement('button');b.type='button';b.className='g11sbtn';b.innerHTML='🔍<span class="t"> Поиск</span><kbd>/</kbd>';b.onclick=open;slot.parentNode.insertBefore(b,slot)}
+  window.G11Search={open:open};
+})();

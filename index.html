@@ -73,7 +73,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 </div></header>
 <main>
 <section id="start">
-<form class="gsearch" action="templates.html" method="get" role="search"><input name="q" type="search" placeholder="🔍 Найти шаблон: отмена заказа, госуслуги, обратная доставка…" autocomplete="off"><button type="submit">Найти</button></form>
+<form class="gsearch" action="templates.html" method="get" role="search" onsubmit="if(window.G11Search){event.preventDefault();G11Search.open();var i=document.querySelector('.g11s input');i.value=this.q.value;i.dispatchEvent(new Event('input'))}"><input name="q" type="search" placeholder="🔍 Поиск по всему порталу: отмена заказа, отпуск, ягодки, формат СВ…" autocomplete="off"><button type="submit">Найти</button></form>
 <div class="note warn">❓ <b>Есть вопросы по заявкам — в первую очередь идём к наставникам</b> (<a href="https://stream.wb.ru/room/strim_gruppa_11" target="_blank">стрим с наставниками</a> или <a href="https://band.wb.ru/cc/channels/9bec0cbcaf633e7d32ae4fe6f5b7eab6" target="_blank">«Флудилка»</a>). Перед передачей СВ — наставник должен подтвердить.</div>
 </section>
 <div class="space-cards">
