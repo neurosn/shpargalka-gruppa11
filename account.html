@@ -75,6 +75,14 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 .pill{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;background:var(--soft);color:var(--accent)}
 .scroll{overflow-x:auto}
 .newpw{font:700 18px/1.4 ui-monospace,Menlo,monospace;background:var(--soft);border:1px dashed var(--accent);border-radius:10px;padding:10px 14px;display:inline-block;margin:6px 0;user-select:all}
+.mbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 14px}.mbar select{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit}
+.stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}.stat div{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:12px 14px}.stat small{display:block;color:var(--muted);font-size:12px}.stat b{font-size:24px;line-height:1.2}.stat .bad b{color:var(--warn)}.stat .good b{color:var(--ok)}
+.money{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}.money div{border-radius:14px;padding:14px;background:linear-gradient(140deg,var(--accent),var(--accent2));color:#fff}.money small{opacity:.85;display:block;font-size:12px}.money b{font-size:26px}.money em{font-style:normal;font-size:12px;opacity:.85}
+.mt{width:100%;border-collapse:collapse;font-size:14px}.mt th{text-align:left;font-size:12px;color:var(--muted);padding:8px;border-bottom:1px solid var(--line);white-space:nowrap}.mt td{padding:8px;border-bottom:1px solid var(--line)}.mt td:first-child{width:auto;font-weight:600;color:inherit}
+.tag{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700}.t-ok{background:rgba(31,157,107,.12);color:var(--ok)}.t-bad{background:rgba(217,72,15,.12);color:var(--warn)}.t-mid{background:var(--soft);color:var(--muted)}
+.tips{list-style:none;margin:0;padding:0}.tips li{display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}.tips li:last-child{border:0}.tips .i{font-size:20px}.tips b{display:block}
+.loading{color:var(--muted);padding:12px 0}
+.sal{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}.sal input{width:180px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
 </style>
 </head>
 <body data-space="team">
@@ -88,9 +96,39 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 <section><h2>👤 <span id="nm"></span></h2>
 <div class="kv"><div><small>ID</small><b id="uid"></b></div><div><small>Роль</small><b id="urole"></b></div><div><small>Вход</small><b>сохранён на этом устройстве</b></div></div>
 </section>
-<section><h2>📊 Мои смены, KPI и выплаты</h2>
-<div class="note">Здесь появятся: смены и часы за месяц, KPI по каждому показателю, прогноз зарплаты и премии и рекомендации, над чем поработать. <span class="soon">шаг 3</span></div>
-<div class="note">⏱ Кнопки «Вышел на смену / Ушёл на перерыв / Вернулся / Ушёл» — тоже будут здесь. <span class="soon">шаг 4</span></div>
+<section><h2>📊 Мой месяц</h2>
+<div class="mbar"><select id="mon" aria-label="Месяц"></select><span id="mtitle" style="color:var(--muted)"></span></div>
+<div id="dload" class="loading">Загружаю данные из таблицы группы…</div>
+<div id="dwrap" hidden>
+<div class="stat">
+<div class="good"><small>Смен отработано</small><b id="s-worked">—</b></div>
+<div><small>Часов</small><b id="s-hours">—</b></div>
+<div class="good"><small>Без нарушений</small><b id="s-ok">—</b></div>
+<div class="bad"><small>С нарушениями</small><b id="s-viol">—</b></div>
+<div class="bad"><small>Без отметки прихода</small><b id="s-abs">—</b></div>
+<div><small>Впереди смен</small><b id="s-fut">—</b></div>
+</div>
+<div class="stat" style="margin-top:10px">
+<div class="bad"><small>Перебор перерыва, раз</small><b id="s-over">—</b></div>
+<div class="bad"><small>Перерыв в 1-й/посл. час</small><b id="s-edge">—</b></div>
+<div class="bad"><small>Ушёл раньше, раз</small><b id="s-early">—</b></div>
+<div><small>Дисциплина</small><b id="s-disc">—</b></div>
+</div>
+</div>
+</section>
+<section id="money-sec" hidden><h2>💰 Зарплата и премия</h2>
+<div class="money"><div><small>За смены (сумма ÷ 15 × смены)</small><b id="m-base">—</b><br><em id="m-base-d"></em></div><div><small>Премия по KPI (как в калькуляторе)</small><b id="m-prem">—</b><br><em id="m-prem-d"></em></div><div><small>Итого (до НДФЛ)</small><b id="m-tot">—</b><br><em>выплата 10-го числа</em></div></div>
+<div class="sal"><label for="sal" style="font-weight:600">Моя сумма по ГПХ:</label><input id="sal" inputmode="decimal" placeholder="например, 60000"><button class="btn" type="button" id="salb">Сохранить</button><span class="msg" id="salm" style="margin:0"></span></div>
+<p style="color:var(--muted);font-size:13px;margin:8px 0 0">Сумму видите только вы и руководитель. Премия = сумма по ГПХ × 15% × коэффициент KPI, план по стажу (не ниже плана 1).</p>
+</section>
+<section id="kpi-sec" hidden><h2>🎯 KPI за месяц</h2>
+<div class="scroll"><table class="mt"><thead><tr><th>Показатель</th><th>Мой средний</th><th>Норма плана 1</th><th>Коэффициент</th><th></th></tr></thead><tbody id="kpib"></tbody></table></div>
+<p id="kpist" style="margin:10px 0 0;font-weight:600"></p>
+</section>
+<section id="tips-sec" hidden><h2>💡 Над чем поработать</h2><ul class="tips" id="tips"></ul></section>
+<section id="sh-sec" hidden><h2>🗓 Смены и дисциплина</h2>
+<div class="scroll"><table class="mt"><thead><tr><th>Дата</th><th>Пришёл</th><th>Ушёл</th><th>Отработано</th><th>Перерывы</th><th>Статус</th></tr></thead><tbody id="shb"></tbody></table></div>
+<p style="color:var(--muted);font-size:13px;margin:8px 0 0">Данные из листа «Дисциплина». Если что-то не так — напишите руководителю.</p>
 </section>
 <section class="f"><h2>🔑 Сменить пароль</h2>
 <p style="margin-top:0;color:var(--muted)">Рекомендуем заменить выданный пароль на свой. После смены вход на других устройствах сбросится.</p>
@@ -107,7 +145,36 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 function $(i){return document.getElementById(i)}
 function whenReady(cb){if(window.G11)cb();else document.addEventListener('g11:ready',cb,{once:true})}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function show(){var u=G11.user();$('gate').hidden=!!u;$('app').hidden=!u;if(!u)return;$('nm').textContent=u.name;$('uid').textContent=u.id;$('urole').textContent=G11.roleName(u.role)}
+function show(){var u=G11.user();$('gate').hidden=!!u;$('app').hidden=!u;if(!u)return;if(!show.loaded){show.loaded=1;loadData()}$('nm').textContent=u.name;$('uid').textContent=u.id;$('urole').textContent=G11.roleName(u.role)}
+
+var rub=function(n){return n==null?'—':Math.round(n).toLocaleString('ru-RU')+' ₽'};
+var pc=function(x){return x==null?'—':Math.round(x*100)+'%'};
+function setT(id,v){$(id).textContent=v==null?'—':v}
+var curMonth=null;
+function loadData(month){$('dload').hidden=false;$('dload').textContent='Загружаю данные из таблицы группы…';
+G11.api('myData',{month:month||curMonth}).then(function(j){curMonth=j.month;
+$('mon').innerHTML=j.months.map(function(m){return '<option value="'+m.key+'"'+(m.key===j.month?' selected':'')+'>'+m.title+'</option>'}).join('');
+var d=j.data,s=d.stats,sm=d.summary||{};$('dload').hidden=true;$('dwrap').hidden=false;
+setT('s-worked',s.worked);setT('s-hours',String(s.hours).replace('.',','));setT('s-ok',s.ok);setT('s-viol',s.viol);setT('s-abs',s.absent+(s.absentReason?' (+'+s.absentReason+' с причиной)':''));setT('s-fut',s.future);
+setT('s-over',sm.overBreak);setT('s-edge',sm.edgeBreak);setT('s-early',sm.early);setT('s-disc',sm.disc==null?null:pc(sm.disc));
+// money
+$('money-sec').hidden=false;var p=d.pay,pr=d.premium;if(p.salary&&!$('sal').value)$('sal').value=p.salary;
+$('m-base').textContent=rub(p.base);$('m-base-d').textContent=p.salary?(rub(p.perShift)+' × '+p.shifts+' смен'):'укажите сумму по ГПХ ниже';
+$('m-prem').textContent=pr?rub(pr.amount):'—';$('m-prem-d').textContent=pr?('коэффициент '+pr.coef.toFixed(2).replace('.',',')+(p.salary?'':' · нужна сумма по ГПХ')):(d.bonus&&/Наставник/i.test(d.bonus.stage)?'наставник без чатов — не считается':'нет данных KPI');
+$('m-tot').textContent=(p.base!=null)?rub(p.base+(pr&&pr.amount||0)):'—';
+// kpi
+var b=d.bonus,k=sm.k||{},N=j.norm;
+if(b&&b.out!=null){$('kpi-sec').hidden=false;var rows=[['Выработка, чатов/смену',b.out,N.out,k.out,b.out>=N.out],['Рейтинг CSI',b.csi,N.csi,k.csi,b.csi>=N.csi],['АХТ (не выше)',b.aht,N.aht,k.aht,b.aht<=N.aht],['% операций',b.ops==null?null:b.ops+'%',N.ops+'%',k.ops,b.ops>=N.ops],['КО, %',b.ko==null?'нет данных':b.ko+'%',N.ko+'%',k.ko,b.ko==null||b.ko>=N.ko]];
+$('kpib').innerHTML=rows.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+(r[1]==null?'—':esc(String(r[1]).replace('.',',')))+'</td><td>'+esc(String(r[2]).replace('.',','))+'</td><td>'+pc(r[3])+'</td><td><span class="tag '+(r[4]?'t-ok':'t-bad')+'">'+(r[4]?'в норме':'ниже нормы')+'</span></td></tr>'}).join('')+'<tr><td>Итог KPI</td><td colspan="2">стаж: '+esc(b.stage)+'</td><td><b>'+pc(sm.kpi)+'</b></td><td></td></tr>';
+$('kpist').textContent=b.status||''}else $('kpi-sec').hidden=true;
+// tips
+$('tips-sec').hidden=false;$('tips').innerHTML=d.tips.map(function(x){return '<li><span class="i">'+x[0]+'</span><div><b>'+esc(x[1])+'</b>'+esc(x[2])+'</div></li>'}).join('');
+// shifts
+var L={ok:['t-ok','✅ OK'],viol:['t-bad',''],future:['t-mid','впереди'],absent:['t-bad','нет отметки'],absent_reason:['t-mid','отсутствие']};
+$('sh-sec').hidden=!d.discipline.length;$('shb').innerHTML=d.discipline.map(function(x){var l=L[x.kind];return '<tr><td>'+esc(x.date)+'</td><td>'+esc(x.came||'—')+'</td><td>'+esc(x.left||'—')+'</td><td>'+esc(x.worked||'—')+'</td><td>'+(x.breaks.length?esc(x.breaks.join(', '))+(x.breakMin!=null?' <small style="color:var(--muted)">('+x.breakMin+' мин)</small>':''):'—')+'</td><td><span class="tag '+l[0]+'">'+esc(l[1]||x.status)+'</span>'+(x.comment?'<br><small style="color:var(--muted)">'+esc(x.comment)+'</small>':'')+'</td></tr>'}).join('');
+}).catch(function(x){$('dload').hidden=false;$('dload').textContent='Не удалось загрузить: '+x.message})}
+$('mon').onchange=function(){loadData(this.value)};
+$('salb').onclick=function(){var m=$('salm');m.className='msg';G11.api('setSalary',{amount:$('sal').value}).then(function(){m.textContent='✅ Сохранено';m.classList.add('ok');loadData()}).catch(function(x){m.textContent=x.message;m.classList.add('bad')})};
 whenReady(show);document.addEventListener('g11:login',show);document.addEventListener('g11:user',show);document.addEventListener('g11:logout',show);
 $('pwf').onsubmit=function(e){e.preventDefault();var m=$('pwm');m.className='msg';if($('np').value!==$('np2').value){m.textContent='Новые пароли не совпадают';m.classList.add('bad');return}
 $('pwb').disabled=true;G11.api('changePassword',{oldPassword:$('op').value,newPassword:$('np').value}).then(function(){m.textContent='✅ Пароль изменён';m.classList.add('ok');$('pwf').reset()}).catch(function(x){m.textContent=x.message;m.classList.add('bad')}).then(function(){$('pwb').disabled=false})};

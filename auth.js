@@ -57,7 +57,7 @@
     if(!menu){menu=document.createElement('div');menu.className='g11menu';document.body.appendChild(menu);document.addEventListener('click',function(e){if(!menu.contains(e.target)&&!e.target.closest('.g11me'))menu.classList.remove('on')})}
     var h='<div class="who"><b>'+esc(u.name)+'</b>'+ROLE[u.role]+' · ID '+esc(u.id)+'</div><a href="account.html">🏠 Мой кабинет</a>';
     if(u.role==='editor'||u.role==='admin')h+='<a href="editor.html">✏️ Кабинет редактора</a>';
-    if(u.role==='admin')h+='<a href="admin.html">🛡 Админка: доступы</a>';
+    if(u.role==='admin')h+='<a href="admin.html">🛡 Панель руководителя</a><a href="logins.html">🔑 Журнал входов</a>';
     h+='<button type="button" id="g11out">🚪 Выйти</button>';menu.innerHTML=h;
     menu.querySelector('#g11out').onclick=logout;
     slot.firstChild.onclick=function(){var r=slot.getBoundingClientRect();menu.style.top=(r.bottom+window.scrollY+6)+'px';menu.classList.toggle('on')};
