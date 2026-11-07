@@ -459,11 +459,12 @@ Object.assign(API, {
       if (!st.came) fail_('Сначала отметьте «Вышел на смену»');
       if (st.left) fail_('Смена уже завершена');
       if (st.onBreak) fail_('Вы уже на перерыве с ' + st.openBreak.from);
+      if (r < 60) fail_('В первый час смены (21:00–22:00) перерыв брать нельзя. Перерыв можно с 22:00.');
+      if (r >= 11 * 60) fail_('В последний час смены (08:00–09:00) перерыв брать нельзя.');
       if (st.breaks.length >= 5) fail_('В таблице место только для 5 перерывов. Напишите руководителю.');
       const bb = breakBoard_(sh.label).filter(function (x) { return x.id !== u.id; });
       if (bb.length >= SHIFT.maxOnBreak) fail_('Сейчас на перерыве ' + bb.length + ' человека: ' + bb.map(function (x) { return x.name.split(' ').slice(0, 2).join(' '); }).join(', ') + '. Дождитесь, пока кто-то вернётся.');
       const k = st.breaks.length + 1; set('Пер.' + k + ' начало', written);
-      if (r < 60 || r > 11 * 60) note = 'перерыв в 1-й/последний час';
     } else if (type === 'back') {
       if (!st.onBreak) fail_('Сейчас вы не на перерыве');
       set('Пер.' + st.openBreak.n + ' конец', written);
