@@ -613,7 +613,7 @@ Object.assign(API, {
     const u = need_(req, ['editor', 'admin']).user;
     const name = String(req.name || 'видео').replace(/[\\/:*?"<>|]+/g, '_').slice(0, 120), mime = String(req.mime || 'application/octet-stream').slice(0, 100), size = Number(req.size) || 0;
     if (!(size > 0)) fail_('Пустой файл');
-    if (size > 500 * 1024 * 1024) fail_('Файл больше 500 МБ — загрузите его на Google Диск сами и вставьте ссылкой');
+    if (size > 10 * 1024 * 1024 * 1024) fail_('Файл больше 10 ГБ — загрузите его на Google Диск сами и вставьте ссылкой');
     const H = { Authorization: 'Bearer ' + ScriptApp.getOAuthToken(), 'X-Upload-Content-Type': mime, 'X-Upload-Content-Length': String(size) };
     const body = JSON.stringify({ name: name, mimeType: mime, parents: [filesFolder_().getId()], description: 'Загрузил(а): ' + u.name + ' · ' + new Date().toLocaleString('ru-RU') });
     const URL0 = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&supportsAllDrives=true', org = String(req.origin || '');
