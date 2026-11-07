@@ -159,7 +159,7 @@ var pc=function(x){return x==null?'—':Math.round(x*100)+'%'};
 function setT(id,v){$(id).textContent=v==null?'—':v}
 var curMonth=null;
 function loadData(month){$('dload').hidden=false;$('dload').textContent='Загружаю данные из таблицы группы…';
-G11.api('myData',{month:month||curMonth}).then(function(j){curMonth=j.month;
+G11.cached('myData',{month:month||curMonth},function(j){curMonth=j.month;
 $('mon').innerHTML=j.months.map(function(m){return '<option value="'+m.key+'"'+(m.key===j.month?' selected':'')+'>'+m.title+'</option>'}).join('');
 var d=j.data,s=d.stats,sm=d.summary||{};$('dload').hidden=true;$('dwrap').hidden=false;
 setT('s-worked',s.worked);setT('s-hours',String(s.hours).replace('.',','));setT('s-ok',s.ok);setT('s-viol',s.viol);setT('s-abs',s.absent+(s.absentReason?' (+'+s.absentReason+' с причиной)':''));setT('s-fut',s.future);
