@@ -614,15 +614,18 @@ Object.assign(API, {
     const name = String(req.name || 'видео').replace(/[\\/:*?"<>|]+/g, '_').slice(0, 120), mime = String(req.mime || 'application/octet-stream').slice(0, 100), size = Number(req.size) || 0;
     if (!(size > 0)) fail_('Пустой файл');
     if (size > 500 * 1024 * 1024) fail_('Файл больше 500 МБ — загрузите его на Google Диск сами и вставьте ссылкой');
-    const r = UrlFetchApp.fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&supportsAllDrives=true', {
-      method: 'post', contentType: 'application/json; charset=UTF-8', muteHttpExceptions: true,
-      headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken(), 'X-Upload-Content-Type': mime, 'X-Upload-Content-Length': String(size) },
-      payload: JSON.stringify({ name: name, mimeType: mime, parents: [filesFolder_().getId()], description: 'Загрузил(а): ' + u.name + ' · ' + new Date().toLocaleString('ru-RU') })
-    });
+    const H = { Authorization: 'Bearer ' + ScriptApp.getOAuthToken(), 'X-Upload-Content-Type': mime, 'X-Upload-Content-Length': String(size) };
+    const body = JSON.stringify({ name: name, mimeType: mime, parents: [filesFolder_().getId()], description: 'Загрузил(а): ' + u.name + ' · ' + new Date().toLocaleString('ru-RU') });
+    const URL0 = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&supportsAllDrives=true', org = String(req.origin || '');
+    const go = function (h) { return UrlFetchApp.fetch(URL0, { method: 'post', contentType: 'application/json; charset=UTF-8', muteHttpExceptions: true, headers: h, payload: body }); };
+    let r = null, direct = false;
+    if (req.direct && /^https:\/\/[\w.-]+(:\d+)?$/.test(org)) { try { r = go(Object.assign({ Origin: org }, H)); direct = true; } catch (e) { r = null; } }
+    if (!r) r = go(H);
     const loc = r.getAllHeaders()['Location'] || r.getAllHeaders()['location'];
     if (!loc) fail_('Google Диск не начал загрузку (' + r.getResponseCode() + ')');
     const uid = rnd_(24); cache_().put('up_' + uid, JSON.stringify({ url: loc, user: u.id, size: size, name: name, mime: mime }), 21600);
-    return { ok: true, uid: uid, chunk: 8 * 1024 * 1024 };
+    // прямой режим: браузер сам отправляет файл на Диск по этой одноразовой ссылке (только для этого файла) — быстрее и с точным прогрессом
+    return { ok: true, uid: uid, chunk: 8 * 1024 * 1024, direct: direct ? loc : null };
   },
   uploadChunk: function (req) {
     const u = need_(req, ['editor', 'admin']).user, st = cget_('up_' + String(req.uid || ''));
@@ -637,6 +640,14 @@ Object.assign(API, {
       return { ok: true, done: true, id: id, name: st.name, mime: st.mime, size: st.size };
     }
     fail_('Google Диск не принял часть файла (' + code + ')');
+  },
+  uploadFinish: function (req) { // после прямой загрузки: открыть доступ по ссылке
+    const u = need_(req, ['editor', 'admin']).user, st = cget_('up_' + String(req.uid || ''));
+    if (!st || st.user !== u.id) fail_('Загрузка устарела — начните заново');
+    const id = String(req.id || ''); if (!/^[\w-]{20,100}$/.test(id)) fail_('Нет файла');
+    const f = DriveApp.getFileById(id); if (f.getName() !== st.name) fail_('Файл не совпадает');
+    f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); cdel_('up_' + req.uid);
+    return { ok: true, id: id, name: st.name, mime: st.mime, size: st.size };
   },
   contentMine: function (req) { need_(req, ['editor', 'admin']); return { ok: true, items: contentAll_().filter(function (x) { return x.active; }).map(cpub_) }; }
 });
@@ -660,7 +671,7 @@ Object.assign(API, {
   adminClearLogins: function (req) { need_(req, ['admin']); return Object.assign({ ok: true }, clearLogins_(true)); }
 });
 
-const READ_ONLY = { upload: 1, uploadStart: 1, uploadChunk: 1, ping: 1, me: 1, myData: 1, groupData: 1, logins: 1, marksLog: 1, shiftState: 1, breakBoard: 1, testState: 1, content: 1, contentMine: 1, adminUsers: 1 };
+const READ_ONLY = { upload: 1, uploadStart: 1, uploadChunk: 1, uploadFinish: 1, ping: 1, me: 1, myData: 1, groupData: 1, logins: 1, marksLog: 1, shiftState: 1, breakBoard: 1, testState: 1, content: 1, contentMine: 1, adminUsers: 1 };
 function doGet() { return out_({ ok: true, service: 'g11-portal' }); }
 function doPost(e) {
   forget_();
