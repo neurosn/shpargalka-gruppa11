@@ -311,6 +311,96 @@ Object.assign(API, {
   }
 });
 
+/* ================= ОТМЕТКИ СМЕНЫ: пришёл / перерыв / вернулся / ушёл ================= */
+const MARKS = '_отметки';
+const SHIFT = { start: '21:00', end: '09:00', openFrom: '20:30', closeAt: '09:30', breakLimit: 75 };
+function marksSheet_() { return sheet_(MARKS, ['Время', 'ID', 'ФИО', 'Действие', 'Записано', 'Смена', 'Примечание']); }
+function nowMsk_() { const d = new Date(); return { date: Utilities.formatDate(d, 'Europe/Moscow', 'yyyy-MM-dd'), hm: Utilities.formatDate(d, 'Europe/Moscow', 'HH:mm'), raw: d }; }
+function mins_(hm) { const m = String(hm || '').match(/(\d{1,2}):(\d{2})/); return m ? Number(m[1]) * 60 + Number(m[2]) : null; }
+function shiftNow_() { // смена 21:00–09:00 относится к дате начала
+  const n = nowMsk_(), t = mins_(n.hm); let date = n.date;
+  if (t < 12 * 60) { const d = new Date(n.raw.getTime() - 24 * 3600 * 1000); date = Utilities.formatDate(d, 'Europe/Moscow', 'yyyy-MM-dd'); }
+  const open = t >= mins_(SHIFT.openFrom) || t <= mins_(SHIFT.closeAt);
+  return { date: date, label: date.split('-').reverse().join('.'), hm: n.hm, t: t, open: open };
+}
+// минуты от начала смены (21:00 = 0), чтобы сравнивать время через полночь
+function rel_(hm) { const m = mins_(hm); if (m === null) return null; return m >= 12 * 60 ? m - 21 * 60 : m + 3 * 60; }
+function findShiftRow_(id, label) {
+  const s = ss_().getSheetByName(DISC); if (!s) fail_('Нет листа «Дисциплина»');
+  const v = s.getDataRange().getDisplayValues();
+  for (let i = 0; i < v.length; i++) {
+    if (String(v[i][0]).trim() !== label || String(v[i][1]).indexOf('Смена') !== 0) continue;
+    let h = i + 1; while (h < v.length && String(v[h][0]).trim() !== 'Сотрудник') h++;
+    if (h >= v.length) break;
+    const col = {}; v[h].forEach(function (name, j) { col[String(name).trim()] = j + 1; });
+    for (let r = h + 1; r < v.length; r++) {
+      const a = String(v[r][0]).trim();
+      if (dkey_(a)) break;
+      if (a === String(id)) return { sheet: s, row: r + 1, col: col, values: v[r] };
+    }
+    return { missing: 'row' };
+  }
+  return { missing: 'block' };
+}
+function shiftState_(f) {
+  const g = function (name) { const c = f.col[name]; return c ? String(f.values[c - 1] || '').trim() : ''; };
+  const breaks = [];
+  for (let k = 1; k <= 5; k++) { const a = g('Пер.' + k + ' начало'), b = g('Пер.' + k + ' конец'); if (a) breaks.push({ n: k, from: a, to: b }); }
+  let used = 0; breaks.forEach(function (b) { if (b.to) { let d = rel_(b.to) - rel_(b.from); if (d < 0) d += 1440; used += d; } });
+  const open = breaks.filter(function (b) { return !b.to; })[0] || null;
+  return { came: g('Пришёл'), left: g('Ушёл'), breaks: breaks, onBreak: !!open, openBreak: open, usedMin: used, status: g('Статус') };
+}
+function markLog_(u, action, written, shift, note) { try { marksSheet_().appendRow([new Date(), u.id, u.name, action, written, shift, note || '']); } catch (e) {} }
+
+Object.assign(API, {
+  shiftState: function (req) {
+    const u = need_(req).user, sh = shiftNow_(), f = findShiftRow_(u.id, sh.label);
+    const base = { ok: true, shift: sh.label, now: sh.hm, windowOpen: sh.open, limit: SHIFT.breakLimit };
+    if (f.missing) return Object.assign(base, { scheduled: false });
+    return Object.assign(base, { scheduled: true, state: shiftState_(f) });
+  },
+  mark: function (req) {
+    const u = need_(req).user, sh = shiftNow_(), type = String(req.type || '');
+    if (!sh.open) fail_('Отмечаться можно только во время смены: с ' + SHIFT.openFrom + ' до ' + SHIFT.closeAt + ' по Москве.');
+    const f = findShiftRow_(u.id, sh.label);
+    if (f.missing) { markLog_(u, type, sh.hm, sh.label, 'нет в графике'); fail_('На смену ' + sh.label + ' вас нет в листе «Дисциплина». Отметка сохранена в журнал — напишите руководителю.'); }
+    const st = shiftState_(f), set = function (name, val) { const c = f.col[name]; if (!c) fail_('В листе нет столбца «' + name + '»'); f.sheet.getRange(f.row, c).setValue(val); };
+    const r = rel_(sh.hm); let written = sh.hm, note = '';
+    if (type === 'start') {
+      if (st.came) fail_('Приход уже отмечен в ' + st.came);
+      if (r < 0) { written = SHIFT.start; note = 'пришёл раньше — засчитано ' + SHIFT.start; }
+      set('Пришёл', written);
+    } else if (type === 'break') {
+      if (!st.came) fail_('Сначала отметьте «Вышел на смену»');
+      if (st.left) fail_('Смена уже завершена');
+      if (st.onBreak) fail_('Вы уже на перерыве с ' + st.openBreak.from);
+      if (st.breaks.length >= 5) fail_('В таблице место только для 5 перерывов. Напишите руководителю.');
+      const k = st.breaks.length + 1; set('Пер.' + k + ' начало', written);
+      if (r < 60 || r > 11 * 60) note = 'перерыв в 1-й/последний час';
+    } else if (type === 'back') {
+      if (!st.onBreak) fail_('Сейчас вы не на перерыве');
+      set('Пер.' + st.openBreak.n + ' конец', written);
+    } else if (type === 'end') {
+      if (!st.came) fail_('Сначала отметьте «Вышел на смену»');
+      if (st.left) fail_('Уход уже отмечен в ' + st.left);
+      if (r < 0) fail_('Смена ещё не началась');
+      if (r > 12 * 60) { written = SHIFT.end; note = 'ушёл позже — засчитано ' + SHIFT.end; }
+      if (st.onBreak) set('Пер.' + st.openBreak.n + ' конец', written);
+      set('Ушёл', written);
+      if (r < 12 * 60 && r >= 0) note = note || 'ушёл раньше окончания смены';
+    } else fail_('Неизвестная отметка');
+    markLog_(u, type, written, sh.label, note);
+    SpreadsheetApp.flush();
+    const f2 = findShiftRow_(u.id, sh.label);
+    return { ok: true, written: written, note: note, state: shiftState_(f2), shift: sh.label, limit: SHIFT.breakLimit };
+  },
+  marksLog: function (req) {
+    need_(req, ['admin']);
+    const v = marksSheet_().getDataRange().getValues().slice(1).reverse().slice(0, 300);
+    return { ok: true, log: v.map(function (r) { return { time: r[0] instanceof Date ? r[0].toISOString() : String(r[0]), id: String(r[1]), name: r[2], action: r[3], written: r[4], shift: r[5], note: r[6] }; }) };
+  }
+});
+
 function doGet() { return out_({ ok: true, service: 'g11-portal' }); }
 function doPost(e) {
   try {
@@ -326,7 +416,7 @@ function doPost(e) {
 
 /* ---------- запустить один раз из редактора: ▶ setup ---------- */
 function setup() {
-  const s = accSheet_(); sesSheet_(); logSheet_(); paySheet_();
+  const s = accSheet_(); sesSheet_(); logSheet_(); paySheet_(); marksSheet_();
   const have = {}; users_().forEach(function (u) { have[u.id] = true; });
   SEED.forEach(function (r) { if (!have[r[0]]) s.appendRow([r[0], r[1], r[2], r[3], r[4], true, new Date()]); });
   Logger.log('Готово: аккаунтов ' + users_().length);
