@@ -73,7 +73,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 <p>Всё для работы с обращениями: куда нести вопрос, правила, разборы кейсов и термины</p>
 </div></header>
 <nav><div class="w">
-<a href="templates.html">📋 Шаблоны</a><a href="sv.html">🧑‍💼 Передача СВ</a><a href="#client">🔗 Для клиента</a><a href="#sd">🗂 СД и каналы</a><a href="#berries">🍓 Ягодки</a><a href="#cancel">🚫 Отмена РИДов</a><a href="#cert">🎁 Сертификаты</a><a href="#track">📮 Трек/Ресейл</a><a href="#cache">🧹 Кеш Веб-КЦ</a><a href="#apps">📱 Версии МП</a><a href="#faq">💬 Разборы</a><a href="#gloss">📖 Сокращения</a>
+<a href="templates.html">📋 Шаблоны</a><a href="sv.html">🧑‍💼 Передача СВ</a><a href="#client">🔗 Для клиента</a><a href="#sd">🗂 СД и каналы</a><a href="#berries">🍓 Ягодки</a><a href="#cancel">🚫 Отмена РИДов</a><a href="#cert">🎁 Сертификаты</a><a href="#cache">🧹 Кеш Веб-КЦ</a><a href="#apps">📱 Версии МП</a><a href="#faq">💬 Разборы</a><a href="#gloss">📖 Сокращения</a>
 </div></nav>
 <main>
 <section id="whub">
@@ -180,10 +180,6 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 <tr><td>«Что-то пошло не так»</td><td>Попросите попробовать ещё раз. Ошибка сохраняется — уточните в антифроде (та же СД).</td></tr>
 </table>
 </section>
-<section id="track">
-<h2>📮 Чаты по ВБ Трек / ВБ Ресейл</h2>
-<div class="note warn">⚠️ Если оператору в чате выпало обращение по <b>ВБ Трек / ВБ Ресейл</b> — <b>отвечать нельзя</b>. Нужно внести номер ЛК в <a href="https://docs.google.com/spreadsheets/d/1QLxbbdGHADA1x2J985kouMnMtPSI1Ok4la0SuPEam7s/edit?gid=0#gid=0" target="_blank">таблицу «Вб трек/ресейл»</a> и <b>закрыть чат без ответа</b>.</div>
-</section>
 <section id="cache">
 <h2>🧹 Веб-КЦ глючит: очистка кеша и куки</h2>
 <div class="note warn">Работаем только в <b>Google Chrome последней версии</b> — в других браузерах Веб-КЦ работает нестабильно, настройку в них не консультируют.</div>
@@ -273,6 +269,6 @@ function upd(){var d=dark();b.textContent=d?'☀️':'🌙';b.title=d?'Свет�
 b.onclick=function(){var n=dark()?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}upd()};
 if(window.matchMedia)matchMedia('(prefers-color-scheme: dark)').addEventListener('change',upd);
 document.body.appendChild(b);upd()})();</script>
-<script src="site.js?v=13" defer></script>
+<script src="site.js?v=14" defer></script>
 </body>
 </html>
