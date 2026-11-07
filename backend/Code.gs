@@ -15,7 +15,18 @@ const MAX_FAILS = 5, LOCK_MIN = 15;
 const SEED = []; // начальные аккаунты уже созданы; новых добавляйте через админку
 
 /* ---------- служебное ---------- */
-function ss_() { return SpreadsheetApp.openById(SHEET_ID); }
+/* ---------- скорость: одна таблица и одно чтение листа на запрос + общий кэш ---------- */
+let _ss = null, _memo = {};
+function ss_() { return _ss || (_ss = SpreadsheetApp.openById(SHEET_ID)); }
+function memo_(k, f) { if (!(k in _memo)) _memo[k] = f(); return _memo[k]; }
+function forget_() { _memo = {}; }
+function cache_() { return CacheService.getScriptCache(); }
+function cget_(k) { try { const x = cache_().get(k); return x ? JSON.parse(x) : null; } catch (e) { return null; } }
+function cput_(k, v, sec) { try { const j = JSON.stringify(v); if (j.length < 95000) cache_().put(k, j, sec); } catch (e) {} }
+function cdel_(k) { try { cache_().remove(k); } catch (e) {} }
+function sesGen_() { return cache_().get('sesgen') || '0'; }
+function bumpSes_() { cache_().put('sesgen', String(Date.now()), 21600); }
+function dropDisc_() { forget_(); cdel_('disc_' + todayKey_().slice(0, 7)); const p = shiftNow_().date.slice(0, 7); cdel_('disc_' + p); }
 function sheet_(name, headers) {
   const ss = ss_();
   let s = ss.getSheetByName(name);
@@ -41,7 +52,8 @@ function genPw_() {
 function out_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
 function fail_(msg, code) { const e = new Error(msg); e.code = code || 'error'; throw e; }
 
-function users_() {
+function users_() { return memo_('users', users0_); }
+function users0_() {
   const v = accSheet_().getDataRange().getValues(); const res = [];
   for (let i = 1; i < v.length; i++) if (v[i][0] !== '') res.push({ row: i + 1, id: String(v[i][0]).trim(), name: v[i][1], role: v[i][2], salt: v[i][3], hash: v[i][4], active: v[i][5] !== false && v[i][5] !== 'нет' });
   return res;
@@ -55,23 +67,27 @@ function newSession_(id, device) {
   sesSheet_().appendRow([sha_(token), id, new Date(), new Date(), String(device || '').slice(0, 120)]);
   return token;
 }
-function session_(token) {
+function session_(token, fresh) {
   if (!token) fail_('Нужно войти', 'auth');
-  const th = sha_(token), s = sesSheet_(), v = s.getDataRange().getValues();
+  const th = sha_(token), ck = 's_' + sesGen_() + '_' + th;
+  if (!fresh) { const c = cget_(ck); if (c) return { user: c, row: null, cached: true }; }
+  const s = sesSheet_(), v = s.getDataRange().getValues();
   for (let i = 1; i < v.length; i++) if (v[i][0] === th) {
     const u = findUser_(v[i][1]);
     if (!u || !u.active) fail_('Аккаунт отключён', 'auth');
     const last = v[i][3] instanceof Date ? v[i][3].getTime() : 0;
     if (Date.now() - last > 6 * 3600 * 1000) s.getRange(i + 1, 4).setValue(new Date());
+    cput_(ck, { id: u.id, name: u.name, role: u.role, active: u.active }, 900);
     return { user: u, row: i + 1 };
   }
   fail_('Сессия завершена, войдите снова', 'auth');
 }
 function dropSessions_(id, exceptRow) {
+  bumpSes_();
   const s = sesSheet_(), v = s.getDataRange().getValues();
   for (let i = v.length - 1; i >= 1; i--) if (String(v[i][1]) === String(id) && i + 1 !== exceptRow) s.deleteRow(i + 1);
 }
-function need_(req, roles) { const se = session_(req.token); if (roles && roles.indexOf(se.user.role) < 0) fail_('Недостаточно прав', 'forbidden'); return se; }
+function need_(req, roles, fresh) { const se = session_(req.token, fresh); if (roles && roles.indexOf(se.user.role) < 0) fail_('Недостаточно прав', 'forbidden'); return se; }
 
 /* ---------- API ---------- */
 const API = {
@@ -96,12 +112,12 @@ const API = {
   me: function (req) { return { ok: true, user: pub_(need_(req).user) }; },
 
   logout: function (req) {
-    try { const se = session_(req.token); sesSheet_().deleteRow(se.row); log_(se.user.id, se.user.name, '🚪 выход', ''); } catch (e) {}
+    try { const se = session_(req.token, true); bumpSes_(); sesSheet_().deleteRow(se.row); log_(se.user.id, se.user.name, '🚪 выход', ''); } catch (e) {}
     return { ok: true };
   },
 
   changePassword: function (req) {
-    const se = need_(req), u = se.user, nw = String(req.newPassword || '');
+    const se = need_(req, null, true), u = se.user, nw = String(req.newPassword || '');
     if (hashPw_(u.salt, String(req.oldPassword || '')) !== u.hash) fail_('Текущий пароль неверный');
     if (nw.length < 8) fail_('Новый пароль — минимум 8 символов');
     const salt = rnd_(16);
@@ -133,7 +149,7 @@ const API = {
     const u = findUser_(req.id); if (!u) fail_('Нет такого сотрудника');
     if (ROLES.indexOf(req.role) < 0) fail_('Неизвестная роль');
     if (u.id === se.user.id && req.role !== 'admin') fail_('Нельзя снять права админа с самой себя');
-    accSheet_().getRange(u.row, 3).setValue(req.role);
+    accSheet_().getRange(u.row, 3).setValue(req.role); bumpSes_();
     return { ok: true };
   },
 
@@ -179,10 +195,12 @@ function monthSheets_() {
   ss_().getSheets().forEach(function (s) {
     const m = s.getName().match(/^KPI\s+([а-яё]+)$/i); if (!m) return;
     const mi = MONTHS.indexOf(m[1].toLowerCase()); if (mi < 0) return;
-    const v = s.getDataRange().getDisplayValues(); let year = null;
-    for (let i = 0; i < v.length && !year; i++) { const k = dkey_(v[i][0]); if (k) year = Number(k.slice(0, 4)); }
+    const yk = 'yr_' + s.getSheetId(); let year = cget_(yk);
+    if (!year) { const n = Math.min(s.getLastRow(), 120); const v = n ? s.getRange(1, 1, n, 1).getDisplayValues() : [];
+      for (let i = 0; i < v.length && !year; i++) { const k = dkey_(v[i][0]); if (k) year = Number(k.slice(0, 4)); }
+      if (year) cput_(yk, year, 21600); }
     if (!year) year = new Date().getFullYear();
-    res.push({ key: year + '-' + ('0' + (mi + 1)).slice(-2), name: s.getName(), title: m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase() + ' ' + year, values: v });
+    res.push({ key: year + '-' + ('0' + (mi + 1)).slice(-2), name: s.getName(), title: m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase() + ' ' + year, sheet: s, values: null });
   });
   const have = {}; res.forEach(function (m) { have[m.key] = true; });
   const now = todayKey_().slice(0, 7); let k = PAY_FROM;
@@ -217,7 +235,11 @@ function block_(v, label) { // строки после заголовка «ID»
   return out;
 }
 function parseKpi_(m) {
-  const v = m.values, sum = {}, bonus = {}, shifts = {};
+  const ck = 'kpi_' + m.key, c = cget_(ck); if (c) return c;
+  const r = parseKpi0_(m); cput_(ck, r, 180); return r;
+}
+function parseKpi0_(m) {
+  const v = m.values || (m.sheet ? m.sheet.getDataRange().getDisplayValues() : []), sum = {}, bonus = {}, shifts = {};
   block_(v, 'ИТОГ ЗА ПЕРИОД').forEach(function (r) {
     sum[String(r[0]).trim()] = { name: String(r[1]).trim(), kpiShifts: num_(r[2]), k: { out: pct_(r[3]), csi: pct_(r[4]), aht: pct_(r[5]), ops: pct_(r[6]), ko: pct_(r[7]) }, kpi: pct_(r[8]),
       worked: num_(r[9]), clean: num_(r[10]), viol: num_(r[11]), disc: pct_(r[12]), overBreak: num_(r[13]), edgeBreak: num_(r[14]), early: num_(r[15]) };
@@ -232,9 +254,14 @@ function parseKpi_(m) {
   }
   return { sum: sum, bonus: bonus, shifts: shifts };
 }
+function discValues_() { return memo_('disc', function () { const s = ss_().getSheetByName(DISC); return s ? { sheet: s, v: s.getDataRange().getDisplayValues() } : null; }); }
 function parseDisc_(monthKey) {
-  const s = ss_().getSheetByName(DISC); if (!s) return {};
-  const v = s.getDataRange().getDisplayValues(), res = {}, today = todayKey_(); let date = null;
+  const ck = 'disc_' + monthKey, c = cget_(ck); if (c) return c;
+  const r = parseDisc0_(monthKey); cput_(ck, r, 90); return r;
+}
+function parseDisc0_(monthKey) {
+  const D = discValues_(); if (!D) return {};
+  const v = D.v, res = {}, today = todayKey_(); let date = null;
   for (let i = 0; i < v.length; i++) {
     const a = String(v[i][0]).trim(), k = dkey_(a);
     if (k && String(v[i][1]).indexOf('Смена') === 0) { date = k; continue; }
@@ -262,7 +289,7 @@ function premium_(b, salary) {
   const coef = (0.30 * parts.out + 0.35 * parts.csi + 0.20 * parts.aht + 0.15 * parts.ops) * sKo(b.ko === null ? null : b.ko / 100);
   return { stage: stageOf_(b.stage), plan: P, parts: parts, coef: coef, amount: salary ? Math.round(salary * 0.15 * coef) : null };
 }
-function salaryOf_(id) { const v = paySheet_().getDataRange().getValues(); for (let i = 1; i < v.length; i++) if (String(v[i][0]) === String(id)) return Number(v[i][1]) || null; return null; }
+function salaryOf_(id) { const map = memo_('pay', function () { const v = paySheet_().getDataRange().getValues(), o = {}; for (let i = 1; i < v.length; i++) o[String(v[i][0])] = Number(v[i][1]) || null; return o; }); return map[String(id)] || null; }
 function tips_(b, s, disc) {
   const t = [];
   if (b && !/Наставник/i.test(b.stage) && b.out !== null) {
@@ -365,8 +392,8 @@ function shiftNow_() { // смена 21:00–09:00 относится к дат�
 // минуты от начала смены (21:00 = 0), чтобы сравнивать время через полночь
 function rel_(hm) { const m = mins_(hm); if (m === null) return null; return m >= 12 * 60 ? m - 21 * 60 : m + 3 * 60; }
 function findShiftRow_(id, label) {
-  const s = ss_().getSheetByName(DISC); if (!s) fail_('Нет листа «Дисциплина»');
-  const v = s.getDataRange().getDisplayValues();
+  const D = discValues_(); if (!D) fail_('Нет листа «Дисциплина»');
+  const s = D.sheet, v = D.v;
   for (let i = 0; i < v.length; i++) {
     if (String(v[i][0]).trim() !== label || String(v[i][1]).indexOf('Смена') !== 0) continue;
     let h = i + 1; while (h < v.length && String(v[h][0]).trim() !== 'Сотрудник') h++;
@@ -391,8 +418,8 @@ function shiftState_(f) {
 }
 
 function breakBoard_(label) { // кто сейчас на перерыве в смене label
-  const s = ss_().getSheetByName(DISC); if (!s) return [];
-  const v = s.getDataRange().getDisplayValues(), res = [];
+  const D = discValues_(); if (!D) return [];
+  const v = D.v, res = [];
   for (let i = 0; i < v.length; i++) {
     if (String(v[i][0]).trim() !== label || String(v[i][1]).indexOf('Смена') !== 0) continue;
     let h = i + 1; while (h < v.length && String(v[h][0]).trim() !== 'Сотрудник') h++;
@@ -449,7 +476,7 @@ Object.assign(API, {
       if (r < 12 * 60 && r >= 0) note = note || 'ушёл раньше окончания смены';
     } else fail_('Неизвестная отметка');
     markLog_(u, type, written, sh.label, note);
-    SpreadsheetApp.flush();
+    SpreadsheetApp.flush(); dropDisc_();
     const f2 = findShiftRow_(u.id, sh.label);
     return { ok: true, written: written, note: note, state: shiftState_(f2), shift: sh.label, limit: SHIFT.breakLimit, board: breakBoard_(sh.label), maxOnBreak: SHIFT.maxOnBreak, now: sh.hm, windowOpen: true, scheduled: true };
   },
@@ -566,7 +593,7 @@ function clearLogins_(keepAdmin) {
   const admins = {}; users_().forEach(function (u) { if (u.role === 'admin') admins[u.id] = true; });
   const L = logSheet_(), v = L.getDataRange().getValues(); let n = 0;
   for (let i = v.length - 1; i >= 1; i--) if (!keepAdmin || !admins[String(v[i][1])]) { L.deleteRow(i + 1); n++; }
-  const S = sesSheet_(), sv = S.getDataRange().getValues(); let s = 0;
+  bumpSes_(); const S = sesSheet_(), sv = S.getDataRange().getValues(); let s = 0;
   for (let i = sv.length - 1; i >= 1; i--) if (!admins[String(sv[i][1])]) { S.deleteRow(i + 1); s++; }
   return { log: n, sessions: s };
 }
@@ -576,12 +603,15 @@ Object.assign(API, {
   adminClearLogins: function (req) { need_(req, ['admin']); return Object.assign({ ok: true }, clearLogins_(true)); }
 });
 
+const READ_ONLY = { ping: 1, me: 1, myData: 1, groupData: 1, logins: 1, marksLog: 1, shiftState: 1, breakBoard: 1, testState: 1, content: 1, contentMine: 1, adminUsers: 1 };
 function doGet() { return out_({ ok: true, service: 'g11-portal' }); }
 function doPost(e) {
+  forget_();
   try {
     const req = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     const fn = API[req.action];
     if (!fn) fail_('Неизвестное действие');
+    if (READ_ONLY[req.action]) return out_(fn(req)); // чтение — без очереди, параллельно
     const lock = LockService.getScriptLock(); lock.waitLock(20000);
     try { return out_(fn(req)); } finally { lock.releaseLock(); }
   } catch (err) {
@@ -594,7 +624,7 @@ function setup() {
   const s = accSheet_(); sesSheet_(); logSheet_(); paySheet_(); marksSheet_(); contentSheet_(); testsSheet_();
   const have = {}; users_().forEach(function (u) { have[u.id] = true; });
   SEED.forEach(function (r) { if (!have[r[0]]) s.appendRow([r[0], r[1], r[2], r[3], r[4], true, new Date()]); });
-  Logger.log('Готово: аккаунтов ' + users_().length);
+  forget_(); Logger.log('Готово: аккаунтов ' + users_().length);
 }
 
 /* ---------- проверка из редактора: ▶ debugData (ничего не меняет) ---------- */
