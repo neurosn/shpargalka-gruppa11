@@ -551,6 +551,15 @@ Object.assign(API, {
 
 /* ================= МАТЕРИАЛЫ РЕДАКТОРОВ (лист «_контент») ================= */
 const CONTENT = '_контент';
+const FILES_FOLDER = 'Портал Группы 11 — файлы статей';
+function filesFolder_() {
+  const pr = PropertiesService.getScriptProperties(), id = pr.getProperty('filesFolder');
+  if (id) { try { return DriveApp.getFolderById(id); } catch (e) {} }
+  const it = DriveApp.getFoldersByName(FILES_FOLDER), f = it.hasNext() ? it.next() : DriveApp.createFolder(FILES_FOLDER);
+  pr.setProperty('filesFolder', f.getId()); return f;
+}
+// ▶ запустить один раз из редактора: Google попросит разрешить доступ к Диску, создаст папку для файлов статей
+function setupFiles() { const f = filesFolder_(); Logger.log('Папка для файлов: ' + f.getName() + ' — ' + f.getUrl()); }
 const CCOLS = ['ID', 'Тип', 'Раздел', 'Заголовок', 'Текст', 'Ссылка', 'Автор', 'Обновлено', 'Активен'];
 function contentSheet_() { return sheet_(CONTENT, CCOLS); }
 function contentAll_() {
@@ -588,6 +597,17 @@ Object.assign(API, {
     CacheService.getScriptCache().remove('content_v1');
     return { ok: true };
   },
+  upload: function (req) { // фото / видео / файл для статей → папка на Google Диске, доступ по ссылке
+    const u = need_(req, ['editor', 'admin']).user;
+    const name = String(req.name || 'файл').replace(/[\\/:*?"<>|]+/g, '_').slice(0, 120), mime = String(req.mime || 'application/octet-stream').slice(0, 100), data = String(req.data || '');
+    if (!data) fail_('Пустой файл');
+    if (data.length > 36 * 1024 * 1024) fail_('Файл больше 25 МБ — загрузите его на Google Диск сами и вставьте ссылкой');
+    const blob = Utilities.newBlob(Utilities.base64Decode(data), mime, name);
+    const f = filesFolder_().createFile(blob);
+    f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    f.setDescription('Загрузил(а): ' + u.name + ' · ' + new Date().toLocaleString('ru-RU'));
+    return { ok: true, id: f.getId(), name: name, mime: mime, size: f.getSize() };
+  },
   contentMine: function (req) { need_(req, ['editor', 'admin']); return { ok: true, items: contentAll_().filter(function (x) { return x.active; }).map(cpub_) }; }
 });
 
@@ -610,7 +630,7 @@ Object.assign(API, {
   adminClearLogins: function (req) { need_(req, ['admin']); return Object.assign({ ok: true }, clearLogins_(true)); }
 });
 
-const READ_ONLY = { ping: 1, me: 1, myData: 1, groupData: 1, logins: 1, marksLog: 1, shiftState: 1, breakBoard: 1, testState: 1, content: 1, contentMine: 1, adminUsers: 1 };
+const READ_ONLY = { upload: 1, ping: 1, me: 1, myData: 1, groupData: 1, logins: 1, marksLog: 1, shiftState: 1, breakBoard: 1, testState: 1, content: 1, contentMine: 1, adminUsers: 1 };
 function doGet() { return out_({ ok: true, service: 'g11-portal' }); }
 function doPost(e) {
   forget_();
