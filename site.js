@@ -3,7 +3,7 @@
   if(window.__g11site)return;window.__g11site=1;
   var MAP={'index.html':'home','':'home','work.html':'work','templates.html':'work','sv.html':'work',
     'tools.html':'tools','calc.html':'tools','salary.html':'tools','check.html':'tools',
-    'team.html':'team','vacation.html':'team','zp.html':'team','account.html':'team','admin.html':'team','editor.html':'team','logins.html':'team'};
+    'team.html':'team','vacation.html':'team','zp.html':'team','account.html':'team','admin.html':'team','editor.html':'team','logins.html':'team','article.html':'work'};
   var file=(location.pathname.split('/').pop()||'');
   var cur=document.body.getAttribute('data-space')||MAP[file]||'';
   var items=[['home','index.html','🏠','Главная'],['work','work.html','💼','Работа'],['tools','tools.html','🧰','Инструменты'],['team','team.html','👥','Команда']];
@@ -21,8 +21,8 @@
   h+='<span class="sp"></span><span id="g11acc"></span></div>';
   bar.innerHTML=h;document.body.insertBefore(bar,document.body.firstChild);
   var a=document.createElement('script');a.src='auth.js?v=4';document.body.appendChild(a);
-  var ij=document.createElement('script');ij.src='icons.js?v=8';ij.async=false;document.body.appendChild(ij);
-  var rj=document.createElement('script');rj.src='rte.js?v=1';rj.async=false;document.body.appendChild(rj);
-  var cj=document.createElement('script');cj.src='content.js?v=2';cj.async=false;document.body.appendChild(cj);
-  var sj=document.createElement('script');sj.src='search.js?v=1';document.body.appendChild(sj);
+  var ij=document.createElement('script');ij.src='icons.js?v=9';ij.async=false;document.body.appendChild(ij);
+  var rj=document.createElement('script');rj.src='rte.js?v=2';rj.async=false;document.body.appendChild(rj);
+  var cj=document.createElement('script');cj.src='content.js?v=3';cj.async=false;document.body.appendChild(cj);
+  var sj=document.createElement('script');sj.src='search.js?v=2';document.body.appendChild(sj);
 })();
