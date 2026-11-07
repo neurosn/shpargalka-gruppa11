@@ -93,7 +93,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 <div class="scroll"><table class="ut"><thead><tr><th>Сотрудник</th><th>Вошёл</th><th>Активность</th><th>Устройство</th></tr></thead><tbody id="sb"><tr><td colspan="4">Загружаю…</td></tr></tbody></table></div></section>
 <section><h2>⏱ Отметки смен</h2><p style="margin-top:0;color:var(--muted)">Кнопки из «Моего кабинета». Всё сразу пишется в лист «Дисциплина», здесь — журнал для проверки.</p>
 <div class="scroll"><table class="ut"><thead><tr><th>Время</th><th>Сотрудник</th><th>Смена</th><th>Действие</th><th>Записано</th><th>Примечание</th></tr></thead><tbody id="mb"><tr><td colspan="6">Загружаю…</td></tr></tbody></table></div></section>
-<section><h2>📜 История входов</h2>
+<section><h2>📜 История входов</h2><p style="margin:0 0 10px"><button class="btn alt" type="button" id="clr" onclick="if(confirm('Удалить историю и активные входы всех сотрудников и наставников? Ваши записи останутся.'))G11.api('adminClearLogins').then(function(j){alert('Удалено записей: '+j.log+', активных входов: '+j.sessions);load()}).catch(function(e){alert(e.message)})">🧹 Очистить входы сотрудников и наставников</button></p>
 <div class="mbar"><select id="flt"><option value="">Все события</option><option value="✅">Только входы</option><option value="❌">Только ошибки</option><option value="🚪">Только выходы</option></select></div>
 <div class="scroll"><table class="ut"><thead><tr><th>Время</th><th>Сотрудник</th><th>ID</th><th>Событие</th><th>Устройство</th></tr></thead><tbody id="lb"><tr><td colspan="5">Загружаю…</td></tr></tbody></table></div></section>
 </div>

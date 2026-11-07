@@ -1,0 +1,107 @@
+/* Единый визуальный стиль: крупнее текст + аккуратные значки вместо смайлов в меню, заголовках, карточках и кнопках.
+   Смайлы внутри шаблонов, заметок, списков правил и новостей не трогаем. */
+(function(){
+  if(window.__g11icons)return;window.__g11icons=1;
+  var P={
+   home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+   briefcase:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/>',
+   tools:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>',
+   users:'<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M16 3.5a4 4 0 0 1 0 9M22 21a7 7 0 0 0-4-6.3"/>',
+   heart:'<path d="M12 21s-8-5.3-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.7-8 11-8 11z"/>',
+   clipboard:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h4"/>',
+   usercheck:'<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M16 11l2 2 4-4"/>',
+   link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+   folder:'<path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+   gift:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v8h14v-8M12 8v12M12 8S10.5 3 8 4s.5 4 4 4zm0 0s1.5-5 4-4-.5 4-4 4z"/>',
+   ban:'<circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/>',
+   mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+   eraser:'<path d="m7 21-4-4 10-10 6 6-6 6zM13 21h8M9 11l6 6"/>',
+   phone:'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
+   chat:'<path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/>',
+   book:'<path d="M4 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4zM20 4h-5a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h5z"/>',
+   clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+   megaphone:'<path d="M3 10v4h3l9 5V5L6 10zM18 9a3 3 0 0 1 0 6M6 14l1 5h3"/>',
+   video:'<rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3"/>',
+   cap:'<path d="m2 9 10-5 10 5-10 5zM6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5M22 9v6"/>',
+   pin:'<path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>',
+   sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+   wallet:'<path d="M3 7a2 2 0 0 1 2-2h13v4"/><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M16 14h2"/>',
+   cash:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 10v4M18 10v4"/>',
+   calc:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/>',
+   wifi:'<path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19" r="1"/>',
+   star:'<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/>',
+   undo:'<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>',
+   hourglass:'<path d="M6 2h12M6 22h12M7 2v4a5 5 0 0 0 10 0V2M7 22v-4a5 5 0 0 1 10 0v4"/>',
+   wrench:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>',
+   box:'<path d="m3 7 9-4 9 4v10l-9 4-9-4z"/><path d="m3 7 9 4 9-4M12 11v10"/>',
+   shield:'<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/>',
+   redirect:'<path d="M15 4h5v5M20 4l-9 9M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/>',
+   crown:'<path d="m3 7 4.5 4L12 4l4.5 7L21 7l-2 12H5z"/>',
+   phoneoff:'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M3 3l18 18"/>',
+   search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
+   ear:'<path d="M6 9a6 6 0 0 1 12 0c0 3-2 4-3 5s-1 3-3 4-3-1-3-1M9 9a3 3 0 0 1 6 0"/>',
+   file:'<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h6"/>',
+   idcard:'<rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M5 16a3 3 0 0 1 6 0M14 10h5M14 14h4"/>',
+   lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+   logout:'<path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h5M15 16l4-4-4-4M19 12H9"/>',
+   pencil:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13 7 4 4"/>',
+   shieldcheck:'<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>',
+   key:'<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M15 8l2 2"/>',
+   timer:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/>',
+   coffee:'<path d="M4 8h13v5a6 6 0 0 1-6 6H10a6 6 0 0 1-6-6zM17 9h1a3 3 0 0 1 0 6h-1M8 2v3M12 2v3"/>',
+   alert:'<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/>',
+   zap:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+   news:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h10M7 16h6"/>',
+   chart:'<path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/>',
+   target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+   bulb:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/>',
+   calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+   flask:'<path d="M9 3h6M10 3v6L4 19a1.5 1.5 0 0 0 1.3 2h13.4a1.5 1.5 0 0 0 1.3-2L14 9V3M7 14h10"/>',
+   building:'<rect x="4" y="3" width="16" height="18" rx="1"/><path d="M8 7h2M14 7h2M8 11h2M14 11h2M8 15h2M14 15h2M10 21v-3h4v3"/>',
+   layers:'<path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/>',
+   receipt:'<path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h4"/>',
+   refresh:'<path d="M20 11a8 8 0 0 0-14-5L4 8M4 3v5h5M4 13a8 8 0 0 0 14 5l2-2M20 21v-5h-5"/>',
+   check:'<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
+   stop:'<path d="M8 3h8l5 5v8l-5 5H8l-5-5V8z"/><path d="M12 8v5M12 16h.01"/>',
+   compass:'<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>',
+   card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>',
+   user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+   plus:'<path d="M12 5v14M5 12h14"/>',
+   cart:'<path d="M3 4h2l2.5 11h11L21 8H6.5"/><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/>',
+   copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',
+   monitor:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+   bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/>',
+   tag:'<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+   list:'<path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/>',
+   sparkle:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>',
+   scale:'<path d="M12 3v18M7 21h10M5 7h14M5 7l-3 7a3 3 0 0 0 6 0zM19 7l-3 7a3 3 0 0 0 6 0z"/>',
+   dot:'<circle cx="12" cy="12" r="4"/>'
+  };
+  var E={'🏠':'home','💼':'briefcase','🧰':'tools','👥':'users','💜':'heart','📋':'clipboard','🧑‍💼':'usercheck','🔗':'link','🗂':'folder','🍓':'gift','🚫':'ban','🎁':'gift','📮':'mail','🧹':'eraser','📱':'phone','💬':'chat','📖':'book','🕗':'clock','📢':'megaphone','🎥':'video','🎓':'cap','📌':'pin','🌴':'sun','💰':'wallet','💵':'cash','🧮':'calc','📶':'wifi','⭐':'star','💸':'cash','↩️':'undo','⏳':'hourglass','🛠':'wrench','📦':'box','🛡':'shield','↪️':'redirect','👑':'crown','📵':'phoneoff','🔎':'search','🔍':'search','👂':'ear','📝':'file','🪪':'idcard','🔐':'lock','🚪':'logout','✏️':'pencil','🔑':'key','⏱':'timer','☕':'coffee','⚠️':'alert','⚡':'zap','📰':'news','📊':'chart','🎯':'target','💡':'bulb','🗓':'calendar','📅':'calendar','🧪':'flask','✉️':'mail','🏢':'building','🧩':'layers','🧾':'receipt','🔁':'refresh','✅':'check','🛑':'stop','🧭':'compass','🚀':'zap','💳':'card','👤':'user','🔙':'undo','📚':'book','➕':'plus','🛒':'cart','👯':'copy','🖥':'monitor','📧':'mail','♻️':'refresh','🔔':'bell','🎉':'sparkle','📈':'chart','🏷':'tag','⚖️':'scale','🟢':'check','🔴':'logout','❓':'bulb','📜':'list','🏦':'building','🙅':'ban','🔕':'bell','🍽':'coffee','📣':'megaphone','🕘':'clock','🧑‍🏫':'cap'};
+  function svg(n){return '<svg class="g11i" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+(P[n]||P.dot)+'</svg>'}
+  var RE=/^\s*((?:\p{Extended_Pictographic}|[↔-↪⬅-⬇])(?:️|‍(?:\p{Extended_Pictographic})️?)*)️?\s*/u;
+  var SEL='.g11bar a,nav a,.chips a,.ftoc a,header h1,main h2,main h3,.link>b,.hub>b,.space>.ic,.tabs button,.g11menu a,.g11menu button,.g11in,.g11me,.g11sbtn,.btn,.sbtn,.mbar a';
+  var SKIP='.tpl,.rich,.note,.ex,.case,td,li,.g11s .list,[data-g11c] .rich';
+  function fix(el){if(el.__ic||el.closest(SKIP))return;var n=el.firstChild;while(n&&n.nodeType===1&&/^(SPAN|B)$/.test(n.tagName)&&!n.className&&n.textContent.trim()&&RE.test(n.textContent)&&n.children.length===0){n=n.firstChild}
+    while(n&&n.nodeType===3&&!n.nodeValue.trim())n=n.nextSibling;if(!n||n.nodeType!==3)return;var m=n.nodeValue.match(RE);if(!m)return;
+    var key=m[1].replace(/️/g,''),name=E[m[1]]||E[key]||E[key+'️'];if(!name&&!el.matches('main h2,main h3,header h1,.link>b,.hub>b'))return;
+    n.nodeValue=n.nodeValue.slice(m[0].length);var w=document.createElement('span');w.className='g11iw';w.innerHTML=svg(name||'dot');n.parentNode.insertBefore(w,n);el.__ic=1;
+    if(el.classList.contains('ic')){el.textContent='';el.appendChild(w)}}
+  function run(root){(root||document).querySelectorAll(SEL).forEach(fix)}
+  var css=':root{--g11fs:17px}body{font-size:var(--g11fs)!important;line-height:1.6!important;-webkit-font-smoothing:antialiased}'+
+   'main{max-width:1000px!important}header{padding:34px 16px 28px!important}header h1{font-size:30px!important;letter-spacing:-.02em;display:flex;align-items:center;gap:12px}header p{font-size:16px!important;margin-top:6px!important}'+
+   'section{padding:24px!important;border-radius:20px!important;box-shadow:0 4px 18px rgba(40,20,70,.06)}main h2{font-size:23px!important;letter-spacing:-.01em;gap:10px!important}main h3{font-size:17.5px!important;display:flex;align-items:center;gap:8px}'+
+   '.note,ul.rules li,.case,.tpl{font-size:16.5px}.tpl{line-height:1.6}.tpl .lbl{font-size:12.5px!important}.link{padding:16px!important;font-size:15.5px}.link b{font-size:16.5px;display:flex!important;align-items:center;gap:8px;margin-bottom:4px}.hub b{font-size:18px!important}'+
+   'nav a,.chips a,.ftoc a{font-size:14px!important;padding:7px 13px!important;display:inline-flex!important;align-items:center;gap:6px}td,th{font-size:15.5px}small{font-size:13.5px}'+
+   '.g11iw{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}.g11i{width:1.15em;height:1.15em;display:block}'+
+   'main h2 .g11iw{width:38px;height:38px;border-radius:12px;background:var(--soft);color:var(--accent)}main h2 .g11i{width:22px;height:22px}'+
+   'header h1 .g11iw{width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.18)}header h1 .g11i{width:28px;height:28px}'+
+   'main h3 .g11iw{color:var(--accent)}.link .g11iw{color:var(--accent)}'+
+   '.space>.ic{display:inline-flex;width:54px;height:54px;border-radius:16px;background:var(--soft);color:var(--accent);align-items:center;justify-content:center}.space>.ic .g11i{width:30px;height:30px}.space b{font-size:21px!important}'+
+   '.g11bar{font-size:14.5px!important}.g11bar a{gap:7px!important}.g11bar .g11i{width:18px;height:18px}'+
+   '[hidden]{display:none!important}.tabs button{display:inline-flex;align-items:center;gap:7px}.mbar select,#cflt{padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit;font-size:15px}.g11in,.g11me,.g11sbtn{display:inline-flex!important;align-items:center;gap:6px}.sbtn .g11i{width:24px;height:24px}.sbtn{font-size:17px!important}.btn{display:inline-flex;align-items:center;gap:6px}'+
+   '@media(max-width:600px){:root{--g11fs:16px}header h1{font-size:24px!important}main h2{font-size:20px!important}section{padding:18px!important}main h2 .g11iw{width:32px;height:32px}}';
+  var st=document.createElement('style');st.id='g11theme';st.textContent=css;document.head.appendChild(st);
+  run();new MutationObserver(function(ms){ms.forEach(function(m){m.addedNodes.forEach(function(n){if(n.nodeType===1){if(n.matches&&n.matches(SEL))fix(n);run(n)}})})}).observe(document.body,{childList:true,subtree:true});
+  window.G11Icons={svg:svg,run:run};
+})();
