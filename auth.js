@@ -71,7 +71,7 @@
   }
   function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 
-  window.G11={api:call,cached:cached,clearCache:clearCache,prefetch:prefetch,user:function(){return S&&S.user},login:openLogin,logout:logout,ready:!!API,roleName:function(r){return ROLE[r]||r}};
+  window.G11={url:API,token:function(){return S&&S.token},api:call,cached:cached,clearCache:clearCache,prefetch:prefetch,user:function(){return S&&S.user},login:openLogin,logout:logout,ready:!!API,roleName:function(r){return ROLE[r]||r}};
   render();
   // тихо обновляем профиль (роль могла поменяться)
   if(S&&API)call('me').then(function(j){S.user=j.user;save(S);render();document.dispatchEvent(new CustomEvent('g11:user',{detail:j.user}))}).catch(function(){});
