@@ -175,7 +175,7 @@ function monthSheets_() {
   ss_().getSheets().forEach(function (s) {
     const m = s.getName().match(/^KPI\s+([а-яё]+)$/i); if (!m) return;
     const mi = MONTHS.indexOf(m[1].toLowerCase()); if (mi < 0) return;
-    const v = s.getDisplayValues(); let year = null;
+    const v = s.getDataRange().getDisplayValues(); let year = null;
     for (let i = 0; i < v.length && !year; i++) { const k = dkey_(v[i][0]); if (k) year = Number(k.slice(0, 4)); }
     if (!year) year = new Date().getFullYear();
     res.push({ key: year + '-' + ('0' + (mi + 1)).slice(-2), name: s.getName(), title: m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase() + ' ' + year, values: v });
@@ -215,7 +215,7 @@ function parseKpi_(m) {
 }
 function parseDisc_(monthKey) {
   const s = ss_().getSheetByName(DISC); if (!s) return {};
-  const v = s.getDisplayValues(), res = {}, today = todayKey_(); let date = null;
+  const v = s.getDataRange().getDisplayValues(), res = {}, today = todayKey_(); let date = null;
   for (let i = 0; i < v.length; i++) {
     const a = String(v[i][0]).trim(), k = dkey_(a);
     if (k && String(v[i][1]).indexOf('Смена') === 0) { date = k; continue; }
