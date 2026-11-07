@@ -13,6 +13,13 @@
       .then(function(r){return r.json()},function(){throw new Error('Нет связи с сервером. Проверьте интернет и попробуйте ещё раз.')})
       .then(function(j){if(!j.ok){if(j.code==='auth'&&S){save(null);S=null;render()}throw new Error(j.error||'Ошибка')}return j});
   }
+  // мгновенный показ: сначала последние сохранённые данные, потом свежие с сервера
+  function ckey(action,data){return 'g11c_'+(S&&S.user&&S.user.id||'')+'_'+action+'_'+JSON.stringify(data||{})}
+  function cached(action,data,fn){var k=ckey(action,data),c=null;try{c=JSON.parse(localStorage.getItem(k)||'null')}catch(e){}
+    if(c){try{fn(c,true)}catch(e){}}
+    return call(action,data).then(function(j){try{localStorage.setItem(k,JSON.stringify(j))}catch(e){}fn(j,false);return j},function(e){if(c)return c;throw e})}
+  function clearCache(){try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('g11c_')===0)localStorage.removeItem(k)})}catch(e){}}
+  var pre=0;function prefetch(){if(!S||Date.now()-pre<120000||/account\.html/.test(location.pathname))return;pre=Date.now();cached('myData',{month:null},function(){}).catch(function(){})}
   var ROLE={admin:'Руководитель',editor:'Наставник',employee:'Сотрудник'};
   var css='.g11acc{display:flex;align-items:center;gap:6px}.g11acc button,.g11acc a{font:600 13px/1 -apple-system,"Segoe UI",Roboto,Arial,sans-serif;border:0;cursor:pointer;border-radius:9px;padding:8px 12px;text-decoration:none}'+
   '.g11in{background:#7b2cbf;color:#fff}.g11me{background:rgba(255,255,255,.1);color:#fff;display:flex;gap:6px;align-items:center}'+
@@ -45,7 +52,7 @@
     }).catch(function(x){err.textContent=x.message}).then(function(){go.disabled=false;go.textContent='Войти'})};
 
   function openLogin(){err.textContent=API?'':'Вход скоро заработает — идёт настройка.';modal.classList.add('on');setTimeout(function(){modal.querySelector('#g11id').focus()},50)}
-  function logout(){call('logout').catch(function(){}).then(function(){save(null);S=null;render();document.dispatchEvent(new Event('g11:logout'));if(/account|admin|editor/.test(location.pathname))location.href='index.html'})}
+  function logout(){call('logout').catch(function(){}).then(function(){clearCache();save(null);S=null;render();document.dispatchEvent(new Event('g11:logout'));if(/account|admin|editor/.test(location.pathname))location.href='index.html'})}
 
   var menu;
   function render(){
@@ -60,11 +67,11 @@
     if(u.role==='admin')h+='<a href="admin.html">🛡 Панель руководителя</a><a href="logins.html">🔑 Журнал входов</a>';
     h+='<button type="button" id="g11out">🚪 Выйти</button>';menu.innerHTML=h;
     menu.querySelector('#g11out').onclick=logout;
-    slot.firstChild.onclick=function(){var r=slot.getBoundingClientRect();menu.style.top=(r.bottom+window.scrollY+6)+'px';menu.classList.toggle('on')};
+    slot.firstChild.onclick=function(){var r=slot.getBoundingClientRect();menu.style.top=(r.bottom+window.scrollY+6)+'px';menu.classList.toggle('on');prefetch()};
   }
   function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 
-  window.G11={api:call,user:function(){return S&&S.user},login:openLogin,logout:logout,ready:!!API,roleName:function(r){return ROLE[r]||r}};
+  window.G11={api:call,cached:cached,clearCache:clearCache,prefetch:prefetch,user:function(){return S&&S.user},login:openLogin,logout:logout,ready:!!API,roleName:function(r){return ROLE[r]||r}};
   render();
   // тихо обновляем профиль (роль могла поменяться)
   if(S&&API)call('me').then(function(j){S.user=j.user;save(S);render();document.dispatchEvent(new CustomEvent('g11:user',{detail:j.user}))}).catch(function(){});
