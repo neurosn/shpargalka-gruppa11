@@ -559,7 +559,7 @@ function filesFolder_() {
   pr.setProperty('filesFolder', f.getId()); return f;
 }
 // ▶ запустить один раз из редактора: Google попросит разрешить доступ к Диску, создаст папку для файлов статей
-function setupFiles() { const f = filesFolder_(); Logger.log('Папка для файлов: ' + f.getName() + ' — ' + f.getUrl()); }
+function setupFiles() { UrlFetchApp.fetch('https://www.googleapis.com/discovery/v1/apis', { muteHttpExceptions: true }); ScriptApp.getOAuthToken(); const f = filesFolder_(); Logger.log('Папка для файлов: ' + f.getName() + ' — ' + f.getUrl()); }
 const CCOLS = ['ID', 'Тип', 'Раздел', 'Заголовок', 'Текст', 'Ссылка', 'Автор', 'Обновлено', 'Активен'];
 function contentSheet_() { return sheet_(CONTENT, CCOLS); }
 function contentAll_() {
@@ -608,6 +608,36 @@ Object.assign(API, {
     f.setDescription('Загрузил(а): ' + u.name + ' · ' + new Date().toLocaleString('ru-RU'));
     return { ok: true, id: f.getId(), name: name, mime: mime, size: f.getSize() };
   },
+  // большие файлы (видео): загрузка частями по 8 МБ через сервер → Google Диск (resumable upload)
+  uploadStart: function (req) {
+    const u = need_(req, ['editor', 'admin']).user;
+    const name = String(req.name || 'видео').replace(/[\\/:*?"<>|]+/g, '_').slice(0, 120), mime = String(req.mime || 'application/octet-stream').slice(0, 100), size = Number(req.size) || 0;
+    if (!(size > 0)) fail_('Пустой файл');
+    if (size > 500 * 1024 * 1024) fail_('Файл больше 500 МБ — загрузите его на Google Диск сами и вставьте ссылкой');
+    const r = UrlFetchApp.fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&supportsAllDrives=true', {
+      method: 'post', contentType: 'application/json; charset=UTF-8', muteHttpExceptions: true,
+      headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken(), 'X-Upload-Content-Type': mime, 'X-Upload-Content-Length': String(size) },
+      payload: JSON.stringify({ name: name, mimeType: mime, parents: [filesFolder_().getId()], description: 'Загрузил(а): ' + u.name + ' · ' + new Date().toLocaleString('ru-RU') })
+    });
+    const loc = r.getAllHeaders()['Location'] || r.getAllHeaders()['location'];
+    if (!loc) fail_('Google Диск не начал загрузку (' + r.getResponseCode() + ')');
+    const uid = rnd_(24); cache_().put('up_' + uid, JSON.stringify({ url: loc, user: u.id, size: size, name: name, mime: mime }), 21600);
+    return { ok: true, uid: uid, chunk: 8 * 1024 * 1024 };
+  },
+  uploadChunk: function (req) {
+    const u = need_(req, ['editor', 'admin']).user, st = cget_('up_' + String(req.uid || ''));
+    if (!st || st.user !== u.id) fail_('Загрузка устарела — начните заново');
+    const bytes = Utilities.base64Decode(String(req.data || '')), start = Number(req.start) || 0, end = start + bytes.length - 1;
+    const r = UrlFetchApp.fetch(st.url, { method: 'put', muteHttpExceptions: true, contentType: st.mime, payload: bytes, headers: { 'Content-Range': 'bytes ' + start + '-' + end + '/' + st.size } });
+    const code = r.getResponseCode();
+    if (code === 308) return { ok: true, done: false, next: end + 1 };
+    if (code === 200 || code === 201) {
+      const id = JSON.parse(r.getContentText()).id, f = DriveApp.getFileById(id);
+      f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); cdel_('up_' + req.uid);
+      return { ok: true, done: true, id: id, name: st.name, mime: st.mime, size: st.size };
+    }
+    fail_('Google Диск не принял часть файла (' + code + ')');
+  },
   contentMine: function (req) { need_(req, ['editor', 'admin']); return { ok: true, items: contentAll_().filter(function (x) { return x.active; }).map(cpub_) }; }
 });
 
@@ -630,7 +660,7 @@ Object.assign(API, {
   adminClearLogins: function (req) { need_(req, ['admin']); return Object.assign({ ok: true }, clearLogins_(true)); }
 });
 
-const READ_ONLY = { upload: 1, ping: 1, me: 1, myData: 1, groupData: 1, logins: 1, marksLog: 1, shiftState: 1, breakBoard: 1, testState: 1, content: 1, contentMine: 1, adminUsers: 1 };
+const READ_ONLY = { upload: 1, uploadStart: 1, uploadChunk: 1, ping: 1, me: 1, myData: 1, groupData: 1, logins: 1, marksLog: 1, shiftState: 1, breakBoard: 1, testState: 1, content: 1, contentMine: 1, adminUsers: 1 };
 function doGet() { return out_({ ok: true, service: 'g11-portal' }); }
 function doPost(e) {
   forget_();
