@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Админка · Группа 11</title>
+<script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<style>
+:root{--bg:#f6f4fb;--card:#fff;--ink:#1d1730;--muted:#6b6480;--line:#e6e1f2;--accent:#7b2cbf;--accent2:#cb11ab;--soft:#f1e8fb;--ok:#1f9d6b;--warn:#d9480f}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#141020;--card:#1e182d;--ink:#eee9f8;--muted:#a59cbd;--line:#30284a;--accent:#b57bee;--accent2:#ee5fd2;--soft:#2a2140;--ok:#4cd39b;--warn:#ff8a5c}}
+:root[data-theme=dark]{--bg:#141020;--card:#1e182d;--ink:#eee9f8;--muted:#a59cbd;--line:#30284a;--accent:#b57bee;--accent2:#ee5fd2;--soft:#2a2140;--ok:#4cd39b;--warn:#ff8a5c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{background:linear-gradient(120deg,var(--accent),var(--accent2));color:#fff;padding:28px 16px 22px}
+header .w{max-width:960px;margin:0 auto}
+header h1{margin:0 0 4px;font-size:26px}
+header p{margin:0;opacity:.9}
+nav{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
+nav .w{max-width:960px;margin:0 auto;display:flex;gap:6px;overflow-x:auto;padding:10px 16px}
+nav a{white-space:nowrap;text-decoration:none;color:var(--accent);background:var(--soft);padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600}
+main{max-width:960px;margin:0 auto;padding:20px 16px 60px}
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px}
+h2{margin:0 0 14px;font-size:20px;display:flex;align-items:center;gap:8px}
+h3{margin:18px 0 8px;font-size:15px;color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.link{display:block;text-decoration:none;color:inherit;border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--soft);transition:.15s}
+.link:hover{border-color:var(--accent);transform:translateY(-1px)}
+.link b{display:block;color:var(--accent)}
+.hub{font-size:14px}.hub b{font-size:17px;margin-bottom:4px}.warnc{border-color:var(--warn)}
+.link small{color:var(--muted);word-break:break-all}
+.time{display:inline-block;background:var(--accent);color:#fff;border-radius:8px;padding:2px 8px;font-weight:700;font-size:13px}
+ul.rules{list-style:none;padding:0;margin:0}
+ul.rules li{padding:10px 0;border-bottom:1px dashed var(--line)}
+ul.rules li:last-child{border:0}
+.tpl{position:relative;border-left:4px solid var(--accent);background:var(--soft);border-radius:10px;padding:12px 14px 12px 14px;margin:10px 0;white-space:pre-wrap}
+.tpl .lbl{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px;padding-right:96px}
+.copy{position:absolute;top:8px;right:8px;border:0;background:var(--accent);color:#fff;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer}
+.copy.done{background:var(--ok)}
+.note{border-radius:10px;padding:10px 14px;background:var(--soft);border:1px solid var(--line);margin:10px 0}
+.note.warn{border-color:var(--warn)}
+code{background:var(--soft);padding:1px 6px;border-radius:6px}
+footer{text-align:center;color:var(--muted);font-size:12px}
+table{width:100%;border-collapse:collapse}
+td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+td:first-child{font-weight:700;width:38%;color:var(--accent)}
+.gl{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px}
+.gl div{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--soft)}
+.gl b{color:var(--accent)}
+#glq{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit;margin-bottom:10px}
+main a:not(.link){color:var(--accent);font-weight:600}
+.theme-btn{position:fixed;right:16px;bottom:16px;z-index:50;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--card,var(--paper));color:var(--ink);font-size:20px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.18);display:grid;place-items:center}
+.theme-btn:hover{border-color:var(--accent)}
+/* chips: без полос прокрутки, на широком экране — в несколько строк */
+nav .w,.chips,.hot{scrollbar-width:none;-ms-overflow-style:none}
+nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{display:none}
+@media (min-width:700px){nav .w,.chips,.hot{flex-wrap:wrap;overflow:visible;white-space:normal}nav a,.chips a{padding:5px 11px}}
+@media (max-width:699px){nav .w,.chips,.hot{-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}}
+.space-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.space{display:block;text-decoration:none;color:inherit;border:1px solid var(--line);border-radius:16px;padding:18px;background:var(--card);transition:.15s}
+.space:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 24px rgba(123,44,191,.12)}
+.space .ic{font-size:30px;line-height:1}.space b{display:block;font-size:19px;margin:8px 0 4px;color:var(--accent)}
+.space ul{margin:8px 0 0;padding-left:18px;color:var(--muted);font-size:14px}.space li{margin:2px 0}
+.gsearch{display:flex;gap:8px}.gsearch input{flex:1;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit;min-width:0}
+.gsearch button{border:0;background:var(--accent);color:#fff;border-radius:12px;padding:0 16px;font:inherit;font-weight:600;cursor:pointer}
+.lead{color:var(--muted);margin:-6px 0 14px}
+.soon{display:inline-block;font-size:11px;font-weight:700;color:var(--muted);border:1px dashed var(--line);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:middle}
+.gate{text-align:center;padding:40px 20px}.gate .ic{font-size:44px}.gate p{color:var(--muted)}
+.btn{border:0;background:var(--accent);color:#fff;border-radius:10px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer}.btn.alt{background:var(--soft);color:var(--accent);border:1px solid var(--line)}.btn:disabled{opacity:.6}
+.f label{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin:12px 0 4px}
+.f input,.f select{width:100%;max-width:360px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+.msg{font-weight:600;margin-top:10px;min-height:20px}.msg.ok{color:var(--ok)}.msg.bad{color:var(--warn)}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}.kv div{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px}.kv small{display:block;color:var(--muted);font-size:12px}.kv b{font-size:17px}
+.ut{width:100%;border-collapse:collapse;font-size:14px}.ut th{text-align:left;color:var(--muted);font-size:12px;padding:8px;border-bottom:1px solid var(--line)}.ut td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}.ut td:first-child{font-weight:400;width:auto;color:inherit}
+.ut select{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+.pill{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;background:var(--soft);color:var(--accent)}
+.scroll{overflow-x:auto}
+.newpw{font:700 18px/1.4 ui-monospace,Menlo,monospace;background:var(--soft);border:1px dashed var(--accent);border-radius:10px;padding:10px 14px;display:inline-block;margin:6px 0;user-select:all}
+</style>
+</head>
+<body data-space="team">
+<header><div class="w">
+<h1>🛡 Админка: доступы</h1>
+<p>Роли, пароли и сотрудники — только для руководителя</p>
+</div></header>
+<main>
+<section id="gate" class="gate"><div class="ic">🔐</div><h2 style="justify-content:center">Нужно войти</h2><p>Войдите по ID сотрудника и паролю — кнопка «Войти» вверху справа.</p><button class="btn" type="button" onclick="G11&&G11.login()">Войти</button></section>
+<section id="deny" hidden class="gate"><div class="ic">🛡</div><h2 style="justify-content:center">Только для руководителя</h2></section>
+<div id="app" hidden>
+<section><h2>🛡 Доступы сотрудников</h2>
+<p style="margin-top:0;color:var(--muted)">Роли: <b>Сотрудник</b> — портал и свой кабинет · <b>Наставник</b> — плюс кабинет редактора · <b>Руководитель</b> — всё, включая эту страницу.</p>
+<div class="scroll"><table class="ut"><thead><tr><th>Сотрудник</th><th>ID</th><th>Роль</th><th>Устройств</th><th>Был(а)</th><th></th></tr></thead><tbody id="ub"><tr><td colspan="6">Загружаю…</td></tr></tbody></table></div>
+<div class="msg" id="um"></div>
+<div id="pwout" hidden class="note warn"><b>Новый пароль для <span id="pwfor"></span>:</b><br><span class="newpw" id="pwval"></span><br><small>Покажется только один раз — скопируйте и передайте сотруднику лично. Старый пароль и все входы этого сотрудника сброшены.</small></div>
+</section>
+<section class="f"><h2>➕ Добавить сотрудника</h2>
+<form id="af"><label>ID сотрудника</label><input id="aid" inputmode="numeric" required><label>ФИО</label><input id="anm" required>
+<label>Роль</label><select id="arl"><option value="employee">Сотрудник</option><option value="editor">Наставник</option><option value="admin">Руководитель</option></select>
+<div style="margin-top:14px"><button class="btn" type="submit" id="ab">Создать и выдать пароль</button></div><div class="msg" id="am"></div></form>
+</section>
+</div>
+</main>
+<script src="site.js" defer></script>
+<script>
+function $(i){return document.getElementById(i)}
+function whenReady(cb){if(window.G11)cb();else document.addEventListener('g11:ready',cb,{once:true})}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+var R={employee:'Сотрудник',editor:'Наставник',admin:'Руководитель'};
+function fmt(d){if(!d)return '—';var x=new Date(d);return x.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'})+' '+x.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}
+function load(){G11.api('adminUsers').then(function(j){$('ub').innerHTML=j.users.map(function(u){return '<tr><td>'+esc(u.name)+(u.active?'':' <span class="pill">отключён</span>')+'</td><td>'+esc(u.id)+'</td><td><select data-id="'+esc(u.id)+'" class="rs">'+['employee','editor','admin'].map(function(r){return '<option value="'+r+'"'+(u.role===r?' selected':'')+'>'+R[r]+'</option>'}).join('')+'</select></td><td>'+u.sessions+'</td><td>'+fmt(u.lastSeen)+'</td><td><button class="btn alt" type="button" data-reset="'+esc(u.id)+'" data-name="'+esc(u.name)+'">Новый пароль</button> <button class="btn alt" type="button" data-act="'+esc(u.id)+'" data-on="'+(u.active?0:1)+'">'+(u.active?'Отключить':'Включить')+'</button></td></tr>'}).join('')}).catch(function(x){$('um').textContent=x.message;$('um').className='msg bad'})}
+function show(){var u=G11.user();$('gate').hidden=!!u;$('deny').hidden=!(u&&u.role!=='admin');$('app').hidden=!(u&&u.role==='admin');if(u&&u.role==='admin')load()}
+whenReady(show);document.addEventListener('g11:login',show);document.addEventListener('g11:logout',show);
+document.addEventListener('change',function(e){if(!e.target.classList.contains('rs'))return;var m=$('um');G11.api('adminSetRole',{id:e.target.dataset.id,role:e.target.value}).then(function(){m.textContent='✅ Роль сохранена';m.className='msg ok'}).catch(function(x){m.textContent=x.message;m.className='msg bad';load()})});
+document.addEventListener('click',function(e){var b=e.target.closest('[data-reset]');if(b){if(!confirm('Выдать новый пароль для «'+b.dataset.name+'»? Старый перестанет работать, все входы сбросятся.'))return;G11.api('adminResetPassword',{id:b.dataset.reset}).then(function(j){$('pwfor').textContent=b.dataset.name;$('pwval').textContent=j.password;$('pwout').hidden=false;load()}).catch(function(x){alert(x.message)});return}
+var a=e.target.closest('[data-act]');if(a){G11.api('adminSetActive',{id:a.dataset.act,active:a.dataset.on==='1'}).then(load).catch(function(x){alert(x.message)})}});
+$('af').onsubmit=function(e){e.preventDefault();var m=$('am');$('ab').disabled=true;G11.api('adminAddUser',{id:$('aid').value,name:$('anm').value,role:$('arl').value}).then(function(j){$('pwfor').textContent=$('anm').value;$('pwval').textContent=j.password;$('pwout').hidden=false;$('af').reset();m.textContent='✅ Сотрудник добавлен';m.className='msg ok';load()}).catch(function(x){m.textContent=x.message;m.className='msg bad'}).then(function(){$('ab').disabled=false})};
+</script>
+<script>(function(){var r=document.documentElement,b=document.createElement('button');b.type='button';b.className='theme-btn';
+function dark(){var t=r.getAttribute('data-theme');return t?t==='dark':(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)}
+function upd(){var d=dark();b.textContent=d?'☀️':'🌙';b.title=d?'Светлая тема':'Тёмная тема';b.setAttribute('aria-label',b.title)}
+b.onclick=function(){var n=dark()?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}upd()};
+if(window.matchMedia)matchMedia('(prefers-color-scheme: dark)').addEventListener('change',upd);
+document.body.appendChild(b);upd()})();</script>
+</body>
+</html>

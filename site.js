@@ -1,5 +1,6 @@
 /* Общее верхнее меню шпаргалки Группы 11: Главная · Работа · Инструменты · Команда */
 (function(){
+  if(window.__g11site)return;window.__g11site=1;
   var MAP={'index.html':'home','':'home','work.html':'work','templates.html':'work','sv.html':'work',
     'tools.html':'tools','calc.html':'tools','salary.html':'tools','check.html':'tools',
     'team.html':'team','vacation.html':'team','zp.html':'team'};
@@ -19,4 +20,5 @@
   items.slice(1).forEach(function(i){h+='<a href="'+i[1]+'"'+(cur===i[0]?' class="on" aria-current="page"':'')+'><span>'+i[2]+'</span><span class="lbl">'+i[3]+'</span></a>'});
   h+='<span class="sp"></span><span id="g11acc"></span></div>';
   bar.innerHTML=h;document.body.insertBefore(bar,document.body.firstChild);
+  var a=document.createElement('script');a.src='auth.js?v=2';document.body.appendChild(a);
 })();
