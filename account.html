@@ -83,6 +83,14 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 .tips{list-style:none;margin:0;padding:0}.tips li{display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}.tips li:last-child{border:0}.tips .i{font-size:20px}.tips b{display:block}
 .loading{color:var(--muted);padding:12px 0}
 .sal{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}.sal input{width:180px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+.shift{border:2px solid var(--accent);background:linear-gradient(180deg,var(--soft),var(--card))}
+.shift .now{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:baseline;margin-bottom:12px}.shift .now b{font-size:18px}
+.sbtns{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.sbtn{border:0;border-radius:14px;padding:16px 12px;font:inherit;font-size:16px;font-weight:700;cursor:pointer;color:#fff;display:flex;flex-direction:column;align-items:center;gap:4px}
+.sbtn small{font-weight:500;font-size:12px;opacity:.85}.sbtn:disabled{opacity:.35;cursor:not-allowed}
+.b-start{background:#1f9d6b}.b-break{background:#d9480f}.b-back{background:#2f7de1}.b-end{background:#6b6480}
+.tl{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.tl span{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:10px}.bar i{display:block;height:100%;background:var(--accent)}
 </style>
 </head>
 <body data-space="team">
@@ -93,6 +101,19 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 <main>
 <section id="gate" class="gate"><div class="ic">🔐</div><h2 style="justify-content:center">Нужно войти</h2><p>Войдите по ID сотрудника и паролю — кнопка «Войти» вверху справа.</p><button class="btn" type="button" onclick="G11&&G11.login()">Войти</button></section>
 <div id="app" hidden>
+<section class="shift" id="shift-sec"><h2>⏱ Смена сегодня</h2>
+<div class="now"><span id="sh-title">Загружаю…</span><b id="sh-now"></b></div>
+<div class="sbtns">
+<button class="sbtn b-start" data-m="start" type="button" disabled>🟢 Вышел на смену<small>с 20:30, раньше 21:00 → 21:00</small></button>
+<button class="sbtn b-break" data-m="break" type="button" disabled>☕ Ушёл на перерыв<small>сначала напишите в чат</small></button>
+<button class="sbtn b-back" data-m="back" type="button" disabled>🔙 Вернулся<small>закрыть перерыв</small></button>
+<button class="sbtn b-end" data-m="end" type="button" disabled>🔴 Ушёл со смены<small>до 09:30, позже 09:00 → 09:00</small></button>
+</div>
+<div class="tl" id="sh-tl"></div>
+<div id="sh-brk" hidden><div class="bar"><i id="sh-bar" style="width:0"></i></div><small id="sh-brkt" style="color:var(--muted)"></small></div>
+<div class="msg" id="sh-msg"></div>
+<p style="color:var(--muted);font-size:13px;margin:6px 0 0">Время берётся с сервера по Москве и сразу записывается в лист «Дисциплина». Перерывы — не более 75 минут за смену, не в первый и последний час. В основном чате отмечаться так же, как раньше.</p>
+</section>
 <section><h2>👤 <span id="nm"></span></h2>
 <div class="kv"><div><small>ID</small><b id="uid"></b></div><div><small>Роль</small><b id="urole"></b></div><div><small>Вход</small><b>сохранён на этом устройстве</b></div></div>
 </section>
@@ -145,7 +166,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 function $(i){return document.getElementById(i)}
 function whenReady(cb){if(window.G11)cb();else document.addEventListener('g11:ready',cb,{once:true})}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function show(){var u=G11.user();$('gate').hidden=!!u;$('app').hidden=!u;if(!u)return;if(!show.loaded){show.loaded=1;loadData()}$('nm').textContent=u.name;$('uid').textContent=u.id;$('urole').textContent=G11.roleName(u.role)}
+function show(){var u=G11.user();$('gate').hidden=!!u;$('app').hidden=!u;if(!u)return;if(!show.loaded){show.loaded=1;loadData();loadShift()}$('nm').textContent=u.name;$('uid').textContent=u.id;$('urole').textContent=G11.roleName(u.role)}
 
 var rub=function(n){return n==null?'—':Math.round(n).toLocaleString('ru-RU')+' ₽'};
 var pc=function(x){return x==null?'—':Math.round(x*100)+'%'};
@@ -175,6 +196,24 @@ $('sh-sec').hidden=!d.discipline.length;$('shb').innerHTML=d.discipline.map(func
 }).catch(function(x){$('dload').hidden=false;$('dload').textContent='Не удалось загрузить: '+x.message})}
 $('mon').onchange=function(){loadData(this.value)};
 $('salb').onclick=function(){var m=$('salm');m.className='msg';G11.api('setSalary',{amount:$('sal').value}).then(function(){m.textContent='✅ Сохранено';m.classList.add('ok');loadData()}).catch(function(x){m.textContent=x.message;m.classList.add('bad')})};
+
+var SH=null;
+function drawShift(j){SH=j;var b=function(m){return document.querySelector('[data-m="'+m+'"]')};
+['start','break','back','end'].forEach(function(m){b(m).disabled=true});$('sh-now').textContent=j.now?('сейчас '+j.now+' МСК'):'';
+if(!j.scheduled){$('sh-title').textContent='Смена '+j.shift+': вас нет в графике';$('sh-tl').innerHTML='';$('sh-brk').hidden=true;return}
+var s=j.state;$('sh-title').innerHTML='Смена <b>'+esc(j.shift)+'</b> · '+(j.windowOpen?'отметки открыты':'отметки откроются в 20:30');
+if(j.windowOpen){b('start').disabled=!!s.came;b('break').disabled=!s.came||!!s.left||s.onBreak;b('back').disabled=!s.onBreak;b('end').disabled=!s.came||!!s.left}
+var tl=[];if(s.came)tl.push('🟢 пришёл '+s.came);s.breaks.forEach(function(x){tl.push('☕ '+x.from+'–'+(x.to||'…'))});if(s.left)tl.push('🔴 ушёл '+s.left);if(s.status)tl.push(s.status);
+$('sh-tl').innerHTML=tl.map(function(x){return '<span>'+esc(x)+'</span>'}).join('');
+var lim=j.limit||75,used=s.usedMin||0;$('sh-brk').hidden=!s.came;$('sh-bar').style.width=Math.min(100,used/lim*100)+'%';$('sh-bar').style.background=used>lim?'var(--warn)':'';
+$('sh-brkt').textContent='Перерывы: '+used+' из '+lim+' мин'+(used>lim?' — перебор!':' · осталось '+(lim-used)+' мин')+(s.onBreak?' (сейчас на перерыве с '+s.openBreak.from+')':'')}
+function loadShift(){G11.api('shiftState').then(drawShift).catch(function(x){$('sh-title').textContent=x.message})}
+document.addEventListener('click',function(e){var btn=e.target.closest('[data-m]');if(!btn||btn.disabled)return;var m=btn.dataset.m,msg=$('sh-msg');
+if(m==='end'&&!confirm('Завершить смену? Уход будет записан сейчас.'))return;
+if(m==='break'){var n=parseInt((SH&&SH.now||'0:0').split(':')[0]),mi=parseInt((SH.now||'0:0').split(':')[1]),t=n*60+mi;if((t>=21*60&&t<22*60)||(t>=8*60&&t<9*60)){if(!confirm('Сейчас первый или последний час смены — перерыв в это время считается нарушением. Всё равно отметить?'))return}}
+msg.className='msg';msg.textContent='Записываю…';document.querySelectorAll('[data-m]').forEach(function(x){x.disabled=true});
+G11.api('mark',{type:m}).then(function(j){msg.textContent='✅ Записано: '+j.written+(j.note?' · '+j.note:'');msg.classList.add('ok');drawShift({scheduled:true,state:j.state,shift:j.shift,now:j.written,windowOpen:true,limit:j.limit});setTimeout(loadShift,1500)}).catch(function(x){msg.textContent=x.message;msg.classList.add('bad');loadShift()})});
+setInterval(function(){if(G11&&G11.user()&&!document.hidden)loadShift()},120000);
 whenReady(show);document.addEventListener('g11:login',show);document.addEventListener('g11:user',show);document.addEventListener('g11:logout',show);
 $('pwf').onsubmit=function(e){e.preventDefault();var m=$('pwm');m.className='msg';if($('np').value!==$('np2').value){m.textContent='Новые пароли не совпадают';m.classList.add('bad');return}
 $('pwb').disabled=true;G11.api('changePassword',{oldPassword:$('op').value,newPassword:$('np').value}).then(function(){m.textContent='✅ Пароль изменён';m.classList.add('ok');$('pwf').reset()}).catch(function(x){m.textContent=x.message;m.classList.add('bad')}).then(function(){$('pwb').disabled=false})};

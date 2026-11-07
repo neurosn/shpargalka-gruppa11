@@ -82,7 +82,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 </head>
 <body data-space="team">
 <header><div class="w">
-<h1>🔑 Журнал входов</h1>
+<h1>🔑 Журнал входов и отметок</h1>
 <p>Кто, когда и с какого устройства входил в портал · только для руководителя</p>
 </div></header>
 <main>
@@ -91,7 +91,9 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 <div id="app" hidden>
 <section><h2>🟢 Активные входы</h2><p style="margin-top:0;color:var(--muted)">Устройства, на которых сейчас сохранён вход. Чтобы выкинуть человека со всех устройств — «Новый пароль» в <a href="admin.html">панели руководителя</a>.</p>
 <div class="scroll"><table class="ut"><thead><tr><th>Сотрудник</th><th>Вошёл</th><th>Активность</th><th>Устройство</th></tr></thead><tbody id="sb"><tr><td colspan="4">Загружаю…</td></tr></tbody></table></div></section>
-<section><h2>📜 История</h2>
+<section><h2>⏱ Отметки смен</h2><p style="margin-top:0;color:var(--muted)">Кнопки из «Моего кабинета». Всё сразу пишется в лист «Дисциплина», здесь — журнал для проверки.</p>
+<div class="scroll"><table class="ut"><thead><tr><th>Время</th><th>Сотрудник</th><th>Смена</th><th>Действие</th><th>Записано</th><th>Примечание</th></tr></thead><tbody id="mb"><tr><td colspan="6">Загружаю…</td></tr></tbody></table></div></section>
+<section><h2>📜 История входов</h2>
 <div class="mbar"><select id="flt"><option value="">Все события</option><option value="✅">Только входы</option><option value="❌">Только ошибки</option><option value="🚪">Только выходы</option></select></div>
 <div class="scroll"><table class="ut"><thead><tr><th>Время</th><th>Сотрудник</th><th>ID</th><th>Событие</th><th>Устройство</th></tr></thead><tbody id="lb"><tr><td colspan="5">Загружаю…</td></tr></tbody></table></div></section>
 </div>
@@ -105,7 +107,9 @@ function fmt(d){if(!d)return '—';var x=new Date(d);return x.toLocaleDateString
 function dev(u){u=String(u||'');if(!u)return '—';var os=/Android/.test(u)?'Android':/iPhone|iPad/.test(u)?'iPhone/iPad':/Windows/.test(u)?'Windows':/Mac OS/.test(u)?'Mac':/Linux/.test(u)?'Linux':'';var br=/YaBrowser/.test(u)?'Яндекс':/Edg\//.test(u)?'Edge':/OPR\//.test(u)?'Opera':/Firefox/.test(u)?'Firefox':/Chrome/.test(u)?'Chrome':/Safari/.test(u)?'Safari':'';return (os+' '+br).trim()||u.slice(0,40)}
 var LOG=[];
 function draw(){var f=$('flt').value;$('lb').innerHTML=LOG.filter(function(r){return !f||String(r.event).indexOf(f)===0}).map(function(r){return '<tr><td>'+fmt(r.time)+'</td><td>'+esc(r.name||'—')+'</td><td>'+esc(r.id)+'</td><td>'+esc(r.event)+'</td><td>'+esc(dev(r.device))+'</td></tr>'}).join('')||'<tr><td colspan="5">Пока пусто</td></tr>'}
-function load(){G11.api('logins').then(function(j){LOG=j.log;draw();$('sb').innerHTML=j.sessions.map(function(s){return '<tr><td>'+esc(s.name||s.id)+'</td><td>'+fmt(s.created)+'</td><td>'+fmt(s.last)+'</td><td>'+esc(dev(s.device))+'</td></tr>'}).join('')||'<tr><td colspan="4">Нет активных входов</td></tr>'}).catch(function(x){$('lb').innerHTML='<tr><td colspan="5">'+esc(x.message)+'</td></tr>'})}
+var ACT={start:'🟢 пришёл',break:'☕ перерыв',back:'🔙 вернулся',end:'🔴 ушёл'};
+function loadMarks(){G11.api('marksLog').then(function(j){$('mb').innerHTML=j.log.map(function(r){return '<tr><td>'+fmt(r.time)+'</td><td>'+esc(r.name)+'</td><td>'+esc(r.shift)+'</td><td>'+(ACT[r.action]||esc(r.action))+'</td><td>'+esc(r.written)+'</td><td>'+esc(r.note)+'</td></tr>'}).join('')||'<tr><td colspan="6">Пока отметок нет</td></tr>'}).catch(function(x){$('mb').innerHTML='<tr><td colspan="6">'+esc(x.message)+'</td></tr>'})}
+function load(){loadMarks();G11.api('logins').then(function(j){LOG=j.log;draw();$('sb').innerHTML=j.sessions.map(function(s){return '<tr><td>'+esc(s.name||s.id)+'</td><td>'+fmt(s.created)+'</td><td>'+fmt(s.last)+'</td><td>'+esc(dev(s.device))+'</td></tr>'}).join('')||'<tr><td colspan="4">Нет активных входов</td></tr>'}).catch(function(x){$('lb').innerHTML='<tr><td colspan="5">'+esc(x.message)+'</td></tr>'})}
 function show(){var u=G11.user();$('gate').hidden=!!u;$('deny').hidden=!(u&&u.role!=='admin');$('app').hidden=!(u&&u.role==='admin');if(u&&u.role==='admin'&&!show.l){show.l=1;load()}}
 $('flt').onchange=draw;
 whenReady(show);document.addEventListener('g11:login',show);document.addEventListener('g11:logout',show);
