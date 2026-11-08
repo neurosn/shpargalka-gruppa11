@@ -429,12 +429,18 @@ function breakBoard_(label) { // кто сейчас на перерыве в с
     for (let r = h + 1; r < v.length; r++) {
       const a = String(v[r][0]).trim(); if (dkey_(a)) break; if (!/^\d{5,9}$/.test(a)) continue;
       if (v[r][col['Ушёл']]) continue;
-      for (let k = 5; k >= 1; k--) { const from = v[r][col['Пер.' + k + ' начало']], to = v[r][col['Пер.' + k + ' конец']]; if (from) { if (!to) res.push({ id: a, name: String(v[r][1]).trim(), from: from }); break; } }
+      for (let k = 5; k >= 1; k--) { const from = v[r][col['Пер.' + k + ' начало']], to = v[r][col['Пер.' + k + ' конец']]; if (from) { if (!to) res.push({ id: a, name: String(v[r][1]).trim(), from: from, n: k }); break; } }
     }
     break;
   }
-  return res;
+  return boardCm_(res, label);
 }
+/* комментарии к перерывам: в таблице — примечание к ячейке «Пер.N начало», для табло и ленты — в кэше на 6 ч */
+function brText_(req) { return String(req.comment || '').replace(/\s+/g, ' ').trim().slice(0, 120); }
+function brcKey_(label, id) { return 'brc_' + label + '_' + id; }
+function brcSave_(label, id, k, text) { if (!text) return; const key = brcKey_(label, id), m = cget_(key) || {}; m[k] = text; cput_(key, m, 21600); }
+function brcAdd_(st, label, id) { const m = cget_(brcKey_(label, id)) || {}; st.breaks.forEach(function (b) { if (m[b.n]) b.comment = m[b.n]; }); if (st.openBreak && m[st.openBreak.n]) st.openBreak.comment = m[st.openBreak.n]; return st; }
+function boardCm_(list, label) { list.forEach(function (x) { const m = cget_(brcKey_(label, x.id)) || {}; if (m[x.n]) x.comment = m[x.n]; }); return list; }
 function markLog_(u, action, written, shift, note) { try { marksSheet_().appendRow([new Date(), u.id, u.name, action, written, shift, note || '']); } catch (e) {} }
 
 Object.assign(API, {
@@ -442,7 +448,7 @@ Object.assign(API, {
     const u = need_(req).user, sh = shiftNow_(), f = findShiftRow_(u.id, sh.label);
     const base = { ok: true, shift: sh.label, now: sh.hm, windowOpen: sh.open, limit: SHIFT.breakLimit, board: breakBoard_(sh.label), maxOnBreak: SHIFT.maxOnBreak };
     if (f.missing) return Object.assign(base, { scheduled: false });
-    return Object.assign(base, { scheduled: true, state: shiftState_(f) });
+    return Object.assign(base, { scheduled: true, state: brcAdd_(shiftState_(f), sh.label, u.id) });
   },
   mark: function (req) {
     const u = need_(req).user, sh = shiftNow_(), type = String(req.type || '');
@@ -465,6 +471,7 @@ Object.assign(API, {
       const bb = breakBoard_(sh.label).filter(function (x) { return x.id !== u.id; });
       if (bb.length >= SHIFT.maxOnBreak) fail_('Сейчас на перерыве ' + bb.length + ' человека: ' + bb.map(function (x) { return x.name.split(' ').slice(0, 2).join(' '); }).join(', ') + '. Дождитесь, пока кто-то вернётся.');
       const k = st.breaks.length + 1; set('Пер.' + k + ' начало', written);
+      const cm = brText_(req); if (cm) { try { f.sheet.getRange(f.row, f.col['Пер.' + k + ' начало']).setNote(cm); } catch (e) {} brcSave_(sh.label, u.id, k, cm); note = 'комментарий: ' + cm; }
     } else if (type === 'back') {
       if (!st.onBreak) fail_('Сейчас вы не на перерыве');
       set('Пер.' + st.openBreak.n + ' конец', written);
@@ -480,7 +487,7 @@ Object.assign(API, {
     markLog_(u, type, written, sh.label, note);
     SpreadsheetApp.flush(); dropDisc_();
     const f2 = findShiftRow_(u.id, sh.label);
-    return { ok: true, written: written, note: note, state: shiftState_(f2), shift: sh.label, limit: SHIFT.breakLimit, board: breakBoard_(sh.label), maxOnBreak: SHIFT.maxOnBreak, now: sh.hm, windowOpen: true, scheduled: true };
+    return { ok: true, written: written, note: note, state: brcAdd_(shiftState_(f2), sh.label, u.id), shift: sh.label, limit: SHIFT.breakLimit, board: breakBoard_(sh.label), maxOnBreak: SHIFT.maxOnBreak, now: sh.hm, windowOpen: true, scheduled: true };
   },
   marksLog: function (req) {
     need_(req, ['admin']);
@@ -512,15 +519,15 @@ function testBoard_() {
   const s = testsSheet_(), v = s.getDataRange().getDisplayValues(), today = nowMsk_().date.split('-').reverse().join('.'), res = [];
   for (let i = 1; i < v.length; i++) {
     if (String(v[i][0]) !== today || v[i][4]) continue;
-    for (let k = 5; k >= 1; k--) { const from = v[i][TCOLS.indexOf('Пер.' + k + ' начало')], to = v[i][TCOLS.indexOf('Пер.' + k + ' конец')]; if (from) { if (!to) res.push({ id: String(v[i][1]), name: String(v[i][2]), from: from }); break; } }
+    for (let k = 5; k >= 1; k--) { const from = v[i][TCOLS.indexOf('Пер.' + k + ' начало')], to = v[i][TCOLS.indexOf('Пер.' + k + ' конец')]; if (from) { if (!to) res.push({ id: String(v[i][1]), name: String(v[i][2]), from: from, n: k }); break; } }
   }
-  return res;
+  return boardCm_(res, 'test_' + today);
 }
 Object.assign(API, {
   breakBoard: function (req) { need_(req); const sh = shiftNow_(); return { ok: true, shift: sh.label, board: breakBoard_(sh.label), maxOnBreak: SHIFT.maxOnBreak }; },
   testState: function (req) {
     const u = need_(req, ['editor', 'admin']).user, t = testRow_(u, false), n = nowMsk_();
-    return { ok: true, test: true, shift: t.today + ' (тест)', now: n.hm, windowOpen: true, scheduled: true, limit: SHIFT.breakLimit, maxOnBreak: SHIFT.maxOnBreak, state: testState_(t), board: testBoard_() };
+    return { ok: true, test: true, shift: t.today + ' (тест)', now: n.hm, windowOpen: true, scheduled: true, limit: SHIFT.breakLimit, maxOnBreak: SHIFT.maxOnBreak, state: brcAdd_(testState_(t), 'test_' + t.today, u.id), board: testBoard_() };
   },
   testMark: function (req) {
     const u = need_(req, ['editor', 'admin']).user, type = String(req.type || ''), n = nowMsk_();
@@ -533,18 +540,20 @@ Object.assign(API, {
       if (st.breaks.length >= 5) fail_('Не больше 5 перерывов');
       const bb = testBoard_().filter(function (x) { return x.id !== u.id; });
       if (bb.length >= SHIFT.maxOnBreak) fail_('Сейчас на тестовом перерыве ' + bb.length + ' человека. Дождитесь, пока кто-то вернётся.');
-      set('Пер.' + (st.breaks.length + 1) + ' начало', n.hm);
+      const k = st.breaks.length + 1; set('Пер.' + k + ' начало', n.hm);
+      const cm = brText_(req); if (cm) { try { t.sheet.getRange(t.row, TCOLS.indexOf('Пер.' + k + ' начало') + 1).setNote(cm); } catch (e) {} brcSave_('test_' + t.today, u.id, k, cm); note = 'комментарий: ' + cm; }
     } else if (type === 'back') { if (!st.onBreak) fail_('Сейчас вы не на перерыве'); set('Пер.' + st.openBreak.n + ' конец', n.hm); }
     else if (type === 'end') { if (!st.came) fail_('Сначала отметьте «Вышел на смену»'); if (st.left) fail_('Уход уже отмечен в ' + st.left); if (st.onBreak) set('Пер.' + st.openBreak.n + ' конец', n.hm); set('Ушёл', n.hm); }
     else fail_('Неизвестная отметка');
     SpreadsheetApp.flush();
-    const t2 = testRow_(u, false), st2 = testState_(t2);
+    const t2 = testRow_(u, false), st2 = brcAdd_(testState_(t2), 'test_' + t2.today, u.id);
     t2.sheet.getRange(t2.row, TCOLS.indexOf('Перерыв, мин') + 1, 1, 2).setValues([[st2.usedMin, new Date()]]);
     return { ok: true, test: true, written: n.hm, note: note, shift: t2.today + ' (тест)', now: n.hm, windowOpen: true, scheduled: true, limit: SHIFT.breakLimit, maxOnBreak: SHIFT.maxOnBreak, state: st2, board: testBoard_() };
   },
   testReset: function (req) {
     const u = need_(req, ['editor', 'admin']).user, t = testRow_(u, false);
     if (t.sheet) t.sheet.deleteRow(t.row);
+    cdel_(brcKey_('test_' + t.today, u.id));
     return { ok: true };
   }
 });
@@ -578,29 +587,34 @@ function mine_(x, u) { return x.authorId ? x.authorId === String(u.id) : String(
 const CATS = '_категории', CAT_DEFAULT = ['Возвраты', 'Приложение', 'Рассрочки'];
 function catSheet_() {
   const ss = ss_(); let s = ss.getSheetByName(CATS);
-  if (!s) { s = ss.insertSheet(CATS); s.appendRow(['Категория', 'Добавил', 'Когда']); s.setFrozenRows(1); CAT_DEFAULT.forEach(function (c) { s.appendRow([c, 'портал', new Date()]); }); s.hideSheet(); }
+  if (!s) { s = ss.insertSheet(CATS); s.appendRow(CAT_COLS); s.setFrozenRows(1); CAT_DEFAULT.forEach(function (c) { s.appendRow([c, 'портал', new Date(), 'article']); }); s.hideSheet(); }
+  else if (s.getLastColumn() < CAT_COLS.length) s.getRange(1, 1, 1, CAT_COLS.length).setValues([CAT_COLS]);
   return s;
 }
-function cats_() { return catSheet_().getDataRange().getValues().slice(1).map(function (r) { return String(r[0] || '').trim(); }).filter(String); }
-function dropContent_() { CacheService.getScriptCache().remove('content_v2'); }
+// kind: article — категории статей, template — свои разделы шаблонов (в материале хранятся как «u:Название»)
+const CAT_COLS = ['Категория', 'Добавил', 'Когда', 'Для'];
+function catKind_(k) { return k === 'template' ? 'template' : 'article'; }
+function cats_(kind) { kind = catKind_(kind); return catSheet_().getDataRange().getValues().slice(1).filter(function (r) { return catKind_(String(r[3] || '')) === kind; }).map(function (r) { return String(r[0] || '').trim(); }).filter(String); }
+function dropContent_() { CacheService.getScriptCache().remove('content_v3'); }
 Object.assign(API, {
   content: function () { // публично: материалы видны всем, даже без входа
-    const cache = CacheService.getScriptCache(), hit = cache.get('content_v2');
+    const cache = CacheService.getScriptCache(), hit = cache.get('content_v3');
     if (hit) return JSON.parse(hit);
-    const res = { ok: true, items: contentAll_().filter(function (x) { return x.active; }).map(cpub_), categories: cats_() };
-    try { cache.put('content_v2', JSON.stringify(res), 300); } catch (e) {}
+    const res = { ok: true, items: contentAll_().filter(function (x) { return x.active; }).map(cpub_), categories: cats_('article'), tsections: cats_('template') };
+    try { cache.put('content_v3', JSON.stringify(res), 300); } catch (e) {}
     return res;
   },
   contentSave: function (req) {
     const u = need_(req, ['editor', 'admin']).user, it = req.item || {};
     const type = ['template', 'link', 'news', 'article'].indexOf(it.type) > -1 ? it.type : fail_('Выберите тип');
-    const title = String(it.title || '').trim().slice(0, 200), text = String(it.text || '').trim().slice(0, it.type === 'article' ? 45000 : 20000), url = String(it.url || '').trim().slice(0, 500), section = String(it.section || '').trim().slice(0, 40);
+    const title = String(it.title || '').trim().slice(0, 200), text = String(it.text || '').trim().slice(0, it.type === 'article' ? 45000 : 20000), url = String(it.url || '').trim().slice(0, 500), section = String(it.section || '').trim().slice(0, 60);
     let category = type === 'article' ? String(it.category || '').trim().slice(0, 40) : '';
     if (!title) fail_('Укажите заголовок');
     if (type === 'template' && !text) fail_('Вставьте текст шаблона');
     if (type === 'article' && !text) fail_('Напишите текст статьи');
     if (type === 'link' && !/^https?:\/\//.test(url)) fail_('Ссылка должна начинаться с http:// или https://');
-    if (category) { const c = cats_().filter(function (x) { return x.toLowerCase() === category.toLowerCase(); })[0]; if (!c) fail_('Категории «' + category + '» нет — добавьте её кнопкой «+»'); category = c; }
+    if (type === 'template' && section.indexOf('u:') === 0) { const nm = section.slice(2).toLowerCase(), c = cats_('template').filter(function (x) { return x.toLowerCase() === nm; })[0]; if (!c) fail_('Раздела «' + section.slice(2) + '» нет — добавьте его кнопкой «+»'); section = 'u:' + c; }
+    if (category) { const c = cats_('article').filter(function (x) { return x.toLowerCase() === category.toLowerCase(); })[0]; if (!c) fail_('Категории «' + category + '» нет — добавьте её кнопкой «+»'); category = c; }
     const s = contentSheet_(), row = [null, type, section, title, text, url, u.name, new Date(), true, category, String(u.id)];
     if (it.id) {
       const ex = contentAll_().filter(function (x) { return x.id === String(it.id); })[0]; if (!ex) fail_('Материал не найден');
@@ -621,19 +635,19 @@ Object.assign(API, {
     return { ok: true };
   },
   catAdd: function (req) {
-    const u = need_(req, ['editor', 'admin']).user, name = String(req.name || '').replace(/\s+/g, ' ').trim().slice(0, 40);
-    if (name.length < 2) fail_('Название категории — от 2 символов');
-    const have = cats_().filter(function (x) { return x.toLowerCase() === name.toLowerCase(); })[0];
-    if (!have) { catSheet_().appendRow([name, u.name, new Date()]); dropContent_(); }
-    return { ok: true, name: have || name, existed: !!have, categories: cats_() };
+    const u = need_(req, ['editor', 'admin']).user, kind = catKind_(req.kind), name = String(req.name || '').replace(/\s+/g, ' ').trim().slice(0, 40);
+    if (name.length < 2) fail_('Название — от 2 символов');
+    const have = cats_(kind).filter(function (x) { return x.toLowerCase() === name.toLowerCase(); })[0];
+    if (!have) { catSheet_().appendRow([name, u.name, new Date(), kind]); dropContent_(); }
+    return { ok: true, kind: kind, name: have || name, existed: !!have, categories: cats_('article'), tsections: cats_('template') };
   },
   catDelete: function (req) {
-    need_(req, ['admin']); const name = String(req.name || '').trim();
-    const used = contentAll_().filter(function (x) { return x.active && x.category === name; }).length;
-    if (used) fail_('В категории «' + name + '» есть статьи (' + used + ') — сначала перенесите их в другую');
+    need_(req, ['admin']); const name = String(req.name || '').trim(), kind = catKind_(req.kind), tpl = kind === 'template';
+    const used = contentAll_().filter(function (x) { return x.active && (tpl ? x.type === 'template' && x.section === 'u:' + name : x.category === name); }).length;
+    if (used) fail_((tpl ? 'В разделе «' + name + '» есть шаблоны (' : 'В категории «' + name + '» есть статьи (') + used + ') — сначала перенесите их в другой');
     const s = catSheet_(), v = s.getDataRange().getValues();
-    for (let i = v.length - 1; i >= 1; i--) if (String(v[i][0]).trim() === name) s.deleteRow(i + 1);
-    dropContent_(); return { ok: true, categories: cats_() };
+    for (let i = v.length - 1; i >= 1; i--) if (String(v[i][0]).trim() === name && catKind_(String(v[i][3] || '')) === kind) s.deleteRow(i + 1);
+    dropContent_(); return { ok: true, categories: cats_('article'), tsections: cats_('template') };
   },
   upload: function (req) { // фото / видео / файл для статей → папка на Google Диске, доступ по ссылке
     const u = need_(req, ['editor', 'admin']).user;
@@ -690,7 +704,7 @@ Object.assign(API, {
   contentMine: function (req) { // наставник — только свои материалы; руководитель — все (mine: true у своих)
     const u = need_(req, ['editor', 'admin']).user, admin = u.role === 'admin';
     const items = contentAll_().filter(function (x) { return x.active && (admin || mine_(x, u)); }).map(function (x) { return Object.assign(cpub_(x), { mine: mine_(x, u) }); });
-    return { ok: true, items: items, categories: cats_(), all: admin };
+    return { ok: true, items: items, categories: cats_('article'), tsections: cats_('template'), all: admin };
   }
 });
 
