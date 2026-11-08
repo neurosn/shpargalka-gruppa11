@@ -560,42 +560,80 @@ function filesFolder_() {
 }
 // ▶ запустить один раз из редактора: Google попросит разрешить доступ к Диску, создаст папку для файлов статей
 function setupFiles() { UrlFetchApp.fetch('https://www.googleapis.com/discovery/v1/apis', { muteHttpExceptions: true }); ScriptApp.getOAuthToken(); const f = filesFolder_(); Logger.log('Папка для файлов: ' + f.getName() + ' — ' + f.getUrl()); }
-const CCOLS = ['ID', 'Тип', 'Раздел', 'Заголовок', 'Текст', 'Ссылка', 'Автор', 'Обновлено', 'Активен'];
-function contentSheet_() { return sheet_(CONTENT, CCOLS); }
+const CCOLS = ['ID', 'Тип', 'Раздел', 'Заголовок', 'Текст', 'Ссылка', 'Автор', 'Обновлено', 'Активен', 'Категория', 'Автор ID'];
+function contentSheet_() {
+  const s = sheet_(CONTENT, CCOLS);
+  if (s.getLastColumn() < CCOLS.length) s.getRange(1, 1, 1, CCOLS.length).setValues([CCOLS]); // новые колонки в старом листе
+  return s;
+}
 function contentAll_() {
   const v = contentSheet_().getDataRange().getValues(), res = [];
-  for (let i = 1; i < v.length; i++) if (v[i][0]) res.push({ row: i + 1, id: String(v[i][0]), type: v[i][1], section: v[i][2], title: v[i][3], text: v[i][4], url: v[i][5], author: v[i][6], updated: v[i][7] instanceof Date ? v[i][7].toISOString() : String(v[i][7] || ''), active: v[i][8] !== false });
+  for (let i = 1; i < v.length; i++) if (v[i][0]) res.push({ row: i + 1, id: String(v[i][0]), type: v[i][1], section: v[i][2], title: v[i][3], text: v[i][4], url: v[i][5], author: v[i][6], updated: v[i][7] instanceof Date ? v[i][7].toISOString() : String(v[i][7] || ''), active: v[i][8] !== false, category: String(v[i][9] || ''), authorId: String(v[i][10] || '') });
   return res;
 }
-function cpub_(x) { return { id: x.id, type: x.type, section: x.section, title: x.title, text: x.text, url: x.url, author: x.author, updated: x.updated }; }
+function cpub_(x) { return { id: x.id, type: x.type, section: x.section, title: x.title, text: x.text, url: x.url, author: x.author, updated: x.updated, category: x.category }; }
+// свой ли материал: по ID автора; у старых материалов ID нет — сверяем по имени
+function mine_(x, u) { return x.authorId ? x.authorId === String(u.id) : String(x.author || '') === String(u.name || ''); }
+/* ---------- категории статей (скрытый лист «_категории») ---------- */
+const CATS = '_категории', CAT_DEFAULT = ['Возвраты', 'Приложение', 'Рассрочки'];
+function catSheet_() {
+  const ss = ss_(); let s = ss.getSheetByName(CATS);
+  if (!s) { s = ss.insertSheet(CATS); s.appendRow(['Категория', 'Добавил', 'Когда']); s.setFrozenRows(1); CAT_DEFAULT.forEach(function (c) { s.appendRow([c, 'портал', new Date()]); }); s.hideSheet(); }
+  return s;
+}
+function cats_() { return catSheet_().getDataRange().getValues().slice(1).map(function (r) { return String(r[0] || '').trim(); }).filter(String); }
+function dropContent_() { CacheService.getScriptCache().remove('content_v2'); }
 Object.assign(API, {
   content: function () { // публично: материалы видны всем, даже без входа
-    const cache = CacheService.getScriptCache(), hit = cache.get('content_v1');
+    const cache = CacheService.getScriptCache(), hit = cache.get('content_v2');
     if (hit) return JSON.parse(hit);
-    const res = { ok: true, items: contentAll_().filter(function (x) { return x.active; }).map(cpub_) };
-    try { cache.put('content_v1', JSON.stringify(res), 300); } catch (e) {}
+    const res = { ok: true, items: contentAll_().filter(function (x) { return x.active; }).map(cpub_), categories: cats_() };
+    try { cache.put('content_v2', JSON.stringify(res), 300); } catch (e) {}
     return res;
   },
   contentSave: function (req) {
     const u = need_(req, ['editor', 'admin']).user, it = req.item || {};
     const type = ['template', 'link', 'news', 'article'].indexOf(it.type) > -1 ? it.type : fail_('Выберите тип');
     const title = String(it.title || '').trim().slice(0, 200), text = String(it.text || '').trim().slice(0, it.type === 'article' ? 45000 : 20000), url = String(it.url || '').trim().slice(0, 500), section = String(it.section || '').trim().slice(0, 40);
+    let category = type === 'article' ? String(it.category || '').trim().slice(0, 40) : '';
     if (!title) fail_('Укажите заголовок');
     if (type === 'template' && !text) fail_('Вставьте текст шаблона');
     if (type === 'article' && !text) fail_('Напишите текст статьи');
     if (type === 'link' && !/^https?:\/\//.test(url)) fail_('Ссылка должна начинаться с http:// или https://');
-    const s = contentSheet_(), row = [null, type, section, title, text, url, u.name, new Date(), true];
-    if (it.id) { const ex = contentAll_().filter(function (x) { return x.id === String(it.id); })[0]; if (!ex) fail_('Материал не найден'); row[0] = ex.id; s.getRange(ex.row, 1, 1, CCOLS.length).setValues([row]); }
+    if (category) { const c = cats_().filter(function (x) { return x.toLowerCase() === category.toLowerCase(); })[0]; if (!c) fail_('Категории «' + category + '» нет — добавьте её кнопкой «+»'); category = c; }
+    const s = contentSheet_(), row = [null, type, section, title, text, url, u.name, new Date(), true, category, String(u.id)];
+    if (it.id) {
+      const ex = contentAll_().filter(function (x) { return x.id === String(it.id); })[0]; if (!ex) fail_('Материал не найден');
+      if (u.role !== 'admin' && !mine_(ex, u)) fail_('Это материал другого наставника — править его может только автор или руководитель', 'forbidden');
+      row[0] = ex.id; if (u.role === 'admin' && !mine_(ex, u)) { row[6] = ex.author; row[10] = ex.authorId; } // руководитель правит чужое — автор остаётся прежним
+      s.getRange(ex.row, 1, 1, CCOLS.length).setValues([row]);
+    }
     else { row[0] = 'c' + Date.now().toString(36); s.appendRow(row); }
-    CacheService.getScriptCache().remove('content_v1');
+    dropContent_();
     return { ok: true, id: row[0] };
   },
   contentDelete: function (req) {
-    need_(req, ['editor', 'admin']);
+    const u = need_(req, ['editor', 'admin']).user;
     const ex = contentAll_().filter(function (x) { return x.id === String(req.id); })[0]; if (!ex) fail_('Материал не найден');
+    if (u.role !== 'admin' && !mine_(ex, u)) fail_('Удалить чужой материал может только руководитель', 'forbidden');
     contentSheet_().getRange(ex.row, 9).setValue(false);
-    CacheService.getScriptCache().remove('content_v1');
+    dropContent_();
     return { ok: true };
+  },
+  catAdd: function (req) {
+    const u = need_(req, ['editor', 'admin']).user, name = String(req.name || '').replace(/\s+/g, ' ').trim().slice(0, 40);
+    if (name.length < 2) fail_('Название категории — от 2 символов');
+    const have = cats_().filter(function (x) { return x.toLowerCase() === name.toLowerCase(); })[0];
+    if (!have) { catSheet_().appendRow([name, u.name, new Date()]); dropContent_(); }
+    return { ok: true, name: have || name, existed: !!have, categories: cats_() };
+  },
+  catDelete: function (req) {
+    need_(req, ['admin']); const name = String(req.name || '').trim();
+    const used = contentAll_().filter(function (x) { return x.active && x.category === name; }).length;
+    if (used) fail_('В категории «' + name + '» есть статьи (' + used + ') — сначала перенесите их в другую');
+    const s = catSheet_(), v = s.getDataRange().getValues();
+    for (let i = v.length - 1; i >= 1; i--) if (String(v[i][0]).trim() === name) s.deleteRow(i + 1);
+    dropContent_(); return { ok: true, categories: cats_() };
   },
   upload: function (req) { // фото / видео / файл для статей → папка на Google Диске, доступ по ссылке
     const u = need_(req, ['editor', 'admin']).user;
@@ -649,7 +687,11 @@ Object.assign(API, {
     f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); cdel_('up_' + req.uid);
     return { ok: true, id: id, name: st.name, mime: st.mime, size: st.size };
   },
-  contentMine: function (req) { need_(req, ['editor', 'admin']); return { ok: true, items: contentAll_().filter(function (x) { return x.active; }).map(cpub_) }; }
+  contentMine: function (req) { // наставник — только свои материалы; руководитель — все (mine: true у своих)
+    const u = need_(req, ['editor', 'admin']).user, admin = u.role === 'admin';
+    const items = contentAll_().filter(function (x) { return x.active && (admin || mine_(x, u)); }).map(function (x) { return Object.assign(cpub_(x), { mine: mine_(x, u) }); });
+    return { ok: true, items: items, categories: cats_(), all: admin };
+  }
 });
 
 /* ---------- очистка журнала входов: всё, кроме руководителя ---------- */
@@ -689,7 +731,7 @@ function doPost(e) {
 
 /* ---------- запустить один раз из редактора: ▶ setup ---------- */
 function setup() {
-  const s = accSheet_(); sesSheet_(); logSheet_(); paySheet_(); marksSheet_(); contentSheet_(); testsSheet_();
+  const s = accSheet_(); sesSheet_(); logSheet_(); paySheet_(); marksSheet_(); contentSheet_(); catSheet_(); testsSheet_();
   const have = {}; users_().forEach(function (u) { have[u.id] = true; });
   SEED.forEach(function (r) { if (!have[r[0]]) s.appendRow([r[0], r[1], r[2], r[3], r[4], true, new Date()]); });
   bumpSes_(); forget_(); Logger.log('Готово: аккаунтов ' + users_().length);
