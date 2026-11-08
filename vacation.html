@@ -73,6 +73,12 @@ main a:not(.link){color:var(--accent);font-weight:600}
 .day.empty{visibility:hidden}
 .day.hol{background:repeating-linear-gradient(135deg,var(--soft),var(--soft) 6px,var(--card) 6px,var(--card) 12px);cursor:not-allowed;border-style:dashed}
 .day.hol .who{color:var(--accent2)}
+.day .fs{position:absolute;right:4px;top:3px;font-size:10px;font-weight:700;color:var(--ok)}
+.day .fs.low{color:var(--warn)}
+.day.full{background:repeating-linear-gradient(135deg,var(--soft),var(--soft) 6px,var(--card) 6px,var(--card) 12px);cursor:not-allowed;border-style:dashed;color:var(--muted)}
+.day.full .fs{color:var(--warn)}
+.day.busy .fs,.day.sel .fs,.day.mine .fs{color:#fff}
+.form select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
 .day.busy{background:#c2410c;border-color:#c2410c;color:#fff;cursor:not-allowed}
 .day.mine{background:var(--ok);border-color:var(--ok);color:#fff}
 .day.sel{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -109,7 +115,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 <body data-space="team">
 <header><div class="w">
 <h1>🌴 Отпуск 2027</h1>
-<p>Бронирование отпусков Группы 11 · даты сразу попадают в общую таблицу</p>
+<p>Бронирование отпусков Группы 11 · даты сразу попадают в общую таблицу отпусков отдела</p>
 </div></header>
 <nav><div class="w">
 <a href="index.html">← Шпаргалка</a><a href="#cal">📅 Календарь</a><a href="#book">✍️ Забронировать</a><a href="#list">📋 Все брони</a><a href="salary.html">💵 Калькулятор зарплаты</a>
@@ -121,11 +127,10 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 <div class="rulesbox">
 <div class="w2"><b>💸 Только за свой счёт</b>Отпуск берётся только за свой счёт.</div>
 <div class="w2"><b>🚫 Без премии</b>При уходе в отпуск премия не будет начислена.</div>
+<div class="w2"><b>🎟 Только при свободном слоте</b>Взять отпуск можно, только если на каждый день есть свободный слот в общей таблице отпусков. Количество свободных слотов показано в календаре.</div>
+<div><b>👤 Один человек</b>В отпуске одновременно может быть только один сотрудник Группы 11.</div>
 <div><b>☀️ Желательно с июня</b>Бронировать можно весь 2027 год, но желательные даты — с июня.</div>
-<div><b>👤 Один человек</b>В отпуске одновременно может быть только один сотрудник группы.</div>
-<div class="w2"><b>🎉 Не в праздники</b>В праздничные и нерабочие дни по календарю РФ отпуск брать нельзя: 1–8 янв, 22–23 фев, 8 мар, 1 и 3 мая, 9–10 мая, 12 и 14 июн, 4–5 ноя, 31 дек.</div>
-<div><b>📏 До 14 дней</b>Один отпуск — не больше 14 дней подряд.</div>
-<div><b>🔐 ПИН-код</b>Придумайте 4 цифры при бронировании. Изменить или удалить бронь можно только с этим ПИН-кодом.</div>
+<div><b>🔐 ПИН-код</b>При первой брони придумайте 4 цифры. Изменить или удалить свою бронь можно только с этим ПИН-кодом.</div>
 </div>
 </section>
 
@@ -135,7 +140,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 <div class="calhead"><button type="button" id="prev" aria-label="Предыдущий месяц">‹</button><h3 id="mtitle"></h3><button type="button" id="next" aria-label="Следующий месяц">›</button></div>
 <div class="grid7" id="dows"></div>
 <div class="grid7" id="days"></div>
-<div class="legend"><span><i style="background:#c2410c"></i>занято</span><span><i style="background:var(--accent)"></i>ваш выбор</span><span><i style="background:var(--ok)"></i>редактируемая бронь</span><span><i style="border:1px dashed var(--line);background:var(--soft)"></i>🎉 праздник — нельзя</span><span><i style="border:1px solid var(--line);background:var(--card)"></i>свободно</span></div>
+<div class="legend"><span><i style="background:#c2410c"></i>занято</span><span><i style="background:var(--accent)"></i>ваш выбор</span><span><i style="background:var(--ok)"></i>редактируемая бронь</span><span><i style="border:1px dashed var(--line);background:var(--soft)"></i>нет свободных слотов — нельзя</span><span><i style="border:1px solid var(--line);background:var(--card)"></i>свободно · <b style="color:var(--ok)">число</b> — свободных слотов в отделе</span></div>
 <p class="loading" id="loading">⏳ Загружаем брони из таблицы… Первый раз это может занять до 20 секунд.</p>
 </section>
 
@@ -144,7 +149,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 <div class="modebar" id="modebar">✏️ Редактирование брони: <span id="modewho"></span> · <a href="#" id="cancelEdit">отменить</a></div>
 <p style="margin-top:0;color:var(--muted)">Нажмите в календаре на первый и последний день отпуска — или введите даты вручную.</p>
 <div class="form">
-<div><label for="fio">Фамилия и Имя</label><input id="fio" autocomplete="name" placeholder="Иванова Анна" maxlength="60"></div>
+<div><label for="emp">Сотрудник</label><select id="emp"><option value="">— выберите себя —</option></select></div>
 <div><label for="from">С</label><input id="from" type="date" min="2027-01-01" max="2027-12-31"></div>
 <div><label for="to">По</label><input id="to" type="date" min="2027-01-01" max="2027-12-31"></div>
 <div><label for="pin">ПИН-код (4 цифры)</label><input id="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="••••"></div>
@@ -158,12 +163,11 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 <div id="listbox"><p class="loading">Загружаем…</p></div>
 </section>
 
-<footer>Данные хранятся в таблице «Группа 11», лист «Отпуск 2027» · Вопросы — к руководителю группы</footer>
+<footer>Данные хранятся в общей таблице отпусков «2027 покупатели звонки+чаты», лист «Покупатели Чаты» (строки «11 ночь») · Вопросы — к руководителю группы</footer>
 </main>
 <script>
 var API='https://script.google.com/macros/s/AKfycby3TmLzEyNubx9Of5FdTA5_Eqexb0d_7EVfac1Xng-maYeiH5LasNRmF3jR6r8H7PjL/exec';
-var HOL={'2027-01-01':'Новогодние каникулы','2027-01-02':'Новогодние каникулы','2027-01-03':'Новогодние каникулы','2027-01-04':'Новогодние каникулы','2027-01-05':'Новогодние каникулы','2027-01-06':'Новогодние каникулы','2027-01-07':'Рождество Христово','2027-01-08':'Новогодние каникулы','2027-02-22':'Выходной (перенос) — День защитника Отечества','2027-02-23':'День защитника Отечества','2027-03-08':'Международный женский день','2027-05-01':'Праздник Весны и Труда','2027-05-03':'Выходной (перенос) — 1 Мая','2027-05-09':'День Победы','2027-05-10':'Выходной (перенос) — День Победы','2027-06-12':'День России','2027-06-14':'Выходной (перенос) — День России','2027-11-04':'День народного единства','2027-11-05':'Выходной (перенос) — День народного единства','2027-12-31':'Выходной (перенос) — Новый год'};
-var YEAR=2027,MAXD=14,items=[],month=5,editId=null,busy=false;
+var YEAR=2027,items=[],free={},people=[],month=5,editId=null,busy=false,loaded=false;
 var MN=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
 var $=function(i){return document.getElementById(i)};
 function iso(d){return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
@@ -171,9 +175,15 @@ function pd(s){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||'');return m?new Date(+
 function ru(s){var d=pd(s);return d?('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear():''}
 function days(a,b){return Math.round((pd(b)-pd(a))/864e5)+1}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function short(n){var p=n.split(' ');return p[0]+(p[1]?' '+p[1][0]+'.':'')}
+function short(n){var p=String(n).split(' ');return p[0]+(p[1]?' '+p[1][0]+'.':'')}
+function cur(){return editId?items.filter(function(x){return x.id===editId})[0]:null}
+function emp(){var e=cur();return e?e.emp:$('emp').value}
 function owner(ds){for(var i=0;i<items.length;i++){var it=items[i];if(it.id!==editId&&ds>=it.from&&ds<=it.to)return it}return null}
-function conflict(a,b){for(var i=0;i<items.length;i++){var it=items[i];if(it.id!==editId&&a<=it.to&&b>=it.from)return it}return null}
+/* свободно в отделе; при переносе свои старые дни считаем освободившимися */
+function fr(ds){if(!(ds in free))return null;var n=free[ds],e=cur();if(e&&ds>=e.from&&ds<=e.to)n++;return n}
+function each(a,b,f){for(var x=pd(a);iso(x)<=b;x.setDate(x.getDate()+1)){var r=f(iso(x));if(r)return r}return null}
+function conflict(a,b){return each(a,b,function(ds){var o=owner(ds);return o?{d:ds,o:o}:null})}
+function noslot(a,b){return each(a,b,function(ds){var n=fr(ds);return n!==null&&n<=0?ds:null})}
 function msg(t,c){var m=$('msg');m.className='msg '+c;m.textContent=t}
 
 function render(){
@@ -187,54 +197,61 @@ function render(){
   for(var k=0;k<off;k++){var e=document.createElement('div');e.className='day empty';box.appendChild(e)}
   for(var d=1;d<=n;d++){
     var dt=new Date(YEAR,month,d),ds=iso(dt),b=document.createElement('button');b.type='button';
-    var o=owner(ds),cls='day'+((dt.getDay()===0||dt.getDay()===6)?' we':'');
+    var o=owner(ds),fs=fr(ds),cls='day'+((dt.getDay()===0||dt.getDay()===6)?' we':'');
     var html='<span class="n">'+d+'</span>';
-    if(HOL[ds]&&!o){cls+=' hol';html+='<span class="who">🎉</span>';b.title='Праздник: '+HOL[ds]+' — отпуск брать нельзя'}
+    if(loaded&&fs!==null)html+='<span class="fs'+(fs>0&&fs<=3?' low':'')+'">'+(fs>0?fs:'0')+'</span>';
     if(o){cls+=' busy';html+='<span class="who">'+esc(short(o.name))+'</span>';b.title='Занято: '+o.name+' ('+ru(o.from)+' – '+ru(o.to)+')'}
-    else if(editId){var me=items.filter(function(x){return x.id===editId})[0];if(me&&ds>=me.from&&ds<=me.to&&!(f&&t))cls+=' mine'}
+    else if(loaded&&fs!==null&&fs<=0){cls+=' full';b.title='Нет свободных слотов в общей таблице'}
+    else if(loaded&&fs!==null)b.title='Свободных слотов: '+fs;
+    var me=cur();if(!o&&me&&ds>=me.from&&ds<=me.to&&!(f&&t))cls+=' mine';
     if(!o&&f&&(ds===f||ds===t))cls+=' sel';else if(!o&&f&&t&&ds>f&&ds<t)cls+=' range';
     b.className=cls;b.innerHTML=html;b.dataset.d=ds;b.onclick=pick;box.appendChild(b)}
   updSum()}
-function holIn(a,b){for(var x=pd(a);iso(x)<=b;x.setDate(x.getDate()+1)){if(HOL[iso(x)])return iso(x)}return null}
-function pick(){var ds=this.dataset.d,o=owner(ds);
-  if(HOL[ds]){msg('В праздничные дни отпуск брать нельзя: '+ru(ds)+' — '+HOL[ds]+'.','err');return}
-  if(o){msg('К сожалению, '+ru(ds)+' занято сотрудником '+o.name+' ('+ru(o.from)+' – '+ru(o.to)+'). Выберите другие даты или договоритесь с ним/ней, чтобы поменяться датами.','err');return}
+function pick(){var ds=this.dataset.d,o=owner(ds),n=fr(ds);
+  if(o){msg('К сожалению, '+ru(ds)+' в отпуске '+o.name+' ('+ru(o.from)+' – '+ru(o.to)+'). Из Группы 11 одновременно может отдыхать только один человек — выберите другие даты или договоритесь, чтобы поменяться.','err');return}
+  if(n!==null&&n<=0){msg('На '+ru(ds)+' нет свободных слотов в общей таблице отпусков — выберите другой день.','err');return}
   var f=$('from').value,t=$('to').value;
   if(!f||(f&&t)){$('from').value=ds;$('to').value=''}
   else if(ds<f){$('to').value=f;$('from').value=ds}else{$('to').value=ds}
   $('msg').className='msg';render()}
 function updSum(){var f=$('from').value,t=$('to').value,s=$('sum');
-  if(f&&t&&t>=f){var n=days(f,t),c=conflict(f,t);s.textContent='Выбрано: '+ru(f)+' – '+ru(t)+' · '+n+' дн.'+(n>MAXD?' ⚠️ больше '+MAXD:'')+(c?' ⚠️ пересекается с '+c.name:'')+(holIn(f,t)?' ⚠️ попадает на праздник':'')}
+  if(f&&t&&t>=f){var c=conflict(f,t),z=noslot(f,t);s.textContent='Выбрано: '+ru(f)+' – '+ru(t)+' · '+days(f,t)+' дн.'+(c?' ⚠️ пересекается с '+c.o.name:'')+(z?' ⚠️ нет слота '+ru(z):'')}
   else if(f)s.textContent='Начало: '+ru(f)+' — теперь выберите последний день';else s.textContent=''}
 
-function api(body){
-  return fetch(API,{method:'POST',body:JSON.stringify(body)}).then(function(r){return r.json()})}
+function fill(r){if(r.items)items=r.items;if(r.free)free=r.free;if(r.people){people=r.people;var sel=$('emp'),v=sel.value||savedEmp();
+  sel.innerHTML='<option value="">— выберите себя —</option>'+people.map(function(p){return '<option value="'+esc(p.id)+'">'+esc(p.name)+'</option>'}).join('');
+  if(v)sel.value=v}}
+function savedEmp(){try{return localStorage.getItem('vac_emp')||''}catch(e){return ''}}
+function api(body){return fetch(API,{method:'POST',body:JSON.stringify(body)}).then(function(r){return r.json()})}
 function load(){
-  return fetch(API).then(function(r){return r.json()}).then(function(r){items=r.items||[];$('loading').style.display='none';render();list()})
-  .catch(function(){$('loading').textContent='⚠️ Не удалось загрузить брони. Обновите страницу через минуту.'})}
+  return fetch(API).then(function(r){return r.json()}).then(function(r){
+    if(!r.ok)throw 0;fill(r);loaded=true;$('loading').style.display='none';render();list()})
+  .catch(function(){$('loading').textContent='⚠️ Не удалось загрузить данные из таблицы отпусков. Обновите страницу через минуту.'})}
 function list(){
   var lb=$('listbox');
-  if(!items.length){lb.innerHTML='<p style="color:var(--muted)">Пока никто не забронировал отпуск — будьте первым!</p>';return}
+  if(!items.length){lb.innerHTML='<p style="color:var(--muted)">Пока в Группе 11 нет отпусков на 2027 год — будьте первым!</p>';return}
   var h='<table class="list">';
-  items.forEach(function(it){h+='<tr><td><b>'+esc(it.name)+'</b><br><span style="color:var(--muted)">'+ru(it.from)+' – '+ru(it.to)+' · '+it.days+' дн.</span></td><td><div class="b"><button class="btn ghost" data-e="'+it.id+'">✏️ Изменить</button><button class="btn danger" data-x="'+it.id+'">🗑 Удалить</button></div></td></tr>'});
+  items.forEach(function(it){h+='<tr><td><b>'+esc(it.name)+'</b><br><span style="color:var(--muted)">'+ru(it.from)+' – '+ru(it.to)+' · '+it.days+' дн.</span></td><td><div class="b">'+
+    (it.locked?'<span style="color:var(--muted);font-size:13px" title="Отпуск внесён в таблицу вручную. Изменить — через руководителя группы.">🔒 внесён в таблицу</span>':
+    '<button class="btn ghost" data-e="'+esc(it.id)+'">✏️ Изменить</button><button class="btn danger" data-x="'+esc(it.id)+'">🗑 Удалить</button>')+'</div></td></tr>'});
   lb.innerHTML=h+'</table>';
   lb.querySelectorAll('[data-e]').forEach(function(b){b.onclick=function(){startEdit(b.dataset.e)}});
   lb.querySelectorAll('[data-x]').forEach(function(b){b.onclick=function(){del(b.dataset.x)}})}
 function startEdit(id){var it=items.filter(function(x){return x.id===id})[0];if(!it)return;
-  editId=id;$('fio').value=it.name;$('from').value=it.from;$('to').value=it.to;$('pin').value='';
+  editId=id;$('emp').value=it.emp;$('emp').disabled=true;$('from').value=it.from;$('to').value=it.to;$('pin').value='';
   $('modebar').style.display='block';$('modewho').textContent=it.name+' ('+ru(it.from)+' – '+ru(it.to)+')';
   $('ftitle').textContent='Изменить даты отпуска';$('go').textContent='Сохранить изменения';
   month=pd(it.from).getMonth();msg('Выберите новые даты и введите ПИН-код, который указали при бронировании.','info');render();
   $('book').scrollIntoView({behavior:'smooth'})}
-function stopEdit(){editId=null;$('modebar').style.display='none';$('ftitle').textContent='Забронировать отпуск';$('go').textContent='Забронировать'}
+function stopEdit(){editId=null;$('emp').disabled=false;$('modebar').style.display='none';$('ftitle').textContent='Забронировать отпуск';$('go').textContent='Забронировать'}
 function del(id){var it=items.filter(function(x){return x.id===id})[0];if(!it||busy)return;
-  var pin=prompt('Удалить бронь «'+it.name+'» ('+ru(it.from)+' – '+ru(it.to)+')?\nВведите ПИН-код, указанный при бронировании:');
+  var pin=prompt('Удалить отпуск «'+it.name+'» ('+ru(it.from)+' – '+ru(it.to)+') из общей таблицы?\nВведите ПИН-код, указанный при бронировании:');
   if(pin===null)return;
   send({action:'delete',id:id,pin:pin.trim()},true)}
 function send(body,isDel){
-  busy=true;$('go').disabled=true;msg('⏳ Сохраняем в таблицу…','info');
+  busy=true;$('go').disabled=true;msg('⏳ Сохраняем в общую таблицу отпусков…','info');
   api(body).then(function(r){
-    if(r.items){items=r.items}
+    fill(r);
     if(r.ok){msg((isDel?'🗑 ':'✅ ')+r.msg,'ok');if(!isDel){$('pin').value='';$('from').value='';$('to').value=''}if(!isDel||body.id===editId)stopEdit()}
     else msg('❌ '+r.msg,'err');
     render();list()})
@@ -242,26 +259,24 @@ function send(body,isDel){
   .then(function(){busy=false;$('go').disabled=false;$('msg').scrollIntoView({behavior:'smooth',block:'nearest'})})}
 $('go').onclick=function(){
   if(busy)return;
-  var name=$('fio').value.replace(/\s+/g,' ').trim(),f=$('from').value,t=$('to').value,pin=$('pin').value.trim();
-  if(name.split(' ').length<2)return msg('Укажите фамилию и имя.','err');
+  var e=emp(),f=$('from').value,t=$('to').value,pin=$('pin').value.trim();
+  if(!e)return msg('Выберите себя в списке сотрудников.','err');
   if(!f||!t)return msg('Выберите даты начала и конца отпуска.','err');
   if(t<f)return msg('Дата окончания раньше даты начала.','err');
   if(f.slice(0,4)!=='2027'||t.slice(0,4)!=='2027')return msg('Можно бронировать только даты 2027 года.','err');
-  if(days(f,t)>MAXD)return msg('Отпуск не больше '+MAXD+' дней подряд (выбрано '+days(f,t)+').','err');
   if(!/^\d{4}$/.test(pin))return msg('ПИН-код — ровно 4 цифры.','err');
-  var h=holIn(f,t);
-  if(h)return msg('В праздничные дни отпуск брать нельзя: '+ru(h)+' — '+HOL[h]+'. Выберите даты без праздников.','err');
   var c=conflict(f,t);
-  if(c)return msg('К сожалению, эти даты заняты сотрудником '+c.name+' (с '+ru(c.from)+' по '+ru(c.to)+'). Выберите другие даты или договоритесь с ним/ней, чтобы поменяться датами.','err');
-  try{localStorage.setItem('vac_fio',name)}catch(e){}
-  send(editId?{action:'edit',id:editId,name:name,from:f,to:t,pin:pin}:{action:'book',name:name,from:f,to:t,pin:pin})};
+  if(c)return msg('К сожалению, '+ru(c.d)+' в отпуске '+c.o.name+' (с '+ru(c.o.from)+' по '+ru(c.o.to)+'). Из Группы 11 одновременно может отдыхать только один человек.','err');
+  var z=noslot(f,t);
+  if(z)return msg('На '+ru(z)+' нет свободных слотов в общей таблице отпусков. Выберите другие даты.','err');
+  try{localStorage.setItem('vac_emp',e)}catch(x){}
+  send(editId?{action:'edit',id:editId,from:f,to:t,pin:pin}:{action:'book',emp:e,from:f,to:t,pin:pin})};
 $('clear').onclick=function(){$('from').value='';$('to').value='';$('msg').className='msg';render()};
 $('cancelEdit').onclick=function(e){e.preventDefault();stopEdit();$('from').value='';$('to').value='';$('msg').className='msg';render()};
 $('prev').onclick=function(){if(month>0){month--;render()}};
 $('next').onclick=function(){if(month<11){month++;render()}};
 ['from','to'].forEach(function(i){$(i).addEventListener('change',function(){var v=$(i).value;if(v&&v.slice(0,4)==='2027')month=pd(v).getMonth();render()})});
 ['пн','вт','ср','чт','пт','сб','вс'].forEach(function(d){var e=document.createElement('div');e.className='dow';e.textContent=d;$('dows').appendChild(e)});
-try{var sv=localStorage.getItem('vac_fio');if(sv)$('fio').value=sv}catch(e){}
 render();load();
 </script>
 <script>(function(){var r=document.documentElement,b=document.createElement('button');b.type='button';b.className='theme-btn';
