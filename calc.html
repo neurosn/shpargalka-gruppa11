@@ -335,6 +335,9 @@
 
   .result-amount.is-zero { color: #ffd0d9; }
 
+  .ndfl-tg{display:flex;align-items:center;gap:9px;margin:16px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.22);color:#fff;font-size:13.5px;font-weight:600;cursor:pointer;user-select:none}
+  .ndfl-tg input{width:18px;height:18px;margin:0;flex:none;accent-color:#fff}
+
   .result-sub {
     min-height: 19px;
     margin: 0;
@@ -511,6 +514,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
         <p class="result-label">Премия</p>
         <div class="result-amount is-empty" id="premium">0 ₽</div>
         <p class="result-sub" id="premium-sub">Заполните показатели</p>
+        <label class="ndfl-tg"><input type="checkbox" id="ndfl"><span>Минус НДФЛ 13% — сумма на руки</span></label>
       </section>
     </aside>
 
@@ -687,8 +691,9 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
       premiumEl.textContent = "—";
       subEl.textContent = "Укажите зарплату";
     } else {
-      premiumEl.textContent = money.format(Math.round(d.premium));
-      subEl.textContent = "К выплате";
+      var net = $("ndfl").checked;
+      premiumEl.textContent = money.format(Math.round(net ? d.premium * 0.87 : d.premium));
+      subEl.textContent = net ? "На руки · НДФЛ 13%: −" + money.format(Math.round(d.premium * 0.13)) : "К выплате, до НДФЛ";
     }
   }
 
@@ -718,6 +723,9 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
     ["fact-vyrabotka", "fact-rating", "fact-ant", "fact-ops", "fact-ko", "salary"].forEach(function (id) {
       $(id).addEventListener("input", render);
     });
+
+    try { $("ndfl").checked = localStorage.getItem("g11_ndfl") === "1"; } catch (e) {}
+    $("ndfl").addEventListener("change", function () { try { localStorage.setItem("g11_ndfl", this.checked ? "1" : "0"); } catch (e) {} render(); });
 
     $("reset").addEventListener("click", function () {
       ["fact-vyrabotka", "fact-rating", "fact-ant", "fact-ops", "fact-ko", "salary"].forEach(function (id) {

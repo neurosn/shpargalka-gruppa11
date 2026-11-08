@@ -87,6 +87,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 
 .headline{border-radius:16px;padding:16px 18px;margin-bottom:14px;background:linear-gradient(140deg,var(--accent),var(--accent2));color:#fff;font-size:16px;line-height:1.6}.headline b{font-size:20px}.headline .big{font-size:30px;font-weight:800;display:block;margin-top:4px}.headline small{opacity:.9;display:block;font-size:13px;margin-top:4px}
 .headline ul{margin:8px 0 0;padding-left:18px;font-size:14px}.pay0{color:var(--warn);font-weight:700}
+.ndfl{display:inline-flex;align-items:center;gap:10px;padding:9px 14px;border:1px solid var(--line);border-radius:12px;background:var(--soft);color:var(--ink);font-weight:600;font-size:14px;cursor:pointer;margin:0 0 14px;user-select:none}.ndfl input{width:18px!important;height:18px;margin:0;padding:0;flex:none;accent-color:var(--accent)}.ndfl small{display:block;font-weight:500;color:var(--muted);font-size:12px}
 </style>
 </head>
 <body data-space="team">
@@ -123,7 +124,8 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 </div>
 </section>
 <section id="money-sec" hidden><h2>💰 Зарплата и премия</h2>
-<div class="money"><div><small>За смены (с учётом нарушений)</small><b id="m-base">—</b><br><em id="m-base-d"></em></div><div><small>Премия по KPI (как в калькуляторе)</small><b id="m-prem">—</b><br><em id="m-prem-d"></em></div><div><small>Итого (до НДФЛ)</small><b id="m-tot">—</b><br><em>выплата 10-го числа</em></div></div>
+<label class="ndfl"><input type="checkbox" id="ndfl"><span>Минус НДФЛ 13%<small>показать сумму «на руки» — сколько придёт на карту</small></span></label>
+<div class="money"><div><small>За смены (с учётом нарушений)</small><b id="m-base">—</b><br><em id="m-base-d"></em></div><div><small>Премия по KPI (как в калькуляторе)</small><b id="m-prem">—</b><br><em id="m-prem-d"></em></div><div><small id="m-tot-l">Итого (до НДФЛ)</small><b id="m-tot">—</b><br><em id="m-tot-d">выплата 10-го числа</em></div></div>
 <div class="sal"><label for="sal" style="font-weight:600">Моя сумма по ГПХ:</label><input id="sal" inputmode="decimal" placeholder="например, 60000"><button class="btn" type="button" id="salb">Сохранить</button><span class="msg" id="salm" style="margin:0"></span></div>
 <p style="color:var(--muted);font-size:13px;margin:8px 0 0">Сумму видите только вы и руководитель. Смена = сумма по ГПХ ÷ 15. Смена без нарушений оплачивается полностью; с нарушением — минус недоработанные часы (полная смена — 10 ч 45 мин работы: 12 ч минус 75 мин перерывов). Невыход — 0. Премия = сумма по ГПХ × 15% × коэффициент KPI.</p>
 </section>
@@ -155,7 +157,9 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return
 function show(){var u=G11.user();$('gate').hidden=!!u;$('app').hidden=!u;if(!u)return;if(!show.loaded){show.loaded=1;loadData();if(u.role==='admin'){$('shift-sec').innerHTML='<h2>⏱ Смены</h2><p style="margin:0;color:var(--muted)">Руководителю отмечаться не нужно — все смены по графику с 1 ноября засчитываются автоматически как полные (21:00–09:00).</p>'}else loadShift()}$('nm').textContent=u.name;$('uid').textContent=u.id;$('urole').textContent=G11.roleName(u.role)}
 
 function plural(n,a,b,c){n=Math.abs(n)%100;var m=n%10;if(n>10&&n<20)return c;if(m===1)return a;if(m>1&&m<5)return b;return c}
-var rub=function(n){return n==null?'—':Math.round(n).toLocaleString('ru-RU')+' ₽'};
+// НДФЛ 13%: галочка запоминается на этом устройстве; все суммы на странице считаются «на руки»
+var NDFL=false;try{NDFL=localStorage.getItem('g11_ndfl')==='1'}catch(e){}
+var rub=function(n){return n==null?'—':Math.round(NDFL?n*0.87:n).toLocaleString('ru-RU')+' ₽'},rub0=function(n){return Math.round(n).toLocaleString('ru-RU')+' ₽'};
 var pc=function(x){return x==null?'—':Math.round(x*100)+'%'};
 function setT(id,v){$(id).textContent=v==null?'—':v}
 var curMonth=null;
@@ -167,7 +171,7 @@ setT('s-worked',s.worked);setT('s-hours',String(s.hours).replace('.',','));setT(
 var MN=(j.monthTitle||'').split(' ')[0].toLowerCase(),MP={'январь':'январе','февраль':'феврале','март':'марте','апрель':'апреле','май':'мае','июнь':'июне','июль':'июле','август':'августе','сентябрь':'сентябре','октябрь':'октябре','ноябрь':'ноябре','декабрь':'декабре'}[MN]||MN;
 var hp=d.pay,hh='В '+MP+' <b>'+s.planned+'</b> '+plural(s.planned,'смена','смены','смен')+' по графику · вы отработали <b>'+s.worked+'</b> '+plural(s.worked,'смену','смены','смен')+' и <b>'+String(s.hours).replace('.',',')+'</b> ч';
 if(hp.salary){hh+='<span class="big">'+(s.future?'Сейчас начислено: ':'По итогу месяца вам заплатят: ')+rub(hp.base+(d.premium&&d.premium.amount||0))+'</span>';
-hh+='<ul><li>'+(s.viol?'Смены с нарушениями: '+s.viol+' — вычтено '+String(s.lostHours).replace('.',',')+' ч ('+rub(hp.deduct)+')':'Смены без нарушений — оплачиваются полностью ✅')+'</li>'+(s.absent?'<li>Невыходы: '+s.absent+' — не оплачиваются</li>':'')+(d.premium&&d.premium.amount?'<li>Премия по KPI: '+rub(d.premium.amount)+'</li>':'')+(s.future?'<li>Впереди '+s.future+' '+plural(s.future,'смена','смены','смен')+' — если отработаете без нарушений, за месяц выйдет '+rub(hp.projected+(d.premium&&d.premium.amount||0))+'</li>':'')+'</ul><small>до НДФЛ · выплата 10-го числа следующего месяца</small>'}
+hh+='<ul><li>'+(s.viol?'Смены с нарушениями: '+s.viol+' — вычтено '+String(s.lostHours).replace('.',',')+' ч ('+rub(hp.deduct)+')':'Смены без нарушений — оплачиваются полностью ✅')+'</li>'+(s.absent?'<li>Невыходы: '+s.absent+' — не оплачиваются</li>':'')+(d.premium&&d.premium.amount?'<li>Премия по KPI: '+rub(d.premium.amount)+'</li>':'')+(s.future?'<li>Впереди '+s.future+' '+plural(s.future,'смена','смены','смен')+' — если отработаете без нарушений, за месяц выйдет '+rub(hp.projected+(d.premium&&d.premium.amount||0))+'</li>':'')+'</ul><small>'+(NDFL?'на руки, после НДФЛ 13%':'до НДФЛ')+' · выплата 10-го числа следующего месяца</small>'}
 else hh+='<small>Укажите сумму по ГПХ в блоке «Зарплата и премия» ниже — и здесь появится, сколько вам заплатят.</small>';
 $('hl').innerHTML=hh;
 setT('s-over',sm.overBreak);setT('s-edge',sm.edgeBreak);setT('s-early',sm.early);setT('s-disc',sm.disc==null?null:pc(sm.disc));
@@ -175,7 +179,7 @@ setT('s-over',sm.overBreak);setT('s-edge',sm.edgeBreak);setT('s-early',sm.early)
 $('money-sec').hidden=false;var p=d.pay,pr=d.premium;if(p.salary&&!$('sal').value)$('sal').value=p.salary;
 $('m-base').textContent=rub(p.base);$('m-base-d').textContent=p.salary?(p.shifts+' смен × '+rub(p.perShift)+(p.deduct?' − '+rub(p.deduct)+' за нарушения':'')):'укажите сумму по ГПХ ниже';
 $('m-prem').textContent=pr?rub(pr.amount):'—';$('m-prem-d').textContent=pr?('коэффициент '+pr.coef.toFixed(2).replace('.',',')+(p.salary?'':' · нужна сумма по ГПХ')):(d.bonus&&/Наставник/i.test(d.bonus.stage)?'наставник без чатов — не считается':'нет данных KPI');
-$('m-tot').textContent=(p.base!=null)?rub(p.base+(pr&&pr.amount||0)):'—';
+$('m-tot').textContent=(p.base!=null)?rub(p.base+(pr&&pr.amount||0)):'—';$('m-tot-l').textContent=NDFL?'Итого на руки (после НДФЛ 13%)':'Итого (до НДФЛ)';$('m-tot-d').textContent=(NDFL&&p.base!=null?'НДФЛ 13%: −'+rub0((p.base+(pr&&pr.amount||0))*0.13)+' · ':'')+'выплата 10-го числа';
 // kpi
 var b=d.bonus,k=sm.k||{},N=j.norm;
 if(b&&b.out!=null){$('kpi-sec').hidden=false;var rows=[['Выработка, чатов/смену',b.out,N.out,k.out,b.out>=N.out],['Рейтинг CSI',b.csi,N.csi,k.csi,b.csi>=N.csi],['АХТ (не выше)',b.aht,N.aht,k.aht,b.aht<=N.aht],['% операций',b.ops==null?null:b.ops+'%',N.ops+'%',k.ops,b.ops>=N.ops],['КО, %',b.ko==null?'нет данных':b.ko+'%',N.ko+'%',k.ko,b.ko==null||b.ko>=N.ko]];
@@ -188,6 +192,7 @@ var L={ok:['t-ok','✅ OK'],viol:['t-bad',''],future:['t-mid','впереди'],
 $('sh-sec').hidden=!d.discipline.length;$('shb').innerHTML=d.discipline.map(function(x){var l=L[x.kind];return '<tr><td>'+esc(x.date)+'</td><td>'+esc(x.came||'—')+'</td><td>'+esc(x.left||'—')+'</td><td>'+esc(x.worked||'—')+'</td><td>'+(x.breaks.length?esc(x.breaks.join(', '))+(x.breakMin!=null?' <small style="color:var(--muted)">('+x.breakMin+' мин)</small>':''):'—')+'</td><td><span class="tag '+l[0]+'">'+esc(l[1]||x.status)+'</span>'+(x.comment?'<br><small style="color:var(--muted)">'+esc(x.comment)+'</small>':'')+'</td><td>'+(x.pay==null?(x.kind==='future'?'—':'<span style="color:var(--muted)">нет суммы</span>'):(x.pay===0?'<span class="pay0">0 ₽</span>':rub(x.pay)+(x.lostHours?'<br><small style="color:var(--warn)">−'+String(x.lostHours).replace('.',',')+' ч</small>':'')))+'</td></tr>'}).join('');
 }).catch(function(x){$('dload').hidden=false;$('dload').textContent='Не удалось загрузить: '+x.message})}
 $('mon').onchange=function(){loadData(this.value)};
+$('ndfl').checked=NDFL;$('ndfl').onchange=function(){NDFL=this.checked;try{localStorage.setItem('g11_ndfl',NDFL?'1':'0')}catch(e){}loadData(curMonth)};
 $('salb').onclick=function(){var m=$('salm');m.className='msg';G11.api('setSalary',{amount:$('sal').value}).then(function(){m.textContent='✅ Сохранено';m.classList.add('ok');loadData()}).catch(function(x){m.textContent=x.message;m.classList.add('bad')})};
 
 function loadShift(){if(!window.G11Shift){setTimeout(loadShift,200);return}if(!loadShift.w)loadShift.w=G11Shift($('shift-sec'),'real');else loadShift.w.reload()}

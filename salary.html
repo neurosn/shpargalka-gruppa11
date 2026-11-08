@@ -73,6 +73,8 @@ nav .w,.chips,.hot{scrollbar-width:none;-ms-overflow-style:none}
 nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{display:none}
 @media (min-width:700px){nav .w,.chips,.hot{flex-wrap:wrap;overflow:visible;white-space:normal}nav a,.chips a{padding:5px 11px}}
 @media (max-width:699px){nav .w,.chips,.hot{-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}}
+.calc label.ndfl{display:inline-flex;margin:0 0 14px}.calc .ndfl input{border:0;border-radius:4px}.ndfl small{margin-top:1px}
+.ndfl{display:inline-flex;align-items:center;gap:10px;padding:9px 14px;border:1px solid var(--line);border-radius:12px;background:var(--soft);color:var(--ink);font-weight:600;font-size:14px;cursor:pointer;margin:0 0 14px;user-select:none}.ndfl input{width:18px!important;height:18px;margin:0;padding:0;flex:none;accent-color:var(--accent)}.ndfl small{display:block;font-weight:500;color:var(--muted);font-size:12px}
 </style>
 </head>
 <body data-space="tools">
@@ -95,9 +97,11 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 <input id="sh" type="number" inputmode="numeric" min="0" max="31" step="1" placeholder="например, 15">
 <div class="steps"><button type="button" data-d="-1">−1</button><button type="button" data-d="1">+1</button><button type="button" data-v="15">15</button></div></div>
 </div>
+<label class="ndfl"><input type="checkbox" id="ndfl"><span>Минус НДФЛ 13%<small>показать сумму «на руки» — сколько придёт на карту</small></span></label>
 <div class="res">
 <div><span>Стоимость одной смены</span><b id="per">—</b></div>
-<div class="main"><span>Придёт 10 числа (до НДФЛ)</span><b id="tot">—</b></div>
+<div id="taxr" hidden><span>НДФЛ 13%</span><b id="tax">—</b></div>
+<div class="main"><span id="totl">Придёт 10 числа (до НДФЛ)</span><b id="tot">—</b></div>
 </div>
 </div>
 </section>
@@ -109,7 +113,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 <li>1️⃣ Берём сумму по договору ГПХ из кабинета MyTeam.</li>
 <li>2️⃣ Делим её на <b>15</b> — столько смен в месяце по графику 2/2. Получаем стоимость одной смены.</li>
 <li>3️⃣ Умножаем на количество отработанных смен.</li>
-<li>💳 Результат — сумма, которая придёт <b>10 числа</b>, <b>до вычета НДФЛ</b>.</li>
+<li>💳 Результат — сумма, которая придёт <b>10 числа</b>, <b>до вычета НДФЛ</b>. Поставьте галочку «Минус НДФЛ 13%» — и калькулятор покажет сумму на руки: <b>× 0,87</b>.</li>
 </ul>
 <div class="note">Пример: ГПХ 60 000 ₽ → смена 4 000 ₽ → отработали 12 смен → 48 000 ₽ до НДФЛ.</div>
 </section>
@@ -119,9 +123,12 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 <script>
 var g=document.getElementById('gph'),s=document.getElementById('sh');
 function rub(n){return n.toLocaleString('ru-RU',{minimumFractionDigits:0,maximumFractionDigits:2})+' ₽'}
-function calc(){var a=parseFloat(g.value),n=parseFloat(s.value);
-var per=a>0?a/15:NaN;document.getElementById('per').textContent=isNaN(per)?'—':rub(Math.round(per*100)/100);
-document.getElementById('tot').textContent=(isNaN(per)||!(n>=0))?'—':rub(Math.round(per*n*100)/100);
+var nd=document.getElementById('ndfl');try{nd.checked=localStorage.getItem('g11_ndfl')==='1'}catch(e){}
+nd.addEventListener('change',function(){try{localStorage.setItem('g11_ndfl',nd.checked?'1':'0')}catch(e){}calc()});
+function calc(){var a=parseFloat(g.value),n=parseFloat(s.value),k=nd.checked?0.87:1;
+var per=a>0?a/15:NaN,ok=!(isNaN(per)||!(n>=0));document.getElementById('per').textContent=isNaN(per)?'—':rub(Math.round(per*k*100)/100);
+document.getElementById('tot').textContent=ok?rub(Math.round(per*n*k*100)/100):'—';
+document.getElementById('totl').textContent=nd.checked?'Придёт 10 числа на руки (после НДФЛ)':'Придёт 10 числа (до НДФЛ)';document.getElementById('taxr').hidden=!nd.checked;document.getElementById('tax').textContent=ok?'−'+rub(Math.round(per*n*0.13*100)/100):'—';
 try{localStorage.setItem('zp_gph',g.value)}catch(e){}}
 try{var v=localStorage.getItem('zp_gph');if(v)g.value=v}catch(e){}
 g.addEventListener('input',calc);s.addEventListener('input',calc);
