@@ -23,6 +23,9 @@ for f, pname in PAGES:
         h2 = re.search(r'<h2[^>]*>(.*?)</h2>', inner, re.S)
         if not h2: continue
         title = txt(h2.group(1)); keys = (re.search(r'data-keys="([^"]*)"', attrs) or [None, ''])[1]
+        if 'data-nosearch' in attrs:  # раздел со своим поиском (разборы «Флудилки») — в общий индекс только заголовок
+            idx.append({'t': title, 'p': pname, 'u': f + '#' + sid, 'k': 'section', 'x': 'Свой поиск внутри раздела', 'w': keys})
+            continue
         body_txt = txt(inner)
         idx.append({'t': title, 'p': pname, 'u': f + '#' + sid, 'k': 'section', 'x': body_txt[len(title):len(title)+180].strip(), 'w': (keys + ' ' + body_txt)[:500]})
         for h3 in re.finditer(r'<h3(?: id="([\w-]+)")?[^>]*>(.*?)</h3>', inner, re.S):
