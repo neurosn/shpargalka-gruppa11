@@ -2,7 +2,7 @@
 window.G11Shift=function(root,mode){
   var test=mode==='test',A=test?{state:'testState',mark:'testMark'}:{state:'shiftState',mark:'mark'},SH=null;
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-  root.classList.add('shift');
+  var QUICK=['Обед','Отдых','Тех. проблема','По согласованию с наставником'];root.classList.add('shift');
   root.innerHTML='<h2>'+(test?'🧪 Тестовая смена':'⏱ Смена сегодня')+'</h2>'+
    (test?'<div class="note" style="margin-top:0">Тест работает в любое время и пишет в лист «Тесты» — реальная «Дисциплина» не меняется. Покажите ребятам, как работают кнопки.</div>':'')+
    '<div class="now"><span class="sh-title">Загружаю…</span><b class="sh-now"></b></div>'+
@@ -10,6 +10,7 @@ window.G11Shift=function(root,mode){
    '<button class="sbtn b-break" data-m="break" type="button" disabled>☕ Ушёл на перерыв<small class="b-hint">не больше 3 человек сразу</small></button>'+
    '<button class="sbtn b-back" data-m="back" type="button" disabled>🔙 Вернулся<small>закрыть перерыв</small></button>'+
    '<button class="sbtn b-end" data-m="end" type="button" disabled>🔴 Ушёл со смены<small>'+(test?'завершить тест':'до 09:30, позже 09:00 → 09:00')+'</small></button></div>'+
+   '<div class="bcm" hidden><label class="bcm-l">Комментарий к перерыву <span>необязательно — увидят все в блоке «Сейчас на перерыве»</span></label><div class="bcm-q">'+QUICK.map(function(x){return '<button type="button" data-q="'+esc(x)+'">'+esc(x)+'</button>'}).join('')+'</div><input class="bcm-in" maxlength="120" autocomplete="off" placeholder="Или напишите своими словами"></div>'+
    '<div class="board"></div><div class="tl"></div><div class="brk" hidden><div class="bar"><i style="width:0"></i></div><small class="brkt" style="color:var(--muted)"></small></div><div class="msg"></div>'+
    (test?'<button class="btn alt reset" type="button" style="margin-top:8px">↺ Сбросить мой тест за сегодня</button>':'<p style="color:var(--muted);font-size:13px;margin:6px 0 0">Время берётся с сервера по Москве и сразу записывается в лист «Дисциплина». Писать в чат о перерыве не нужно — все видят, кто сейчас на перерыве. Перерывы — не более 75 минут за смену. В первый (21:00–22:00) и последний (08:00–09:00) час кнопка перерыва заблокирована.</p>');
   var q=function(s){return root.querySelector(s)},B=function(m){return root.querySelector('[data-m="'+m+'"]')};
@@ -18,21 +19,25 @@ window.G11Shift=function(root,mode){
   function tick(){var d=new Date(),m=d.getUTCHours()*60+d.getUTCMinutes()+180,mm=m%1440,next=[22*60,8*60].map(function(x){return (x-mm+1440)%1440||1440});var ms=(Math.min.apply(null,next)*60-d.getUTCSeconds()+3)*1000;setTimeout(function(){if(G11.user())load();tick()},ms)}
   function draw(j){SH=j;['start','break','back','end'].forEach(function(m){B(m).disabled=true});q('.sh-now').textContent=j.now?('сейчас '+j.now+' МСК'):'';
     var me=G11.user()&&G11.user().id,max=j.maxOnBreak||3,others=(j.board||[]).filter(function(x){return x.id!==me}),full=others.length>=max;
-    q('.board').innerHTML='<div class="bwho'+(full?' full':'')+'"><b>☕ Сейчас на перерыве: '+(j.board||[]).length+' из '+max+'</b>'+((j.board||[]).length?'<div>'+(j.board||[]).map(function(x){return '<span>'+esc(String(x.name).split(' ').slice(0,2).join(' '))+' · с '+esc(String(x.from).slice(0,5))+'</span>'}).join('')+'</div>':'<div><span class="empty">никого — можно идти</span></div>')+'</div>';
-    if(!j.scheduled){q('.sh-title').textContent='Смена '+j.shift+': вас нет в графике';q('.tl').innerHTML='';q('.brk').hidden=true;return}
+    q('.board').innerHTML='<div class="bwho'+(full?' full':'')+'"><b>☕ Сейчас на перерыве: '+(j.board||[]).length+' из '+max+'</b>'+((j.board||[]).length?'<div>'+(j.board||[]).map(function(x){return '<span>'+esc(String(x.name).split(' ').slice(0,2).join(' '))+' · с '+esc(String(x.from).slice(0,5))+(x.comment?' · <i class="bcm-t">'+esc(x.comment)+'</i>':'')+'</span>'}).join('')+'</div>':'<div><span class="empty">никого — можно идти</span></div>')+'</div>';
+    if(!j.scheduled){q('.sh-title').textContent='Смена '+j.shift+': вас нет в графике';q('.tl').innerHTML='';q('.brk').hidden=true;q('.bcm').hidden=true;return}
     var s=j.state;q('.sh-title').innerHTML='Смена <b>'+esc(j.shift)+'</b>'+(test?'':' · '+(j.windowOpen?'отметки открыты':'отметки откроются в 20:30'));
     var ban=!test&&edge(j.now);
     if(j.windowOpen){B('start').disabled=!!s.came;B('break').disabled=!s.came||!!s.left||s.onBreak||full||!!ban;B('back').disabled=!s.onBreak;B('end').disabled=!s.came||!!s.left}
     q('.b-hint').textContent=ban&&!s.onBreak?ban:(full&&!s.onBreak?'занято: 3 человека на перерыве':'не больше 3 человек сразу');
-    var tl=[];if(s.came)tl.push('🟢 пришёл '+String(s.came).slice(0,5));s.breaks.forEach(function(x){tl.push('☕ '+String(x.from).slice(0,5)+'–'+(x.to?String(x.to).slice(0,5):'…'))});if(s.left)tl.push('🔴 ушёл '+String(s.left).slice(0,5));if(s.status)tl.push(s.status);
+    q('.bcm').hidden=!(s.came&&!s.left&&!s.onBreak&&(test||j.windowOpen)&&!ban);
+    var tl=[];if(s.came)tl.push('🟢 пришёл '+String(s.came).slice(0,5));s.breaks.forEach(function(x){tl.push('☕ '+String(x.from).slice(0,5)+'–'+(x.to?String(x.to).slice(0,5):'…')+(x.comment?' · '+x.comment:''))});if(s.left)tl.push('🔴 ушёл '+String(s.left).slice(0,5));if(s.status)tl.push(s.status);
     q('.tl').innerHTML=tl.map(function(x){return '<span>'+esc(x)+'</span>'}).join('');
     var lim=j.limit||75,used=s.usedMin||0;q('.brk').hidden=!s.came;q('.bar i').style.width=Math.min(100,used/lim*100)+'%';q('.bar i').style.background=used>lim?'var(--warn)':'';
     q('.brkt').textContent='Перерывы: '+used+' из '+lim+' мин'+(used>lim?' — перебор!':' · осталось '+(lim-used)+' мин')+(s.onBreak?' (сейчас на перерыве с '+String(s.openBreak.from).slice(0,5)+')':'')}
+  function syncQ(){var v=q('.bcm-in').value.trim();root.querySelectorAll('[data-q]').forEach(function(b){b.classList.toggle('on',b.dataset.q===v)})}
+  root.addEventListener('input',function(e){if(e.target.classList.contains('bcm-in'))syncQ()});
   function load(){return G11.api(A.state).then(draw).catch(function(x){q('.sh-title').textContent=x.message})}
   root.addEventListener('click',function(e){var btn=e.target.closest('[data-m]');if(btn&&!btn.disabled){var m=btn.dataset.m,msg=q('.msg');
     if(m==='end'&&!confirm(test?'Завершить тестовую смену?':'Завершить смену? Уход будет записан сейчас.'))return;
     msg.className='msg';msg.textContent='Записываю…';root.querySelectorAll('[data-m]').forEach(function(x){x.disabled=true});
-    G11.api(A.mark,{type:m}).then(function(j){msg.textContent='✅ Записано: '+String(j.written).slice(0,5)+(j.note?' · '+j.note:'');msg.classList.add('ok');draw(j)}).catch(function(x){msg.textContent=x.message;msg.classList.add('bad');load()})}
+    var cm=m==='break'?q('.bcm-in').value.trim():'';G11.api(A.mark,cm?{type:m,comment:cm}:{type:m}).then(function(j){if(m==='break'){q('.bcm-in').value='';syncQ()}msg.textContent='✅ Записано: '+String(j.written).slice(0,5)+(j.note?' · '+j.note:'');msg.classList.add('ok');draw(j)}).catch(function(x){msg.textContent=x.message;msg.classList.add('bad');load()})}
+    var qb=e.target.closest('[data-q]');if(qb){var inp=q('.bcm-in');inp.value=inp.value===qb.dataset.q?'':qb.dataset.q;syncQ();return}
     if(e.target.closest('.reset')){if(!confirm('Удалить вашу тестовую запись за сегодня?'))return;G11.api('testReset').then(function(){q('.msg').textContent='Тест сброшен';load()})}});
   var timer=setInterval(function(){if(G11.user()&&!document.hidden)load()},test?20000:60000);
   if(!test)tick();load();return {reload:load,stop:function(){clearInterval(timer)}};
@@ -42,5 +47,6 @@ window.G11Shift=function(root,mode){
 '.sbtn small{font-weight:500;font-size:12px;opacity:.85}.sbtn:disabled{opacity:.35;cursor:not-allowed}.b-start{background:#1f9d6b}.b-break{background:#d9480f}.b-back{background:#2f7de1}.b-end{background:#6b6480}'+
 '.tl{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.tl span{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px}'+
 '.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:10px}.bar i{display:block;height:100%;background:var(--accent)}'+
+'.bcm{margin-top:12px;border:1px dashed var(--line);border-radius:12px;padding:10px 12px;background:var(--card)}.bcm-l{display:block;font-size:13px;font-weight:700;margin-bottom:8px}.bcm-l span{font-weight:500;color:var(--muted);font-size:12px}.bcm-q{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.bcm-q button{border:1px solid var(--line);background:var(--soft);color:var(--accent);border-radius:999px;padding:5px 12px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}.bcm-q button.on{background:var(--accent);color:#fff;border-color:var(--accent)}.bcm-in{width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}.bcm-t{font-style:normal;color:var(--muted)}'+
 '.bwho{margin-top:12px;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 12px}.bwho.full{border-color:var(--warn)}.bwho b{font-size:14px}.bwho div{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.bwho span{background:var(--soft);border-radius:999px;padding:3px 10px;font-size:13px}.bwho .empty{color:var(--muted)}';
 var s=document.createElement('style');s.textContent=css;document.head.appendChild(s)})();
