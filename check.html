@@ -40,5 +40,5 @@ T.forEach(function(x,i){var d=document.createElement('div');d.className='row';d.
 document.getElementById('copy').onclick=function(){var b=this,t='Проверка связи (без VPN), '+new Date().toLocaleString('ru-RU')+'\n'+res.filter(Boolean).join('\n')+'\n'+navigator.userAgent;
  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){b.textContent='Скопировано ✓'},function(){prompt('Скопируйте:',t)})};
 </script>
-<script src="site.js?v=19" defer></script>
+<script src="site.js?v=20" defer></script>
 </body></html>
