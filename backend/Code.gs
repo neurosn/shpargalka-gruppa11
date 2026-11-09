@@ -261,18 +261,20 @@ function parseDisc_(monthKey) {
 }
 function parseDisc0_(monthKey) {
   const D = discValues_(); if (!D) return {};
-  const v = D.v, res = {}, today = todayKey_(); let date = null;
+  const v = D.v, res = {}, today = todayKey_(), liveDate = shiftNow_().date; let date = null;
   for (let i = 0; i < v.length; i++) {
     const a = String(v[i][0]).trim(), k = dkey_(a);
     if (k && String(v[i][1]).indexOf('Смена') === 0) { date = k; continue; }
     if (!date || !/^\d{5,9}$/.test(a) || date.slice(0, 7) !== monthKey) continue;
     const came = String(v[i][2]).trim(), left = String(v[i][3]).trim(), status = String(v[i][7]).trim(), comment = String(v[i][19] || '').trim();
     const breaks = []; for (let c = 8; c <= 17; c += 2) if (v[i][c] && v[i][c + 1]) breaks.push(v[i][c] + '–' + v[i][c + 1]);
-    let kind;
-    if (came) kind = /^✅/.test(status) ? 'ok' : 'viol';
+    let kind, live = false;
+    // смена ещё идёт (пришёл, ухода пока нет) — это не нарушение: считаем как обычную, без вычета
+    if (came && !left && date === liveDate) { kind = 'ok'; live = true; }
+    else if (came) kind = /^✅/.test(status) ? 'ok' : 'viol';
     else if (date >= today) kind = 'future';
     else kind = comment ? 'absent_reason' : 'absent';
-    (res[a] = res[a] || []).push({ date: date.split('-').reverse().join('.'), came: came, left: left, breakMin: num_(v[i][4]), leftMin: num_(v[i][5]), worked: String(v[i][6]).trim(), hours: hm_(v[i][6]), status: status, breaks: breaks, edge: String(v[i][18]).trim(), comment: comment, kind: kind });
+    (res[a] = res[a] || []).push({ date: date.split('-').reverse().join('.'), came: came, left: left, breakMin: num_(v[i][4]), leftMin: num_(v[i][5]), worked: String(v[i][6]).trim(), hours: hm_(v[i][6]), status: status, breaks: breaks, edge: String(v[i][18]).trim(), comment: comment, kind: kind, live: live, status: live ? '⏳ смена идёт' : status });
   }
   return res;
 }
