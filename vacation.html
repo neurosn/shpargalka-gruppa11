@@ -133,7 +133,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 <div class="w2"><b>🎟 Только при свободном слоте</b>Взять отпуск можно, только если на каждый день есть свободный слот в общей таблице отпусков. Количество свободных слотов показано в календаре.</div>
 <div><b>👤 Один человек</b>В отпуске одновременно может быть только один сотрудник Группы 11.</div>
 <div><b>☀️ Желательно с июня</b>Бронировать можно весь 2027 год, но желательные даты — с июня.</div>
-<div><b>🔐 ПИН-код</b>При первой брони придумайте 4 цифры. Изменить или удалить свою бронь можно только с этим ПИН-кодом.</div>
+<div><b>🔐 Вход на портал</b>Бронь привязана к вашему личному кабинету: войдите по своему ID — и бронируйте, меняйте или удаляйте только свои отпуска. ПИН-код не нужен.</div>
 </div>
 </section>
 
@@ -150,12 +150,12 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 <section id="book">
 <h2>✍️ <span id="ftitle">Забронировать отпуск</span></h2>
 <div class="modebar" id="modebar">✏️ Редактирование брони: <span id="modewho"></span> · <a href="#" id="cancelEdit">отменить</a></div>
-<p style="margin-top:0;color:var(--muted)">Нажмите в календаре на первый и последний день отпуска — или введите даты вручную.</p>
+<p style="margin-top:0;color:var(--muted)">Нажмите в календаре на первый и последний день отпуска — или введите даты вручную. Бронь привязана к вашему входу на портал — ПИН-код не нужен.</p>
+<div class="msg info" id="needlogin" style="display:none">🔐 Чтобы забронировать или изменить отпуск, войдите на портал по своему ID. <button class="btn" type="button" id="loginbtn" style="margin-left:6px">Войти</button></div>
 <div class="form">
 <div><label for="emp">Сотрудник</label><select id="emp"><option value="">— выберите себя —</option></select></div>
 <div><label for="from">С</label><input id="from" type="date" min="2027-01-01" max="2027-12-31"></div>
 <div><label for="to">По</label><input id="to" type="date" min="2027-01-01" max="2027-12-31"></div>
-<div><label for="pin">ПИН-код (4 цифры)</label><input id="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="••••"></div>
 </div>
 <div class="actions"><button class="btn" id="go" type="button">Забронировать</button><button class="btn ghost" id="clear" type="button">Сбросить</button><span class="sum" id="sum"></span></div>
 <div class="msg" id="msg"></div>
@@ -179,6 +179,9 @@ function ru(s){var d=pd(s);return d?('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getM
 function days(a,b){return Math.round((pd(b)-pd(a))/864e5)+1}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function short(n){var p=String(n).split(' ');return p[0]+(p[1]?' '+p[1][0]+'.':'')}
+function me(){return window.G11&&G11.user()}
+function adm(){var u=me();return !!(u&&u.role==='admin')}
+function mine(it){var u=me();return !!u&&(u.role==='admin'||String(it.emp)===String(u.id))}
 function cur(){return editId?items.filter(function(x){return x.id===editId})[0]:null}
 function emp(){var e=cur();return e?e.emp:$('emp').value}
 function owner(ds){for(var i=0;i<items.length;i++){var it=items[i];if(it.id!==editId&&ds>=it.from&&ds<=it.to)return it}return null}
@@ -223,9 +226,13 @@ function updSum(){var f=$('from').value,t=$('to').value,s=$('sum');
 
 function fill(r){if(r.items)items=r.items;if(r.free)free=r.free;if(r.people){people=r.people;var sel=$('emp'),v=sel.value||savedEmp();
   sel.innerHTML='<option value="">— выберите себя —</option>'+people.map(function(p){return '<option value="'+esc(p.id)+'">'+esc(p.name)+'</option>'}).join('');
-  if(v)sel.value=v}}
+  if(v)sel.value=v;who()}}
+// кто вошёл: сотрудник видит в списке только себя выбранным; руководитель может выбрать любого
+function who(){var u=me(),sel=$('emp');$('needlogin').style.display=u?'none':'block';$('go').disabled=!u;
+  if(u&&!adm()&&!editId){sel.value=u.id;sel.disabled=true;if(sel.value!==String(u.id))msg('Вашего ID нет в строках «11 ночь» общей таблицы отпусков — напишите руководителю группы.','err')}
+  else if(!editId)sel.disabled=false;if(loaded)list()}
 function savedEmp(){try{return localStorage.getItem('vac_emp')||''}catch(e){return ''}}
-function api(body){return fetch(API,{method:'POST',body:JSON.stringify(body)}).then(function(r){return r.json()})}
+function api(body){body.token=window.G11&&G11.token();return fetch(API,{method:'POST',body:JSON.stringify(body)}).then(function(r){return r.json()})}
 function load(){
   return fetch(API).then(function(r){return r.json()}).then(function(r){
     if(!r.ok)throw 0;fill(r);loaded=true;$('loading').style.display='none';render();list()})
@@ -235,45 +242,44 @@ function list(){
   if(!items.length){lb.innerHTML='<p style="color:var(--muted)">Пока в Группе 11 нет отпусков на 2027 год — будьте первым!</p>';return}
   var h='<table class="list">';
   items.forEach(function(it){h+='<tr><td><b>'+esc(it.name)+'</b><br><span style="color:var(--muted)">'+ru(it.from)+' – '+ru(it.to)+' · '+it.days+' дн.</span></td><td><div class="b">'+
-    (it.locked?'<span style="color:var(--muted);font-size:13px" title="Отпуск внесён в таблицу вручную. Изменить — через руководителя группы.">🔒 внесён в таблицу</span>':
+    (!mine(it)?'':
     '<button class="btn ghost" data-e="'+esc(it.id)+'">✏️ Изменить</button><button class="btn danger" data-x="'+esc(it.id)+'">🗑 Удалить</button>')+'</div></td></tr>'});
   lb.innerHTML=h+'</table>';
   lb.querySelectorAll('[data-e]').forEach(function(b){b.onclick=function(){startEdit(b.dataset.e)}});
   lb.querySelectorAll('[data-x]').forEach(function(b){b.onclick=function(){del(b.dataset.x)}})}
 function startEdit(id){var it=items.filter(function(x){return x.id===id})[0];if(!it)return;
-  editId=id;$('emp').value=it.emp;$('emp').disabled=true;$('from').value=it.from;$('to').value=it.to;$('pin').value='';
+  editId=id;$('emp').value=it.emp;$('emp').disabled=true;$('from').value=it.from;$('to').value=it.to;
   $('modebar').style.display='block';$('modewho').textContent=it.name+' ('+ru(it.from)+' – '+ru(it.to)+')';
   $('ftitle').textContent='Изменить даты отпуска';$('go').textContent='Сохранить изменения';
-  month=pd(it.from).getMonth();msg('Выберите новые даты и введите ПИН-код, который указали при бронировании.','info');render();
+  month=pd(it.from).getMonth();msg('Выберите новые даты и нажмите «Сохранить изменения».','info');render();
   $('book').scrollIntoView({behavior:'smooth'})}
-function stopEdit(){editId=null;$('emp').disabled=false;$('modebar').style.display='none';$('ftitle').textContent='Забронировать отпуск';$('go').textContent='Забронировать'}
+function stopEdit(){editId=null;$('emp').disabled=false;who();$('modebar').style.display='none';$('ftitle').textContent='Забронировать отпуск';$('go').textContent='Забронировать'}
 function del(id){var it=items.filter(function(x){return x.id===id})[0];if(!it||busy)return;
-  var pin=prompt('Удалить отпуск «'+it.name+'» ('+ru(it.from)+' – '+ru(it.to)+') из общей таблицы?\nВведите ПИН-код, указанный при бронировании:');
-  if(pin===null)return;
-  send({action:'delete',id:id,pin:pin.trim()},true)}
+  if(!confirm('Удалить отпуск «'+it.name+'» ('+ru(it.from)+' – '+ru(it.to)+') из общей таблицы?'))return;
+  send({action:'delete',id:id},true)}
 function send(body,isDel){
   busy=true;$('go').disabled=true;msg('⏳ Сохраняем в общую таблицу отпусков…','info');
   api(body).then(function(r){
     fill(r);
-    if(r.ok){msg((isDel?'🗑 ':'✅ ')+r.msg,'ok');if(!isDel){$('pin').value='';$('from').value='';$('to').value=''}if(!isDel||body.id===editId)stopEdit()}
+    if(r.ok){msg((isDel?'🗑 ':'✅ ')+r.msg,'ok');if(!isDel){$('from').value='';$('to').value=''}if(!isDel||body.id===editId)stopEdit()}
     else msg('❌ '+r.msg,'err');
     render();list()})
   .catch(function(){msg('❌ Не удалось связаться с таблицей. Проверьте интернет и попробуйте ещё раз.','err')})
   .then(function(){busy=false;$('go').disabled=false;$('msg').scrollIntoView({behavior:'smooth',block:'nearest'})})}
 $('go').onclick=function(){
   if(busy)return;
-  var e=emp(),f=$('from').value,t=$('to').value,pin=$('pin').value.trim();
+  var e=emp(),f=$('from').value,t=$('to').value;
+  if(!me()){G11&&G11.login();return msg('Сначала войдите на портал по своему ID.','err')}
   if(!e)return msg('Выберите себя в списке сотрудников.','err');
   if(!f||!t)return msg('Выберите даты начала и конца отпуска.','err');
   if(t<f)return msg('Дата окончания раньше даты начала.','err');
   if(f.slice(0,4)!=='2027'||t.slice(0,4)!=='2027')return msg('Можно бронировать только даты 2027 года.','err');
-  if(!/^\d{4}$/.test(pin))return msg('ПИН-код — ровно 4 цифры.','err');
   var c=conflict(f,t);
   if(c)return msg('К сожалению, '+ru(c.d)+' в отпуске '+c.o.name+' (с '+ru(c.o.from)+' по '+ru(c.o.to)+'). Из Группы 11 одновременно может отдыхать только один человек.','err');
   var z=noslot(f,t);
   if(z)return msg('На '+ru(z)+' нет свободных слотов в общей таблице отпусков. Выберите другие даты.','err');
   try{localStorage.setItem('vac_emp',e)}catch(x){}
-  send(editId?{action:'edit',id:editId,from:f,to:t,pin:pin}:{action:'book',emp:e,from:f,to:t,pin:pin})};
+  send(editId?{action:'edit',id:editId,from:f,to:t}:{action:'book',emp:e,from:f,to:t})};
 $('clear').onclick=function(){$('from').value='';$('to').value='';$('msg').className='msg';render()};
 $('cancelEdit').onclick=function(e){e.preventDefault();stopEdit();$('from').value='';$('to').value='';$('msg').className='msg';render()};
 $('prev').onclick=function(){if(month>0){month--;render()}};
@@ -281,6 +287,8 @@ $('next').onclick=function(){if(month<11){month++;render()}};
 ['from','to'].forEach(function(i){$(i).addEventListener('change',function(){var v=$(i).value;if(v&&v.slice(0,4)==='2027')month=pd(v).getMonth();render()})});
 ['пн','вт','ср','чт','пт','сб','вс'].forEach(function(d){var e=document.createElement('div');e.className='dow';e.textContent=d;$('dows').appendChild(e)});
 render();load();
+$('loginbtn').onclick=function(){window.G11&&G11.login()};
+(function w(){if(window.G11){who();['g11:login','g11:logout','g11:user'].forEach(function(ev){document.addEventListener(ev,who)})}else document.addEventListener('g11:ready',w,{once:true})})();
 </script>
 <script>(function(){var r=document.documentElement,b=document.createElement('button');b.type='button';b.className='theme-btn';
 function dark(){var t=r.getAttribute('data-theme');return t?t==='dark':(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)}
@@ -288,6 +296,6 @@ function upd(){var d=dark();b.textContent=d?'☀️':'🌙';b.title=d?'Свет�
 b.onclick=function(){var n=dark()?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}upd()};
 if(window.matchMedia)matchMedia('(prefers-color-scheme: dark)').addEventListener('change',upd);
 document.body.appendChild(b);upd()})();</script>
-<script src="site.js?v=19" defer></script>
+<script src="site.js?v=20" defer></script>
 </body>
 </html>
