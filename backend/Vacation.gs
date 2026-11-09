@@ -8,17 +8,17 @@
  *
  * Правила: только 2027 год; на каждый день нужен свободный слот отдела;
  * в один день в отпуске может быть только один человек из Группы 11.
- * ПИН-коды (соль + SHA-256) хранятся в таблице «Группа 11», скрытый лист «_отпуск_пин».
- * Отпуск, внесённый в таблицу вручную (у сотрудника ещё нет ПИН-кода), на сайте не меняется —
- * пока сотрудник не задаст ПИН-код первой бронью.
+ * Кто бронирует — определяет вход на портал (личный кабинет): браузер присылает токен сессии портала,
+ * сервер находит его хеш в листе «_сессии» таблицы «Группа 11», а роль — в листе «_доступ».
+ * Сотрудник бронирует и меняет только свои отпуска; руководитель (admin) — любые.
+ * ПИН-коды больше не нужны.
  */
 const VAC_SS = '1AO1UvIQc7J3q3Jbe69FB3MMw6He6z-KJsgPKV3eC6Vg';
 const VAC_GID = 1494585550;
 const GROUP = '11 ночь';
 const HDR_ROW = 4, TOTAL_ROW = 1, TAKEN_ROW = 3, FIRST_DATA_ROW = 5;
-const PIN_SS = '1WTmuXiOqswY36a12nPJNSDDNxkIIW02VODYRlxsxmeQ';
-const PIN_SHEET = '_отпуск_пин';
-const YEAR = 2027, MAX_FAILS = 5, LOCK_MIN = 15;
+const PORTAL_SS = '1WTmuXiOqswY36a12nPJNSDDNxkIIW02VODYRlxsxmeQ'; // таблица «Группа 11»: входы портала
+const YEAR = 2027;
 
 function out_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
 function sha_(s) { return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, s, Utilities.Charset.UTF_8).map(function (b) { return ('0' + (b & 255).toString(16)).slice(-2); }).join(''); }
@@ -34,17 +34,27 @@ function vacSheet_() {
   if (!s) throw new Error('Не найден лист отпусков');
   return s;
 }
-function pinSheet_() {
-  const ss = SpreadsheetApp.openById(PIN_SS);
-  let s = ss.getSheetByName(PIN_SHEET);
-  if (!s) { s = ss.insertSheet(PIN_SHEET); s.appendRow(['EmployeeID', 'ФИО', 'Соль', 'Хеш', 'Обновлено']); s.setFrozenRows(1); s.hideSheet(); }
-  return s;
+/** Вход портала: токен → сотрудник. Хеш токена ищем в «_сессии», роль и активность — в «_доступ». */
+function who_(token) {
+  token = String(token || '');
+  if (token.length < 20) throw new Error('Войдите на портал (кнопка «Войти» вверху), чтобы бронировать отпуск.');
+  const th = sha_(token), c = CacheService.getScriptCache(), hit = c.get('vs_' + th);
+  if (hit) return JSON.parse(hit);
+  const ss = SpreadsheetApp.openById(PORTAL_SS), ses = ss.getSheetByName('_сессии'), acc = ss.getSheetByName('_доступ');
+  const sv = ses ? ses.getDataRange().getValues() : [];
+  let id = null;
+  for (let i = 1; i < sv.length; i++) if (sv[i][0] === th) { id = String(sv[i][1]).trim(); break; }
+  if (!id) throw new Error('Вход устарел — выйдите и войдите на портал заново.');
+  const av = acc.getDataRange().getValues();
+  for (let i = 1; i < av.length; i++) if (String(av[i][0]).trim() === id) {
+    if (av[i][5] === false || av[i][5] === 'нет') throw new Error('Аккаунт отключён.');
+    const u = { id: id, name: String(av[i][1]), role: String(av[i][2]) };
+    c.put('vs_' + th, JSON.stringify(u), 300);
+    return u;
+  }
+  throw new Error('Аккаунт не найден.');
 }
-function pins_() {
-  const v = pinSheet_().getDataRange().getValues(), r = {};
-  for (let i = 1; i < v.length; i++) if (v[i][0] !== '') r[String(v[i][0]).trim()] = { row: i + 1, salt: v[i][2], hash: v[i][3] };
-  return r;
-}
+function canEdit_(u, empId) { return u.role === 'admin' || u.id === String(empId); }
 
 /** Читает лист: колонки дат, строки Группы 11, свободные слоты. */
 function read_() {
@@ -74,7 +84,7 @@ function read_() {
 }
 
 /** Непрерывные отрезки «1» → брони. */
-function items_(st, pins) {
+function items_(st) {
   const res = [];
   st.people.forEach(function (p) {
     let cur = null;
@@ -84,26 +94,12 @@ function items_(st, pins) {
     });
     if (cur) res.push(cur);
   });
-  res.forEach(function (it) { it.id = it.emp + '_' + it.from; it.days = range_(it.from, it.to).length; it.locked = !pins[it.emp]; });
+  res.forEach(function (it) { it.id = it.emp + '_' + it.from; it.days = range_(it.from, it.to).length; });
   res.sort(function (a, b) { return a.from < b.from ? -1 : 1; });
   return res;
 }
-function state_(st, pins) {
-  return { items: items_(st, pins), free: st.free, people: st.people.map(function (p) { return { id: p.id, name: p.name }; }) };
-}
-
-function checkPin_(emp, pin, pins) {
-  const c = CacheService.getScriptCache(), k = 'vf_' + emp, f = +(c.get(k) || 0);
-  if (f >= MAX_FAILS) throw new Error('Слишком много неверных ПИН-кодов. Попробуйте через ' + LOCK_MIN + ' минут.');
-  const p = pins[emp];
-  if (!p) return false;
-  if (sha_(p.salt + pin) !== p.hash) { c.put(k, String(f + 1), LOCK_MIN * 60); throw new Error('Неверный ПИН-код.'); }
-  c.remove(k); return true;
-}
-function setPin_(emp, name, pin, pins) {
-  const salt = Utilities.getUuid().replace(/-/g, '').slice(0, 16), h = sha_(salt + pin), s = pinSheet_();
-  if (pins[emp]) s.getRange(pins[emp].row, 3, 1, 3).setValues([[salt, h, new Date()]]);
-  else s.appendRow([emp, name, salt, h, new Date()]);
+function state_(st) {
+  return { items: items_(st), free: st.free, people: st.people.map(function (p) { return { id: p.id, name: p.name }; }) };
 }
 
 /** Проверка дат: год, слот отдела, один человек Группы 11 в день, нет пересечения со своими днями. */
@@ -128,34 +124,31 @@ function write_(st, p, list, val) {
 }
 
 function doGet() {
-  try { return out_(Object.assign({ ok: true }, state_(read_(), pins_()))); }
+  try { return out_(Object.assign({ ok: true }, state_(read_()))); }
   catch (e) { return out_({ ok: false, msg: String(e.message || e) }); }
 }
 
 function doPost(e) {
   const lock = LockService.getScriptLock();
   try { lock.waitLock(20000); } catch (x) { return out_({ ok: false, msg: 'Сервер занят, попробуйте ещё раз через минуту.' }); }
-  let st, pins;
+  let st;
   try {
     const b = JSON.parse(e.postData.contents || '{}');
-    st = read_(); pins = pins_();
-    const pin = String(b.pin || '').trim();
-    if (!/^\d{4}$/.test(pin)) throw new Error('ПИН-код — ровно 4 цифры.');
+    const u = who_(b.token);
+    st = read_();
     let msg = '';
 
     if (b.action === 'book') {
       const p = st.people.filter(function (x) { return x.id === String(b.emp); })[0];
       if (!p) throw new Error('Сотрудник не найден в Группе 11 общей таблицы.');
-      const had = checkPin_(p.id, pin, pins);
+      if (!canEdit_(u, p.id)) throw new Error('Бронировать можно только свой отпуск.');
       const ds = validate_(st, p, b.from, b.to, null);
       write_(st, p, ds, true);
-      if (!had) setPin_(p.id, p.name, pin, pins);
-      msg = 'Отпуск ' + short_(p.name) + ' с ' + ru_(b.from) + ' по ' + ru_(b.to) + ' (' + ds.length + ' дн.) внесён в общую таблицу.' + (had ? '' : ' Запомните ПИН-код — он нужен для изменения брони.');
+      msg = 'Отпуск ' + short_(p.name) + ' с ' + ru_(b.from) + ' по ' + ru_(b.to) + ' (' + ds.length + ' дн.) внесён в общую таблицу.';
     } else if (b.action === 'edit' || b.action === 'delete') {
-      const it = items_(st, pins).filter(function (x) { return x.id === String(b.id); })[0];
+      const it = items_(st).filter(function (x) { return x.id === String(b.id); })[0];
       if (!it) throw new Error('Бронь не найдена — возможно, её уже изменили. Обновите страницу.');
-      if (it.locked) throw new Error('Этот отпуск внесён в таблицу вручную — изменить его можно через руководителя группы.');
-      checkPin_(it.emp, pin, pins);
+      if (!canEdit_(u, it.emp)) throw new Error('Менять можно только свой отпуск. Если нужно поменяться датами — напишите руководителю группы.');
       const p = st.people.filter(function (x) { return x.id === it.emp; })[0];
       const old = range_(it.from, it.to), oldSet = {};
       old.forEach(function (d) { oldSet[d] = true; });
@@ -172,10 +165,10 @@ function doPost(e) {
       }
     } else throw new Error('Неизвестное действие.');
 
-    return out_(Object.assign({ ok: true, msg: msg }, state_(read_(), pins_())));
+    return out_(Object.assign({ ok: true, msg: msg }, state_(read_())));
   } catch (err) {
     let s = {};
-    try { s = state_(st || read_(), pins || pins_()); } catch (x) {}
+    try { s = state_(st || read_()); } catch (x) {}
     return out_(Object.assign({ ok: false, msg: String(err.message || err) }, s));
   } finally { lock.releaseLock(); }
 }
