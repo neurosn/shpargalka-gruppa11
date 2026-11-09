@@ -79,6 +79,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 .mbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 12px}.mbar select{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit}
 .gt td,.gt th{white-space:nowrap}.gt td:first-child{white-space:normal}.tag{display:inline-block;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:700}.t-ok{background:rgba(31,157,107,.12);color:var(--ok)}.t-bad{background:rgba(217,72,15,.12);color:var(--warn)}.t-mid{background:var(--soft);color:var(--muted)}
 .sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}.sum div{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px 12px}.sum small{display:block;color:var(--muted);font-size:12px}.sum b{font-size:20px}
+.brkb{display:flex;flex-wrap:wrap;gap:8px}.brkb .bp{border:1px solid var(--line);background:var(--soft);border-radius:12px;padding:8px 12px;font-size:14px}.brkb .bp b{display:block}.brkb .bp small{color:var(--muted)}.brkb .bp.long{border-color:var(--warn)}.brkb .bp.long small{color:var(--warn)}.brkb .none{color:var(--muted)}
 </style>
 </head>
 <body data-space="team">
@@ -90,6 +91,10 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 <section id="gate" class="gate"><div class="ic">🔐</div><h2 style="justify-content:center">Нужно войти</h2><p>Войдите по ID сотрудника и паролю — кнопка «Войти» вверху справа.</p><button class="btn" type="button" onclick="G11&&G11.login()">Войти</button></section>
 <section id="deny" hidden class="gate"><div class="ic">🛡</div><h2 style="justify-content:center">Только для руководителя</h2></section>
 <div id="app" hidden>
+<section id="brk"><h2>☕ Сейчас на перерыве</h2>
+<div id="brkb" class="brkb">Загружаю…</div>
+<p style="color:var(--muted);font-size:13px;margin:8px 0 0" id="brkt"></p>
+</section>
 <section><h2>📊 Результаты группы</h2>
 <div class="mbar"><select id="gmon" aria-label="Месяц"></select><a class="btn alt" href="logins.html" style="text-decoration:none">🔑 Журнал входов</a><button class="btn alt" type="button" id="grefresh" title="Если правили таблицу вручную — подтянуть изменения сразу">🔁 Обновить из таблицы</button></div>
 <div id="gload" style="color:var(--muted)">Загружаю…</div>
@@ -128,7 +133,14 @@ return '<tr><td>'+esc(r.name)+'</td><td>'+s.worked+' из '+s.planned+'</td><td>
 }).catch(function(x){$('gload').hidden=false;$('gload').textContent='Не удалось загрузить: '+x.message})}
 $('gmon').onchange=function(){loadGroup(this.value)};
 $('grefresh').onclick=function(){var b=this;b.disabled=true;b.lastChild.textContent=' Обновляю…';G11.api('adminRefresh').then(function(){return loadGroup($('gmon').value)}).catch(function(e){alert(e.message)}).then(function(){b.disabled=false;b.lastChild.textContent=' Обновить из таблицы'})};
-function show(){var u=G11.user();$('gate').hidden=!!u;$('deny').hidden=!(u&&u.role!=='admin');$('app').hidden=!(u&&u.role==='admin');if(u&&u.role==='admin'&&!show.l){show.l=1;load();loadGroup()}}
+// кто сейчас на перерыве: обновляется каждые 30 секунд, пока вкладка открыта
+function mskMin(){var d=new Date();return (d.getUTCHours()*60+d.getUTCMinutes()+180)%1440}
+function brk(){G11.api('breakBoard').then(function(j){var b=j.board||[],now=mskMin();
+  $('brkb').innerHTML=b.length?b.map(function(x){var p=String(x.from).match(/(\d{1,2}):(\d{2})/),m=p?(now-(+p[1]*60+ +p[2])+1440)%1440:null;
+    return '<div class="bp'+(m!=null&&m>30?' long':'')+'"><b>'+esc(x.name)+'</b><small>с '+esc(String(x.from).slice(0,5))+(m!=null?' · '+m+' мин':'')+(x.comment?' · '+esc(x.comment):'')+'</small></div>'}).join(''):'<span class="none">Никого нет на перерыве</span>';
+  $('brkt').textContent='Смена '+j.shift+' · на перерыве '+b.length+' из '+(j.maxOnBreak||3)+' · обновлено '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}).catch(function(x){$('brkb').textContent=x.message})}
+setInterval(function(){if(G11.user()&&G11.user().role==='admin'&&!document.hidden)brk()},30000);
+function show(){var u=G11.user();$('gate').hidden=!!u;$('deny').hidden=!(u&&u.role!=='admin');$('app').hidden=!(u&&u.role==='admin');if(u&&u.role==='admin'&&!show.l){show.l=1;load();loadGroup();brk()}}
 whenReady(show);document.addEventListener('g11:login',show);document.addEventListener('g11:logout',show);
 document.addEventListener('change',function(e){if(!e.target.classList.contains('rs'))return;var m=$('um');G11.api('adminSetRole',{id:e.target.dataset.id,role:e.target.value}).then(function(){m.textContent='✅ Роль сохранена';m.className='msg ok'}).catch(function(x){m.textContent=x.message;m.className='msg bad';load()})});
 document.addEventListener('click',function(e){var b=e.target.closest('[data-reset]');if(b){if(!confirm('Выдать новый пароль для «'+b.dataset.name+'»? Старый перестанет работать, все входы сбросятся.'))return;G11.api('adminResetPassword',{id:b.dataset.reset}).then(function(j){$('pwfor').textContent=b.dataset.name;$('pwval').textContent=j.password;$('pwout').hidden=false;load()}).catch(function(x){alert(x.message)});return}
