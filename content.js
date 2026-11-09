@@ -19,6 +19,12 @@
     var hh=document.querySelector('header h1');if(hh)hh.textContent=x.title;var hp=document.querySelector('header p');if(hp)hp.innerHTML='<a href="'+sp[0]+'#articles" style="color:#fff">'+sp[1]+'</a> · <i data-i="pencil"></i> '+esc(x.author||'')+' · '+d(x.updated);document.querySelectorAll('.g11bar a').forEach(function(a){var on=a.getAttribute('href')===sp[0];a.classList.toggle('on',on)});
     box.innerHTML='<div class="rich art">'+R(x.text)+'</div><div class="art-foot"><a class="btn alt" href="'+sp[0]+'#articles">← Все статьи</a><button class="btn alt" type="button" id="artcopy">🔗 Скопировать ссылку</button></div>';
     var cb=document.getElementById('artcopy');cb.onclick=function(){var u=location.href;(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).catch(function(){fb(u)}).then(function(){cb.textContent='✓ Ссылка скопирована'})}}
+  // подраздел шаблонов: «club>Начало заголовка h3» — шаблон встаёт в конец этого подраздела
+  var subKey=function(t){return String(t||'').replace(/^[^0-9A-Za-zА-Яа-яЁё«"]+/,'').replace(/\s+/g,' ').trim().slice(0,40)};
+  function subPlace(v){var i=v.indexOf('>'),sec=document.getElementById(v.slice(0,i)),k=v.slice(i+1);if(!sec)return null;
+    var h=[].filter.call(sec.querySelectorAll('h3'),function(x){return subKey(x.textContent)===k})[0];if(!h)return null;
+    var n=h.nextElementSibling;while(n&&!(n.tagName==='H3'||n.tagName==='H2'||(n.classList&&n.classList.contains('src'))))n=n.nextElementSibling;
+    return {p:h.parentNode,b:n||null}}
   var CATS=[],TSECS=[];function artCat(){}
   function render(items,cats,ts){if(cats)CATS=cats;if(ts)TSECS=ts;
     if(artCat.v==null){artCat.v='';try{artCat.v=sessionStorage.getItem('g11_acat_'+(file==='team.html'?'team':'work'))||''}catch(_){}}
@@ -28,7 +34,9 @@
       var tpls=items.filter(function(x){return x.type==='template'}),loose=[],own={};
       tpls.forEach(function(x){var sec=x.section&&x.section!=='new'&&document.getElementById(x.section);
         var el=document.createElement('div');el.className='tpl';el.id='c-'+x.id;el.setAttribute('data-g11c','1');el.innerHTML='<span class="lbl"><i data-i="pencil"></i> '+esc(x.title)+'</span><div class="rich" style="white-space:normal">'+R(x.text)+'</div>'+by(x);el.style.whiteSpace='normal';copyBtn(el,x.text);
-        if(/^u:/.test(x.section||'')){var nm=x.section.slice(2);(own[nm]=own[nm]||[]).push(el)}else if(sec&&sec.tagName==='SECTION'){var src=sec.querySelector('.src');src?sec.insertBefore(el,src):sec.appendChild(el)}else loose.push(el)});
+        var sub=/^[\w-]+>/.test(x.section||'')&&subPlace(x.section);
+        if(sub){sub.p.insertBefore(el,sub.b)}
+        else if(/^u:/.test(x.section||'')){var nm=x.section.slice(2);(own[nm]=own[nm]||[]).push(el)}else if(sec&&sec.tagName==='SECTION'){var src=sec.querySelector('.src');src?sec.insertBefore(el,src):sec.appendChild(el)}else loose.push(el)});
       // свои разделы наставников: отдельные блоки в конце страницы + кнопка в верхнем меню разделов
       var names=(TSECS||[]).filter(function(n){return own[n]});Object.keys(own).forEach(function(n){if(names.indexOf(n)<0)names.push(n)});
       var chips=document.querySelector('.chips'),last=[].slice.call(main.querySelectorAll(':scope>section')).pop();

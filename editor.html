@@ -127,13 +127,22 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 </div>
 </div>
 </main>
-<script src="site.js?v=18" defer></script>
+<script src="site.js?v=19" defer></script>
 <script src="shift.js?v=3" defer></script>
 <script>
 function $(i){return document.getElementById(i)}
 function whenReady(cb){if(window.G11)cb();else document.addEventListener('g11:ready',cb,{once:true})}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 var SECN={};[].forEach.call(document.querySelectorAll('#csec option'),function(o){SECN[o.value]=o.textContent});
+// подразделы шаблонов (заголовки внутри разделов страницы «Шаблоны») — подтягиваем со страницы, чтобы список всегда совпадал
+var subKey=function(t){return String(t||'').replace(/^[^0-9A-Za-zА-Яа-яЁё«"]+/,'').replace(/\s+/g,' ').trim().slice(0,40)};
+function subs(){fetch('templates.html',{cache:'no-cache'}).then(function(r){return r.text()}).then(function(h){var d=new DOMParser().parseFromString(h,'text/html'),sel=$('csec'),cur=sel.value;
+  [].slice.call(sel.options).forEach(function(o){if(o.value.indexOf('>')>-1)o.remove()});
+  [].slice.call(sel.options).forEach(function(o){var sec=/^[\w-]+$/.test(o.value)&&d.getElementById(o.value);if(!sec)return;var after=o;
+    [].forEach.call(sec.querySelectorAll('h3'),function(h3){var t=h3.textContent.replace(/\s+/g,' ').trim(),k=subKey(t);if(!k)return;var n=document.createElement('option');n.value=o.value+'>'+k;n.textContent='↳ '+t.replace(/^[^0-9A-Za-zА-Яа-яЁё«"]+/,'');
+      after.parentNode.insertBefore(n,after.nextSibling);after=n;SECN[n.value]=o.textContent.replace(/^[^0-9A-Za-zА-Яа-яЁё«"]+/,'')+' → '+n.textContent.slice(2)})});
+  sel.value=subs.want||cur;if(sel.selectedIndex<0)sel.value='new';subs.want=null;if(ITEMS.length)list()}).catch(function(){})}
+subs();
 var TYPE={template:'<i data-i="clipboard"></i> Шаблон',link:'<i data-i="link"></i> Ссылка',news:'<i data-i="news"></i> Новость',article:'<i data-i="file"></i> Статья'},ITEMS=[];
 function goUrl(x){return x.type==='template'?'templates.html#c-'+x.id:x.type==='link'?(x.section==='team'?'team.html':'work.html')+'#c-'+x.id:x.type==='article'?'article.html?id='+encodeURIComponent(x.id):'index.html#c-'+x.id}
 var RTE=null;function rte(){if(!RTE&&window.G11Rich)RTE=G11Rich.editor($('ctext'),'Текст, который увидят ребята',{title:function(){return $('ctitle').value}});return RTE}
@@ -165,7 +174,7 @@ function reset(){$('cf').reset();rte()&&rte().setHTML('');$('cid').value='';$('f
 $('ccancel').onclick=reset;
 $('cf').onsubmit=function(e){e.preventDefault();var t=$('ctype').value,m=$('cmsg');if(rte()&&rte().pending()){m.className='msg bad';m.textContent='Подождите — файлы ещё загружаются';return}m.className='msg';m.textContent='Сохраняю…';$('csave').disabled=true;
 G11.api('contentSave',{item:{id:$('cid').value||null,type:t,section:t==='template'?$('csec').value:(t==='link'||t==='article')?$('cspace').value:'',title:$('ctitle').value,category:t==='article'?$('ccat').value:'',text:rte()?rte().getHTML():'',url:$('curl').value}}).then(function(){m.textContent='✅ Опубликовано';m.classList.add('ok');reset();load()}).catch(function(x){m.textContent=x.message;m.classList.add('bad')}).then(function(){$('csave').disabled=false})};
-document.addEventListener('click',function(e){var ed=e.target.closest('[data-ed]');if(ed){var x=ITEMS.filter(function(i){return i.id===ed.dataset.ed})[0];if(!x)return;$('cid').value=x.id;$('ctype').value=x.type;form();if(x.type==='template'){if(/^u:/.test(x.section||'')&&TSECS.indexOf(x.section.slice(2))<0)secs(TSECS.concat([x.section.slice(2)]));$('csec').value=x.section||'new'}if(x.type==='link'||x.type==='article')$('cspace').value=x.section||'work';if(x.type==='article'){if(x.category&&CATS.indexOf(x.category)<0)cats(CATS.concat([x.category]));$('ccat').value=x.category||''}$('ctitle').value=x.title;rte()&&rte().setHTML(x.text||'');$('curl').value=x.url||'';$('ftitle').textContent='✏️ Редактирование';$('csave').textContent='Сохранить';$('ccancel').hidden=false;$('form').scrollIntoView({behavior:'smooth'});return}
+document.addEventListener('click',function(e){var ed=e.target.closest('[data-ed]');if(ed){var x=ITEMS.filter(function(i){return i.id===ed.dataset.ed})[0];if(!x)return;$('cid').value=x.id;$('ctype').value=x.type;form();if(x.type==='template'){if(/^u:/.test(x.section||'')&&TSECS.indexOf(x.section.slice(2))<0)secs(TSECS.concat([x.section.slice(2)]));$('csec').value=x.section||'new';if($('csec').selectedIndex<0){subs.want=x.section;$('csec').value='new'}}if(x.type==='link'||x.type==='article')$('cspace').value=x.section||'work';if(x.type==='article'){if(x.category&&CATS.indexOf(x.category)<0)cats(CATS.concat([x.category]));$('ccat').value=x.category||''}$('ctitle').value=x.title;rte()&&rte().setHTML(x.text||'');$('curl').value=x.url||'';$('ftitle').textContent='✏️ Редактирование';$('csave').textContent='Сохранить';$('ccancel').hidden=false;$('form').scrollIntoView({behavior:'smooth'});return}
 var sd=e.target.closest('[data-secdel]');if(sd){var sn=sd.dataset.secdel;if(!confirm('Удалить раздел шаблонов «'+sn+'»? Удалить можно только пустой раздел.'))return;G11.api('catDelete',{name:sn,kind:'template'}).then(function(j){secs(j.tsections)}).catch(function(x){alert(x.message)});return}
 var cd=e.target.closest('[data-catdel]');if(cd){var n=cd.dataset.catdel;if(!confirm('Удалить категорию «'+n+'»? Удалить можно только пустую категорию.'))return;G11.api('catDelete',{name:n}).then(function(j){cats(j.categories)}).catch(function(x){alert(x.message)});return}
 var dl=e.target.closest('[data-del]');if(dl){if(!confirm('Удалить материал? Он пропадёт из шпаргалки.'))return;G11.api('contentDelete',{id:dl.dataset.del}).then(load).catch(function(x){alert(x.message)});return}
