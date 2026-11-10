@@ -113,6 +113,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 .hot{margin-bottom:6px}
 .catnav{background:var(--card);border-bottom:1px solid var(--line)}.catnav .w{max-width:960px;margin:0 auto;padding:10px 16px}
 .searching-page .catnav{display:none}
+.searching-page main{display:flex;flex-direction:column}.searching-page main>*{order:900}.searching-page #empty{order:999}
 .totop{position:fixed;right:16px;bottom:72px;z-index:50;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--accent);font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.18);display:none;place-items:center}.totop.on{display:grid}
 section{scroll-margin-top:150px}
 </style>
@@ -185,7 +186,7 @@ section{scroll-margin-top:150px}
 <div id="ecEx"></div>
 </section>
 
-<section id="news" data-keys="новости новость баг сбой неподбор отменили закончился склад вип vip клуб 8 9 уровень ап апы мой wb кешбэк категории защита 360 wb кэш мобильная связь лимит 15000 wb банк rustore история операций частями просрочка казахстан беларусь кошелек геолокация смс вход счет для бизнеса">
+<section id="news" data-keys="новости новость баг сбой">
 <h2>📰 Из новостей КЦ · 5–10 ноября</h2>
 <div class="note">Главное из новостей портала КЦ за неделю. Шаблоны со значком 🚫 — <b>текст менять нельзя</b>. Новости быстро устаревают: если с даты прошло много времени, сверьтесь с новостью и статьёй БЗ, а при сомнениях — сначала к наставнику.</div>
 
@@ -593,16 +594,40 @@ function fb(t){var a=document.createElement('textarea');a.value=t;document.body.
 var q=document.getElementById('q');
 function nz(s){return (s||'').toLowerCase().replace(/ё/g,'е').replace(/[«»"“”.,:;!?()]/g,' ')}
 var SYN={'отказ':['отмен','отказ'],'отмен':['отмен','отказ'],'деньг':['деньг','дс ','возвр'],'дс':['дс ','деньг'],'вернут':['возвр','верн'],'возвр':['возвр','верн'],'обрат':['обратн'],'кошел':['кошел','wb банк','счет'],'банк':['банк','кошел'],'номер':['номер','телефон'],'телеф':['телефон','номер'],'клуб':['клуб','подписк'],'подпи':['подписк','клуб'],'рассро':['рассроч','частями','кредит'],'частям':['частями','рассроч'],'кредит':['кредит','рассроч'],'пвз':['пвз','пункт выдачи'],'пункт':['пункт','пвз'],'проблем':['проблем','колокольч'],'срок':['срок','дней','дня'],'оцен':['оцен','звезд','опрос'],'жалоб':['жалоб','претенз'],'паспор':['паспорт','госуслуг'],'госус':['госуслуг','паспорт'],'задерж':['задерж','опозд','долго'],'долго':['долго','задерж','ожидан']};
-function alts(w){if(w.length<2)return [w];var st=w.length>=6?w.slice(0,5):w;for(var k in SYN){if(st.indexOf(k)===0||k.indexOf(st)===0)return SYN[k].concat([st])}return [st]}
-function run(){var raw=nz(q.value).trim(),ws=raw?raw.split(/\s+/).filter(Boolean):[],any=false,total=0;
-document.querySelectorAll('main section').forEach(function(sec){var base=nz(sec.querySelector('h2').textContent+' '+(sec.dataset.keys||'')),hit=0,h3='',vis2=false;
+Object.assign(SYN,{'войт':['вход','войт','зайт','авториз','логин'],'вход':['вход','войт','зайт','авториз'],'зайт':['вход','войт','зайт'],'авториз':['авториз','вход','войт'],'прилож':['прилож','мп '],'ложн':['ложн','ошибочн','неверн'],'ошибоч':['ошибочн','ложн','неверн','ошибк'],'баг':['баг','сбой','ошибк','исправ'],'сбой':['сбой','баг','ошибк','исправ'],'глюч':['сбой','ошибк'],'вип':['vip','вип'],'кешбэ':['кешбэк','кэшбэк'],'ягод':['ягод','балл'],'балл':['балл','ягод'],'просро':['просроч'],'уведом':['уведомл','пуш'],'смс':['смс','sms','код'],'страх':['страх','полис','защит'],'сломан':['сломан','брак','поврежд'],'брак':['брак','сломан','дефект']});
+// служебные слова не участвуют в поиске: «не могут войти в приложение» ищем по «войти приложение»
+var STOPW={};('и в во на но а я мы вы он она они не ни нет да у к ко с со о об от до по за из для что чтобы как так же ли бы то это уже еще все вот был была были быть есть будет можно нужно надо очень только или если почему зачем какой какая какие клиент клиента клиенту клиенты пишет пишут могу может могут хочу хочет хотят мне меня мой моя мои свой свою сегодня вчера сейчас пожалуйста подскажите').split(' ').forEach(function(w){STOPW[w]=1});
+function stem(w){if(w.length>=7)return w.slice(0,Math.max(5,w.length-3));if(w.length>=5)return w.slice(0,w.length-2);return w}
+function alts(w){var st=stem(w);for(var k in SYN){if(st.indexOf(k)===0||(k.indexOf(st)===0&&st.length>=3))return SYN[k].concat([st])}return [st]}
+var EN="qwertyuiop[]asdfghjkl;'zxcvbnm,.`",RU='йцукенгшщзхъфывапролджэячсмитьбюё',PAGE=null,VOCP=null;
+function pageTxt(){if(!PAGE){PAGE=nz(document.querySelector('main').textContent);VOCP={};PAGE.split(/[^a-zа-я0-9]+/).forEach(function(w){if(w.length>=4)VOCP[w]=(VOCP[w]||0)+1})}return PAGE}
+function lev(a,b){if(Math.abs(a.length-b.length)>2)return 9;var p=[],i,j;for(j=0;j<=b.length;j++)p[j]=j;for(i=1;i<=a.length;i++){var c=[i];for(j=1;j<=b.length;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[b.length]}
+// слова нет на странице — пробуем английскую раскладку, затем похожее слово (опечатка)
+function fixW(w){var P=pageTxt();if(alts(w).some(function(a){return P.indexOf(a)>-1}))return w;
+ if(/^[a-z\[\];',.`]+$/.test(w)){var s=w.replace(/./g,function(c){var k=EN.indexOf(c);return k<0?c:RU.charAt(k)});if(alts(s).some(function(a){return P.indexOf(a)>-1}))return s}
+ if(w.length<4)return w;var max=w.length>=7?2:1,best=null,bd=9,bf=0;for(var v in VOCP){if(Math.abs(v.length-w.length)>max)continue;var d=lev(w,v);if(d<=max&&(d<bd||(d===bd&&VOCP[v]>bf))){bd=d;bf=VOCP[v];best=v}}return best||w}
+function run(){var raw=nz(q.value).trim(),all=raw?raw.split(/\s+/).filter(Boolean):[],any=false,total=0;
+var ws=all.filter(function(w){return !STOPW[w]&&(w.length>1||/\d/.test(w))});if(all.length&&!ws.length)ws=all;
+var fixed=ws.map(fixW),fixedNote=fixed.join(' ')!==ws.join(' ')?fixed.join(' '):'';ws=fixed;
+var A=ws.map(alts);
+// короткий запрос — нужны все слова; длинный — достаточно большей части (≈60%); если пусто — ослабляем
+var need=ws.length<=2?ws.length:Math.ceil(ws.length*.6),partial=false;
+function pass(n){total=0;any=false;
+document.querySelectorAll('main section').forEach(function(sec){var base=nz(sec.querySelector('h2').textContent+' '+(sec.dataset.keys||'')),hit=0,h3='',vis2=false,best=0;
 var els=sec.querySelectorAll('.tpl,.note,table,h3,.src');
 els.forEach(function(el){if(el.tagName==='H3')h3=nz(el.textContent);var txt=base+' '+h3+' '+nz(el.textContent);
-var ok=!ws.length||ws.every(function(w){return alts(w).some(function(a){return txt.indexOf(a)>-1})});el.style.display=ok?'':'none';if(ok&&el.classList.contains('tpl'))hit++;if(ok&&el.tagName!=='H3')vis2=true;});
-if(ws.length){els.forEach(function(el){if(el.tagName==='H3'){var n=el.nextElementSibling,vis=false;while(n&&n.tagName!=='H3'&&n.tagName!=='H2'){if(n.style.display!=='none'&&!n.classList.contains('src'))vis=true;n=n.nextElementSibling}el.style.display=vis?'':'none'}})}
-var show=!ws.length||hit>0||vis2;sec.style.display=show?'':'none';if(show)any=true;total+=hit;});
+var own=h3+' '+nz(el.textContent),cnt=0,oc=0;A.forEach(function(al){if(al.some(function(a){return own.indexOf(a)>-1})){cnt++;oc++}else if(al.some(function(a){return base.indexOf(a)>-1}))cnt++});
+// совпадения в самом шаблоне/подзаголовке важнее, чем в названии раздела и его ключевых словах
+var ok=!ws.length||(cnt>=n&&oc>=Math.max(1,n-1));if(ok&&el.tagName!=='H3'){var lb=el.querySelector('.lbl'),lt=nz((lb?lb.textContent:'')+' '+h3),lc=0;A.forEach(function(al){if(al.some(function(a){return lt.indexOf(a)>-1}))lc++});best=Math.max(best,oc*10+cnt*3+lc*6)}el.style.display=ok?'':'none';if(ok&&el.classList.contains('tpl'))hit++;if(ok&&el.tagName!=='H3')vis2=true;});
+if(ws.length){els.forEach(function(el){if(el.tagName==='H3'){var nx=el.nextElementSibling,vis=false;while(nx&&nx.tagName!=='H3'&&nx.tagName!=='H2'){if(nx.style.display!=='none'&&!nx.classList.contains('src'))vis=true;nx=nx.nextElementSibling}el.style.display=vis?'':'none'}})}
+var show=!ws.length||hit>0||vis2;sec.style.display=show?'':'none';
+// разделы с лучшим совпадением (особенно в названии шаблона) — выше
+sec.style.order=ws.length&&show?String(800-Math.min(799,best)):'';if(show)any=true;total+=hit;});}
+pass(need);while(ws.length&&!any&&need>1){need--;partial=true;pass(need)}
+var hq='helper.html?q='+encodeURIComponent(q.value.trim());
 document.getElementById('empty').style.display=any?'none':'block';
-document.getElementById('qcount').textContent=ws.length?('Найдено шаблонов: '+total+' · очистите поиск, чтобы снова увидеть все разделы'):'';document.body.classList.toggle('searching-page',ws.length>0);}
+document.getElementById('empty').innerHTML='Ничего не нашлось — попробуйте другое слово или <a href="'+hq+'">🤖 спросите помощника оператора</a> (ищет и по всем шаблонам БЗ)';
+document.getElementById('qcount').innerHTML=ws.length?((fixedNote?'✏️ Ищем: <b>'+fixedNote.replace(/</g,'&lt;')+'</b> · ':'')+'Найдено шаблонов: '+total+(partial?' (совпала часть слов)':'')+' · <a href="'+hq+'">🤖 подобрать в помощнике</a> · очистите поиск, чтобы снова увидеть все разделы'):'';document.body.classList.toggle('searching-page',ws.length>0);}
 q.addEventListener('input',run);
 try{var _q=new URLSearchParams(location.search).get('q');if(_q){q.value=_q;run()}}catch(e){}
 var tt=document.getElementById('totop');window.addEventListener('scroll',function(){tt.classList.toggle('on',window.scrollY>600)},{passive:true});tt.onclick=function(){window.scrollTo({top:0,behavior:'smooth'})};
