@@ -78,6 +78,7 @@ details.extra summary{cursor:pointer;color:var(--accent);font-weight:600;font-si
 </div>
 <div class="chips" id="ex"></div>
 <div class="masked" id="masked"></div>
+<p class="privacy">✨ Понимает опечатки («обнавите», «закз») и текст, набранный в английской раскладке («pfrfp» → «заказ»). Ищет по шпаргалке, новостям недели и всем шаблонам БЗ.</p>
 <p class="privacy">🔒 Поиск работает только в вашем браузере — текст никуда не отправляется и не сохраняется. ФИО, телефоны и номера заказов вставлять не нужно: они скрываются автоматически и для поиска не важны.</p>
 </section>
 <div id="out"></div>
@@ -92,7 +93,10 @@ var KB=(window.G11_KB||[]).slice();
 // шаблоны от наставников (кабинет редактора) — из кеша контента, если он уже загружен на этом устройстве
 try{var c=JSON.parse(localStorage.getItem('g11_content_cache')||'null');(c&&c.items||[]).forEach(function(x){if(x.type!=='template')return;var tx=window.G11Rich?G11Rich.toText(x.text):String(x.text||'');KB.push({k:'tpl',sec:'✏️ От наставников',sit:'',lbl:x.title,x:tx,p:'📋 Шаблоны',u:'templates.html#c-'+x.id,keys:'',note:'',src:[],id:'c'+x.id})})}catch(e){}
 // все остальные шаблоны из Базы знаний КЦ (страница bz.html) — чуть ниже по весу, чем шаблоны шпаргалки
-(window.G11_BZ||[]).forEach(function(e){KB.push({k:'tpl',sec:'📚 БЗ · '+e.s,sit:e.h||e.a,lbl:e.c?(e.c.length>110?e.c.slice(0,107)+'…':e.c):e.a,x:e.x,p:'📚 Шаблоны БЗ',u:'bz.html#a'+e.id,keys:e.a,note:'',src:[{t:'Статья БЗ: '+e.a,u:'https://callcenter.wildberries.ru/KNOWLEDGE_BASE/PATH/base/ID/'+e.id}],id:'b'+e.n,wt:.85})});
+function cut(s,n){return s.length>n?s.slice(0,n-1)+'…':s}
+function bzSit(e){var h=e.h||'';if(!h||/^(негатив|позитив|нейтрал|шаблон|вариант|пример)/i.test(h)||h.length>110||(/^\d+(\.\d+)*\.?\s/.test(h)&&h.length>70))return e.a;return h.replace(/^\d+(\.\d+)*\.?\s+/,'')}
+function bzLbl(e){var h=e.h||'',c=e.c?cut(e.c,110):'';if(/^(негатив|позитив|нейтрал)/i.test(h))return h+(c?' · '+c:'');if(/^(шаблон|вариант)\s*\d*$/i.test(h))return h+(c?' · '+c:'');return c||e.a}
+(window.G11_BZ||[]).forEach(function(e){KB.push({k:'tpl',sec:'📚 БЗ · '+e.s,sit:bzSit(e),lbl:bzLbl(e),x:e.x,p:'📚 Шаблоны БЗ',u:'bz.html#a'+e.id,keys:e.a,note:'',src:[{t:'Статья БЗ: '+e.a,u:'https://callcenter.wildberries.ru/KNOWLEDGE_BASE/PATH/base/ID/'+e.id}],id:'b'+e.n,wt:.8})});
 
 /* ---------- текст: нормализация, стоп-слова, основы слов ---------- */
 function nz(s){return String(s||'').toLowerCase().replace(/ё/g,'е')}
@@ -131,9 +135,42 @@ var INTENTS=[
  [['ягод','баллы','бонус'],['ягод','компенсац']],
  [['сертиф','подарочн'],['сертификат']],
  [['кеш','куки','тормоз','веб','кц'],['кеш','куки']],
- [['обратн','транспорт','вернул','сдал'],['обратн','доставк','спис']]
+ [['обратн','транспорт','вернул','сдал'],['обратн','доставк','спис']],
+ [['вип','vip'],['vip','клуб','подписк']],
+ [['ап','апы','апов','апа','уровн','лояльн'],['ап','уровн','лояльн']],
+ [['кешбэк','кешбек','кэшбэк','кэшбек','кешбэка','категор'],['кешбэк','категор']],
+ [['частям','просроч','график','рассроч'],['частям','рассроч','просрочк']],
+ [['неподбор','законч','склад','наличи'],['неподбор','склад','отмен']],
+ [['смс','sms','код','войт','вход','авториз'],['смс','код','вход']],
+ [['партнер','партнеров'],['партнер','балл']],
+ [['страхов','полис','защит','360'],['страхов','защит']],
+ [['беларус','белорус','минск'],['беларус']],
+ [['казахстан','казах'],['казахстан']]
 ];
+// сочетания слов: «оплатить телефон» — это про мобильную связь, а не про смену номера
+var COMBOS=[
+ [['оплат','оплач','плат','пополн','положит','кинут'],['телефон','связ','мобил','сотов','симк','номер'],['мобильн','связ','лимит','оплат']],
+ [['баллы','балл','кешбэк','кешбек'],['партнер','магазин','кошел'],['партнер','балл','кошельк']],
+ [['отмен','отменил','отменили'],['склад','законч','наличи','неподбор'],['неподбор','склад']],
+ [['прилож','приложен'],['банк'],['банк','прилож','исправ','вход']],
+ [['привез','пришел','получил','доставил','курьер'],['сломан','разби','бит','порва','брак','дефект','испорч'],['брак','проверк','заявк']]
+];
+function combos(toks){var add=[];COMBOS.forEach(function(c){var a=toks.some(function(t){return c[0].some(function(p){return t.indexOf(p)===0})}),b=toks.some(function(t){return c[1].some(function(p){return t.indexOf(p)===0})});if(a&&b)c[2].forEach(function(x){if(add.indexOf(x)<0)add.push(x)})});return add}
 var XM={};function expand(toks){var ex=[];XM={};toks.forEach(function(t){XM[t]=[]});INTENTS.forEach(function(g){toks.forEach(function(t){if(g[0].some(function(p){return t.indexOf(p)===0||(p.length>=5&&p.indexOf(t)===0&&t.length>=4)}))g[1].forEach(function(a){XM[t].push(a);if(toks.indexOf(a)<0&&ex.indexOf(a)<0)ex.push(a)})})});return ex}
+
+/* ---------- раскладка и опечатки ---------- */
+var EN='qwertyuiop[]asdfghjkl;\'zxcvbnm,.`',RU='йцукенгшщзхъфывапролджэячсмитьбюё';
+function swapLayout(s){return s.replace(/[a-z\[\];',.`]/gi,function(ch){var lo=ch.toLowerCase(),i=EN.indexOf(lo);if(i<0)return ch;var r=RU.charAt(i);return ch===lo?r:r.toUpperCase()})}
+var VOC=null;function vocab(){if(VOC)return VOC;var m={};DOCS.forEach(function(d){for(var k in d.f)d.f[k].forEach(function(w){if(w.length>=3)m[w]=(m[w]||0)+1})});VOC=m;return m}
+function known(w){var v=vocab();return v[stem(w)]?1:0}
+// «pfrfp yt ghbitk» → «заказ не пришел»: включаем, если после замены слов из базы становится больше
+function fixLayout(s){var lat=(s.match(/[a-z]/gi)||[]).length,cyr=(s.match(/[а-яё]/gi)||[]).length;if(lat<3||lat<cyr*2)return null;
+ var sw=swapLayout(s),a=words(s).reduce(function(n,w){return n+known(w)},0),b=words(sw).reduce(function(n,w){return n+known(w)},0);return b>a?sw:null}
+function lev(a,b,max){if(Math.abs(a.length-b.length)>max)return max+1;var p=[],i,j;for(j=0;j<=b.length;j++)p[j]=j;for(i=1;i<=a.length;i++){var c=[i],mn=i;for(j=1;j<=b.length;j++){c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));if(c[j]<mn)mn=c[j]}if(mn>max)return max+1;p=c}return p[b.length]}
+// неизвестное слово заменяем на самое частое похожее из базы (1 ошибка, для длинных слов — 2)
+var FIXC={};function fixTypo(t){if(FIXC[t]!==undefined)return FIXC[t];var res=null;if(t.length>=4&&!/^\d+$/.test(t)&&df(t)===0){var v=vocab(),max=t.length>=7?2:1,best=0,bd=9;
+ for(var w in v){if(Math.abs(w.length-t.length)>max||w.charAt(0)!==t.charAt(0)&&t.length<6)continue;var d=lev(t,w,max);if(d<=max&&(d<bd||(d===bd&&v[w]>best))){bd=d;best=v[w];res=w}}}
+ return FIXC[t]=res}
 
 /* ---------- тон клиента ---------- */
 var NEG=['ужас','безобраз','сколько можно','надоел','обман','мошен','жалоб','позор','кошмар','издева','бесит','отврат','хамств','суд','роспотреб','прокурат','никогда больше','верните мои','достали','возмут','!!'];
@@ -147,15 +184,23 @@ function mask(s){var hit={};s=s.replace(/[\w.+-]+@[\w-]+\.[\w.]+/g,function(){hi
 
 /* ---------- индекс: поля с весами, IDF ---------- */
 var FW={lbl:3.5,sit:3.5,sec:1.6,keys:1.2,x:1.3,note:.4};
-var DOCS=KB.map(function(e){var f={};for(var k in FW)f[k]=words(e[k]||'').map(stem);return {e:e,f:f}});
+var DOCS=KB.map(function(e){var f={};for(var k in FW)f[k]=words(e[k]||'').map(stem);return {e:e,f:f,seq:f.sit.concat(['|'],f.lbl,['|'],f.x)}});
 var DF={};function df(t){if(DF[t]!=null)return DF[t];var n=0;DOCS.forEach(function(d){for(var k in d.f){if(d.f[k].some(function(w){return same(w,t)})){n++;break}}});return DF[t]=n}
 function idf(t){var n=DOCS.length;return Math.log(1+(n-df(t)+.5)/(df(t)+.5))}
-function scoreDoc(d,terms){var s=0,matched=[];terms.forEach(function(q){var best=0;for(var k in FW){var arr=d.f[k],tf=0;for(var i=0;i<arr.length;i++)if(same(arr[i],q.t))tf++;if(tf)best=Math.max(best,FW[k]*(1+Math.log(tf)))}if(best){s+=q.w*idf(q.t)*best;matched.push(q.t)}});return {s:s*(d.e.wt||1),m:matched}}
+function scoreDoc(d,terms){var s=0,matched=[];terms.forEach(function(q){var best=0;for(var k in FW){var arr=d.f[k],tf=0;for(var i=0;i<arr.length;i++)if(same(arr[i],q.t))tf++;if(tf)best=Math.max(best,FW[k]*(1+Math.log(tf)))}if(best){s+=q.w*idf(q.t)*best;matched.push(q.t)}});
+ // слова запроса стоят рядом и в шаблоне («не пришёл заказ», «вернуть деньги») — это точнее
+ if(matched.length>1&&PAIRS.length){var sq=d.seq,bon=0;PAIRS.forEach(function(p){for(var i=0;i<sq.length;i++){if(same(sq[i],p[0])){for(var j=i+1;j<=i+2&&j<sq.length;j++)if(same(sq[j],p[1])){bon++;return}}}});s*=1+Math.min(bon,3)*.12}
+ return {s:s*(d.e.wt||1),m:matched}}
+var PAIRS=[];
 
 /* ---------- поиск и группировка по ситуациям ---------- */
 var state={tone:'auto',kind:'all'};
-function search(raw){var toks=qtokens(raw);toks=toks.filter(function(t,i){return toks.indexOf(t)===i});if(!toks.length)return {groups:[],toks:[]};
- var ex=expand(toks),terms=toks.map(function(t){return {t:t,w:1}}).concat(ex.map(function(t){return {t:t,w:.5}}));
+function search(raw){var toks=qtokens(raw),fixes=[];
+ toks=toks.map(function(t){if(t.indexOf('не')===0&&t.length>4&&df(t)===0)return t;var f=fixTypo(t);if(f){fixes.push([t,f]);return f}return t});
+ toks=toks.filter(function(t,i){return toks.indexOf(t)===i});if(!toks.length)return {groups:[],toks:[],fixes:fixes};
+ PAIRS=[];for(var pi=0;pi<toks.length-1;pi++)if(toks[pi].indexOf('не')!==0||toks[pi].length<=4)PAIRS.push([toks[pi],toks[pi+1]]);
+ var ex=expand(toks),cb=combos(toks);cb.forEach(function(t){var i=ex.indexOf(t);if(i>-1)ex.splice(i,1)});
+ var terms=toks.map(function(t){return {t:t,w:1}}).concat(cb.filter(function(t){return toks.indexOf(t)<0}).map(function(t){return {t:t,w:1.1}}),ex.map(function(t){return {t:t,w:.5}}));
  var totalIdf=toks.reduce(function(a,t){return a+idf(t)},0)||1;
  var G={},order=[];
  DOCS.forEach(function(d){if(state.kind!=='all'&&d.e.k!==state.kind)return;var r=scoreDoc(d,terms);if(r.s<=0)return;
@@ -163,7 +208,7 @@ function search(raw){var toks=qtokens(raw);toks=toks.filter(function(t,i){return
    var g=G[key];g.items.push({e:d.e,s:r.s});r.m.forEach(function(t){g.m[t]=1})});
  var groups=order.map(function(k){var g=G[k];g.items.sort(function(a,b){return b.s-a.s});var top=g.items[0].s,rest=g.items.slice(1,4).reduce(function(a,x){return a+x.s},0);
    var cov=toks.reduce(function(a,t){return a+(g.m[t]?idf(t):(XM[t]||[]).some(function(x){return g.m[x]})?idf(t)*.7:0)},0)/totalIdf;g.cov=cov;g.score=(top+.15*rest)*(.35+cov);g.shown=toks.filter(function(t){return g.m[t]}).concat(Object.keys(g.m).filter(function(t){return toks.indexOf(t)<0}).map(function(t){return t+'*'}));return g});
- groups.sort(function(a,b){return b.score-a.score});return {groups:groups.slice(0,5),toks:toks,ex:ex}}
+ groups.sort(function(a,b){return b.score-a.score});return {groups:groups.slice(0,5),toks:toks,ex:ex,fixes:fixes}}
 
 /* ---------- отрисовка ---------- */
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
@@ -172,13 +217,14 @@ var out=document.getElementById('out'),q=document.getElementById('q'),masked=doc
 var TPLS={},OM={};
 function tplHTML(e,pref){TPLS[e.id]=e.x;return '<div class="tpl'+(e.k==='sv'?' sv':'')+(pref?' pref':'')+'"><span class="lbl">'+(e.k==='sv'?'✉️ Формат СВ · ':'')+esc(e.lbl)+(pref?' · подходит по тону':'')+'</span>'+hl(e.x)+'<button class="copy" data-id="'+esc(e.id)+'">Копировать</button></div>'}
 function draw(){
- var raw=q.value,mk=mask(raw);
+ var raw=q.value,lay=fixLayout(raw);if(lay)raw=lay;var mk=mask(raw);
  masked.style.display=mk.hit.length?'block':'none';masked.innerHTML=mk.hit.length?'🙈 Скрыли из запроса: <b>'+mk.hit.join(', ')+'</b>. Для поиска они не нужны — в шаблоны их подставляете вы сами.':'';
  if(!raw.trim()){out.innerHTML='';return}
  var r=search(mk.s);OM={};var ww=words(mk.s);ww.forEach(function(w,i){OM[stem(w)]=w;if((w==='не'||w==='нет')&&ww[i+1])OM['не'+stem(ww[i+1])]='не '+ww[i+1]});
  var neg=state.tone==='neg'||(state.tone==='auto'&&isNeg(raw));
  if(!r.groups.length){out.innerHTML='<section class="empty">Ничего не нашлось 🤔<br>Попробуйте описать иначе: <i>«списали за доставку»</i>, <i>«нет кнопки отмены»</i> — или спросите наставника во «Флудилке».</section>';return}
- var h='<p class="status">Тон клиента: <span class="tone'+(neg?' neg':'')+'">'+(neg?'недоволен':'спокойный')+'</span>'+(state.tone==='auto'?' (определён автоматически)':'')+' · найдено ситуаций: '+r.groups.length+'</p>';
+ var fx=[];if(lay)fx.push('⌨️ Исправили раскладку: <b>'+esc(lay)+'</b>');if(r.fixes&&r.fixes.length)fx.push('✏️ Учли опечатки: '+r.fixes.map(function(f){return esc((OM[f[0]]||f[0]))+' → <b>'+esc(f[1])+'…</b>'}).join(', '));
+ var h=(fx.length?'<p class="status">'+fx.join(' · ')+'</p>':'')+'<p class="status">Тон клиента: <span class="tone'+(neg?' neg':'')+'">'+(neg?'недоволен':'спокойный')+'</span>'+(state.tone==='auto'?' (определён автоматически)':'')+' · найдено ситуаций: '+r.groups.length+'</p>';
  r.groups.forEach(function(g,gi){
    var conf=g.cov>=.6?['hi','точно подходит']:g.cov>=.34?['mid','похоже']:['lo','возможно'];
    var tp=g.items.filter(function(x){return x.e.k!=='rule'}).map(function(x){return x.e});
@@ -212,7 +258,7 @@ out.addEventListener('click',function(e){var b=e.target.closest('.copy');if(!b)r
  if(navigator.clipboard){navigator.clipboard.writeText(t).then(ok,function(){fb(t);ok()})}else{fb(t);ok()}});
 // ?q=... — можно открыть помощника сразу с запросом (например, из общего поиска)
 try{var pq=new URLSearchParams(location.search).get('q');if(pq){q.value=pq;draw()}}catch(e){}
-window.G11Helper={search:search,qtokens:qtokens,mask:mask};
+window.G11Helper={search:search,qtokens:qtokens,mask:mask,fixLayout:fixLayout};
 })();
 </script>
 <script>(function(){var r=document.documentElement,b=document.createElement('button');b.type='button';b.className='theme-btn';
