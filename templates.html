@@ -60,6 +60,16 @@ main a:not(.link){color:var(--accent);font-weight:600}
 .theme-btn{position:fixed;right:16px;bottom:16px;z-index:50;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--card,var(--paper));color:var(--ink);font-size:20px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.18);display:grid;place-items:center}
 .theme-btn:hover{border-color:var(--accent)}
 .ec{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--bg)}
+#gen{scroll-margin-top:155px;margin:22px -6px 18px;padding:16px;border:2px solid var(--accent);border-radius:16px;background:linear-gradient(135deg,var(--soft),var(--card));box-shadow:0 10px 28px rgba(123,44,191,.22)}
+#gen>h3{margin:0 0 4px;font-size:19px;color:var(--accent);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#gen>h3 .tag{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;background:var(--accent);color:#fff;border-radius:999px;padding:3px 9px}
+#gen>.sub{margin:0 0 12px;color:var(--muted);font-size:13px}
+#gen .ec{background:var(--card);border-color:var(--accent)}
+.gen-fab{position:fixed;left:16px;bottom:16px;z-index:50;display:flex;align-items:center;gap:6px;text-decoration:none;background:linear-gradient(120deg,var(--accent),var(--accent2));color:#fff;font-weight:700;font-size:14px;padding:11px 16px;border-radius:999px;box-shadow:0 8px 22px rgba(123,44,191,.35)}
+.gen-fab:hover{filter:brightness(1.08)}
+.chips a.gen-chip{background:var(--accent);color:#fff}
+@keyframes genflash{0%{box-shadow:0 0 0 0 rgba(203,17,171,.6)}100%{box-shadow:0 10px 28px rgba(123,44,191,.22),0 0 0 14px rgba(203,17,171,0)}}
+#gen.flash{animation:genflash .9s ease-out 2}
 .ec-l{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:12px 0 6px}
 .ec-l:first-child{margin-top:0}
 .ec textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit;resize:vertical}
@@ -116,7 +126,7 @@ section{scroll-margin-top:150px}
 <input id="q" type="search" placeholder="🔍 Поиск: «отменить заказ», «обратная доставка», «госуслуги», «10 дней»…" autocomplete="off">
 <div class="hot" id="hot"><span>Часто ищут:</span><button type="button">отмена заказа</button><button type="button">обратная доставка</button><button type="button">проблема 10 дней</button><button type="button">госуслуги</button><button type="button">смена номера</button><button type="button">подписка клуб</button><button type="button">рассрочка</button><button type="button">оценка</button><button type="button">закрытый пвз</button></div><div id="qcount" class="qcount"></div>
 </div></div>
-<div class="catnav"><div class="w"><div class="chips"><a class="back" href="index.html">← Шпаргалка</a><a href="bz.html">📚 Все шаблоны БЗ</a><a href="#empathy">💜 Конструктор эмпатии</a><a href="#rate">⭐ Запрос оценки</a><a href="#refund">💸 Возвраты и отмены</a><a href="#cancel">🚫 Отмена заказа</a><a href="#ot">↩️ Обратная доставка</a><a href="#wait">⏳ Ожидание и уточнение</a><a href="#problem">🛠 Проблемы и сроки</a><a href="#gosuslugi">🪪 Госуслуги</a><a href="#delivery">📦 Доставка и ПВЗ</a><a href="#paid">🛡 Платные услуги и страховки</a><a href="#redirect">↪️ Другие поддержки</a><a href="#app">📱 Мобильное приложение</a><a href="#club">👑 ВБ Клуб</a><a href="#phone">📵 Смена номера</a><a href="#ask">🔎 Уточняющие вопросы</a><a href="#listen">👂 Активное слушание</a><a href="#forms">📝 Формы для коллег</a></div></div></div>
+<div class="catnav"><div class="w"><div class="chips"><a class="back" href="index.html">← Шпаргалка</a><a class="gen-chip" href="#gen">🛠 Генератор ответа</a><a href="bz.html">📚 Все шаблоны БЗ</a><a href="#empathy">💜 Конструктор эмпатии</a><a href="#rate">⭐ Запрос оценки</a><a href="#refund">💸 Возвраты и отмены</a><a href="#cancel">🚫 Отмена заказа</a><a href="#ot">↩️ Обратная доставка</a><a href="#wait">⏳ Ожидание и уточнение</a><a href="#problem">🛠 Проблемы и сроки</a><a href="#gosuslugi">🪪 Госуслуги</a><a href="#delivery">📦 Доставка и ПВЗ</a><a href="#paid">🛡 Платные услуги и страховки</a><a href="#redirect">↪️ Другие поддержки</a><a href="#app">📱 Мобильное приложение</a><a href="#club">👑 ВБ Клуб</a><a href="#phone">📵 Смена номера</a><a href="#ask">🔎 Уточняющие вопросы</a><a href="#listen">👂 Активное слушание</a><a href="#forms">📝 Формы для коллег</a></div></div></div>
 <main>
 <section id="empathy" data-keys="эмпатия конструктор генератор присоединение понимание">
 <h2>💜 Конструктор эмпатии · присоединение и понимание</h2>
@@ -133,7 +143,9 @@ section{scroll-margin-top:150px}
 <li><b>Долго ждал?</b> Поблагодарите за ожидание, даже если клиент спокоен. Если уже негативит — добавьте фразу из колонки «Извиняемся».</li>
 </ul>
 
-<h3>🛠 Генератор ответа</h3>
+<div id="gen">
+<h3>🛠 Генератор ответа <span class="tag">быстрый ответ</span></h3>
+<p class="sub">Вставьте шаблон из БЗ, отметьте ситуацию — генератор добавит приветствие, эмпатию и завершение.</p>
 <div class="ec">
 <label class="ec-l">1. Вставьте шаблон из БЗ (фактура — решение или объяснение)</label>
 <textarea id="ecFact" rows="4" placeholder="Например: Статус заказа будет скорректирован в течение 24 часов. Деньги вернутся тем же способом, которым вы оплачивали."></textarea>
@@ -161,6 +173,7 @@ section{scroll-margin-top:150px}
 <div id="ecWarn" class="ec-warn"></div>
 <div class="note" style="margin-bottom:0">⭐ Добавили в ответ запрос оценки — <b>не забудьте после отправки нажать в чате с клиентом кнопку «Завершить чат и запросить оценку»</b>. Иначе опрос клиенту не придёт.</div>
 <div class="ec-btns"><button type="button" class="btn" id="ecCopy">📋 Копировать ответ</button><button type="button" class="btn alt" id="ecClear">Очистить</button></div>
+</div>
 </div>
 
 <h3>🧩 Конструктор фраз (кликните — фраза вставится в ответ)</h3>
@@ -556,7 +569,7 @@ function seg(id,cb){var w=$(id);w.addEventListener('click',function(e){var b=e.t
 seg('ecMood',function(v){mood=v});seg('ecSex',function(v){sex=v;renderCols();renderEx()});
 function renderCols(){var h='';COLS.forEach(function(c){h+='<div class="ec-col" style="--c:'+c.c+'"><b>'+c.t+'</b><small>'+c.s+'</small>';c.p.forEach(function(p){h+='<button type="button">'+g(p)+'</button>'});h+='</div>'});$('ecCols').innerHTML=h}
 $('ecCols').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;ins(b.textContent)});
-function ins(t){var o=$('ecOut'),s=o.selectionStart,en=o.selectionEnd,v=o.value;if(document.activeElement!==o&&!o.dataset.touched){s=en=v.length}
+function ins(t){var o=$('ecOut'),s=o.selectionStart,en=o.selectionEnd,v=o.value;if(/^\s*(здравствуйте|добр(ый|ое)\s|доброй\s+ночи)/i.test(t)&&/(^|\n)\s*(здравствуйте|добр(ый|ое)\s+(день|вечер|утро)|доброй\s+ночи)/i.test(v)){$('ecWarn').innerHTML='👋 Приветствие уже есть в ответе — второй раз не добавляем.';return}if(document.activeElement!==o&&!o.dataset.touched){s=en=v.length}
 var pre=v.slice(0,s),post=v.slice(en),sep=pre&&!/\s$/.test(pre)?' ':'';o.value=pre+sep+t+(post&&!/^\s/.test(post)?' ':'')+post;var p=(pre+sep+t).length;o.focus();o.setSelectionRange(p,p);o.dataset.touched=1}
 $('ecOut').addEventListener('click',function(){this.dataset.touched=1});
 // Варианты по ситуации (индексы из подборки)
@@ -584,7 +597,16 @@ function noEmoji(s){return s.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F
 function gen(){
  var fact=$('ecFact').value.trim(),inc=$('ecInc').checked,w=[],out=[];
  if(!fact)w.push('⚠️ Нет фактуры: вставьте шаблон или объяснение из БЗ — без него ответ будет выглядеть как отписка.');
- if($('ecHello').checked)out.push('Здравствуйте!');
+ // приветствие уже есть в шаблоне («Здравствуйте», «Добрый день» и т.п.) — не дублируем, а ставим его в начало ответа
+ var GREET=/^\s*((?:[Зз]дравствуй(?:те)?|[Дд]обр(?:ый|ое|ого)\s+(?:день|дня|вечер|вечера|утро|утра)|[Дд]оброй\s+ночи|[Пп]риветствую(?: вас)?)(?:\s*,\s*[А-ЯЁA-Z][а-яёa-z-]+(?:\s+[А-ЯЁA-Z][а-яёa-z-]+)?)?)\s*[!.,]*/;
+ var gm=fact.match(GREET),greet='';
+ if(gm){greet=gm[1].trim();fact=fact.slice(gm[0].length).replace(/^[\s!.,]+/,'').trim();if(!/[!.]$/.test(greet))greet+='!';
+  if(!fact)w.push('⚠️ В поле шаблона только приветствие — добавьте фактуру из БЗ.');}
+ if(greet)out.push(greet.charAt(0).toUpperCase()+greet.slice(1));
+ else if($('ecHello').checked)out.push('Здравствуйте!');
+ // повторное «Здравствуйте» внутри шаблона тоже убираем
+ fact=fact.replace(/(^|\n)\s*здравствуйте[!.,]?\s*(?=\n|$)/gi,'$1').replace(/^\n+/,'');
+ if(fact)fact=fact.charAt(0).toUpperCase()+fact.slice(1);
  var open=[];
  if(inc){
   if($('ecWait').checked)open.push('Спасибо, что подождали.');
@@ -603,7 +625,7 @@ function gen(){
   var f=noEmoji(fact).trim();if(inc)fact=f;
   var lines=fact.split(/\n/),first=lines[0],startsList=/^\s*(\d+[.)]|[—–-])/.test(first);
   if(inc){out.push(fact)}
-  else if(!startsList&&seed%2===0&&/^[А-ЯЁ]/.test(first)&&!/^(Я|Вы|Вам|Ваш)/.test(first)){
+  else if(!startsList&&seed%2===0&&/^[А-ЯЁ]/.test(first)&&!/^(Я|Вы|Вам|Ваш|Мы|Нам|Мне)\s/.test(first)){
    lines[0]=g(pick(P.linkLow))+' '+low(first);out.push(lines.join('\n'))}
   else{out.push(g(pick(P.linkCol))+'\n'+fact)}
  }
@@ -657,6 +679,8 @@ function upd(){var d=dark();b.textContent=d?'☀️':'🌙';b.title=d?'Свет�
 b.onclick=function(){var n=dark()?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}upd()};
 if(window.matchMedia)matchMedia('(prefers-color-scheme: dark)').addEventListener('change',upd);
 document.body.appendChild(b);upd()})();</script>
+<a class="gen-fab" href="#gen" title="Перейти к генератору ответа">🛠 Генератор</a>
+<script>(function(){function go(){var g=document.getElementById("gen");if(!g)return;g.classList.remove("flash");void g.offsetWidth;g.classList.add("flash");setTimeout(function(){var t=document.getElementById("ecFact");if(t&&!t.value)t.focus({preventScroll:true})},450)}document.addEventListener("click",function(e){var a=e.target.closest('a[href="#gen"]');if(!a)return;e.preventDefault();var q=document.getElementById("q");if(q&&q.value){q.value="";q.dispatchEvent(new Event("input"))}document.getElementById("gen").scrollIntoView({behavior:"smooth",block:"start"});history.replaceState(null,"","#gen");go()});if(location.hash==="#gen")setTimeout(go,300)})();</script>
 <script src="site.js?v=20" defer></script>
 </body>
 </html>
