@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"><link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#5b0fa8">
+<title>Шаблоны БЗ КЦ · Группа 11</title>
+<script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<style>
+:root{--bg:#f6f4fb;--card:#fff;--ink:#1d1730;--muted:#6b6480;--line:#e6e1f2;--accent:#7b2cbf;--accent2:#cb11ab;--soft:#f1e8fb;--ok:#1f9d6b;--warn:#d9480f;--mark:#fff1a8}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#141020;--card:#1e182d;--ink:#eee9f8;--muted:#a59cbd;--line:#30284a;--accent:#b57bee;--accent2:#ee5fd2;--soft:#2a2140;--ok:#4cd39b;--warn:#ff8a5c;--mark:#5a4a12}}
+:root[data-theme=dark]{--bg:#141020;--card:#1e182d;--ink:#eee9f8;--muted:#a59cbd;--line:#30284a;--accent:#b57bee;--accent2:#ee5fd2;--soft:#2a2140;--ok:#4cd39b;--warn:#ff8a5c;--mark:#5a4a12}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{background:linear-gradient(120deg,var(--accent),var(--accent2));color:#fff;padding:28px 16px 22px}
+header .w{max-width:960px;margin:0 auto}
+header h1{margin:0 0 4px;font-size:26px}
+header p{margin:0;opacity:.9}
+.cats{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
+.cats .w{max-width:960px;margin:0 auto;padding:10px 16px}
+#q{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;margin-bottom:8px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.chips a{white-space:nowrap;text-decoration:none;color:var(--accent);background:var(--soft);padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer}
+.chips a.back{background:var(--accent);color:#fff}
+.chips a.on{outline:2px solid var(--accent)}
+main{max-width:960px;margin:0 auto;padding:20px 16px 60px}
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px;scroll-margin-top:120px}
+h2{margin:0 0 12px;font-size:20px}
+.note{border-radius:10px;padding:10px 14px;background:var(--soft);border:1px solid var(--line);margin:10px 0}
+.note.warn{border-color:var(--warn)}
+details.art{border:1px solid var(--line);border-radius:12px;margin:8px 0;background:var(--bg);scroll-margin-top:120px}
+details.art>summary{cursor:pointer;padding:10px 14px;font-weight:700;color:var(--accent);list-style:none;display:flex;gap:8px;justify-content:space-between}
+details.art>summary::-webkit-details-marker{display:none}
+details.art>summary .cnt{color:var(--muted);font-weight:600;font-size:12px;white-space:nowrap}
+details.art .in{padding:0 14px 12px}
+.kb{font-size:12px;color:var(--muted)}
+.kb a{color:var(--accent);font-weight:600}
+.item{margin:12px 0 0;scroll-margin-top:120px}
+.sit{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px}
+.lead{font-size:13px;color:var(--muted);margin-bottom:4px;white-space:pre-wrap}
+.where{font-size:12px;color:var(--muted);margin-bottom:4px}
+.tpl{position:relative;border-left:4px solid var(--accent);background:var(--soft);border-radius:10px;padding:12px 96px 12px 14px;white-space:pre-wrap;word-wrap:break-word}
+.tpl i.ph{font-style:normal;background:var(--mark);border-radius:4px;padding:0 2px}
+.copy{position:absolute;top:8px;right:8px;border:0;background:var(--accent);color:#fff;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer}
+.copy.done{background:var(--ok)}
+mark{background:var(--mark);color:inherit;border-radius:3px}
+.empty{text-align:center;color:var(--muted);padding:30px}
+.more{display:block;margin:14px auto 0;border:1px solid var(--line);background:var(--card);color:var(--accent);font:600 14px inherit;padding:9px 16px;border-radius:999px;cursor:pointer}
+footer{text-align:center;color:var(--muted);font-size:12px}
+footer a{color:var(--accent)}
+.theme-btn{position:fixed;right:16px;bottom:16px;z-index:50;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:20px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.18);display:grid;place-items:center}
+@media (max-width:560px){.tpl{padding:38px 12px 12px}}
+</style>
+</head>
+<body data-space="work">
+<header><div class="w">
+<h1>📚 Все шаблоны из Базы знаний КЦ</h1>
+<p>Шаблоны из статей БЗ «Поддержка покупателей», которых нет на странице «Шаблоны» · <span id="stat"></span> · выгрузка 10.11.2026</p>
+</div></header>
+<div class="cats"><div class="w">
+<input id="q" type="search" placeholder="🔍 Поиск по всем шаблонам БЗ: «рассрочка досрочно», «курьер не приехал», «клуб вернуть деньги»…" autocomplete="off">
+<div class="chips" id="chips"><a class="back" href="templates.html">← Шаблоны</a><a data-s="" class="on">Все разделы</a></div>
+</div></div>
+<main>
+<section>
+<div class="note warn">⚠️ <b>Перед отправкой сверьтесь со статьёй БЗ</b> (ссылка «Открыть в БЗ» у каждой статьи): условия и сроки меняются, а у шаблона может быть своё условие применения. Текст в <i style="font-style:normal;background:var(--mark);padding:0 3px;border-radius:4px">[квадратных скобках]</i> заменяйте на данные клиента.</div>
+<div class="note">🧑‍🏫 Сомневаетесь, какой шаблон подходит, — сначала к наставнику (стрим с наставниками / «Флудилка»). Передаём обращение в СВ только после подтверждения наставника. Основные шаблоны группы — на странице <a href="templates.html">📋 Шаблоны</a>, подбор по ситуации — в <a href="helper.html">🤖 Помощнике оператора</a>.</div>
+</section>
+<div id="out"></div>
+</main>
+<footer><p>Группа 11 · Смена 1 ночь · <a href="index.html">на главную</a></p></footer>
+<script src="bz-data.js?v=1"></script>
+<script>
+(function(){
+var D=window.G11_BZ||[],$=function(id){return document.getElementById(id)};
+var KBURL='https://callcenter.wildberries.ru/KNOWLEDGE_BASE/PATH/base/ID/';
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function nz(s){return String(s||'').toLowerCase().replace(/ё/g,'е')}
+D.forEach(function(e){e._t=nz(e.a+' '+e.h+' '+e.c+' '+e.x)});
+// группировка: раздел → статья → шаблоны
+var SECS=[],BYS={},BYA={};
+D.forEach(function(e){if(!BYS[e.s]){BYS[e.s]=[];SECS.push(e.s)}if(!BYA[e.id]){BYA[e.id]=[];BYS[e.s].push(e.id)}BYA[e.id].push(e)});
+$('stat').textContent=D.length+' шаблонов в '+Object.keys(BYA).length+' статьях';
+var chips=$('chips'),cur='';
+SECS.forEach(function(s,i){var a=document.createElement('a');a.textContent=s;a.setAttribute('data-s',s);chips.appendChild(a)});
+chips.addEventListener('click',function(ev){var a=ev.target.closest('a[data-s]');if(!a)return;cur=a.getAttribute('data-s');[].forEach.call(chips.querySelectorAll('a[data-s]'),function(x){x.classList.toggle('on',x===a)});render()});
+function hl(t,ws){var h=esc(t).replace(/\[[^\]\n]{1,80}\]/g,function(m){return '<i class="ph">'+m+'</i>'});
+  if(!ws||!ws.length)return h;var re=new RegExp('('+ws.map(function(w){return w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}).join('|')+')','gi');
+  return h.replace(/(<[^>]+>)|([^<]+)/g,function(m,tag,txt){return tag||txt.replace(re,'<mark>$1</mark>')})}
+function item(e,ws,showWhere){return '<div class="item" id="n'+e.n+'">'+(showWhere?'<div class="where">'+esc(e.s)+' → <b>'+esc(e.a)+'</b> · <a href="'+KBURL+e.id+'" target="_blank" rel="noopener">в БЗ</a></div>':'')+
+  (e.h?'<div class="sit">'+hl(e.h,ws)+'</div>':'')+(e.c?'<div class="lead">'+hl(e.c,ws)+'</div>':'')+
+  '<div class="tpl"><button class="copy" type="button" data-n="'+e.n+'">Копировать</button>'+hl(e.x,ws)+'</div></div>'}
+function artBody(id){return '<div class="kb">Статья БЗ № '+id+' · <a href="'+KBURL+id+'" target="_blank" rel="noopener">Открыть в БЗ ↗</a></div>'+BYA[id].map(function(e){return item(e)}).join('')}
+var limit=60,lastQ='';
+function render(){
+  var q=nz($('q').value).trim(),out=$('out');
+  if(q!==lastQ){limit=60;lastQ=q}
+  if(q.length>=2){
+    var ws=q.split(/[^a-zа-я0-9]+/).filter(function(w){return w.length>1});
+    var stems=ws.map(function(w){return w.length>5?w.slice(0,w.length-2):w});
+    var res=D.filter(function(e){return (!cur||e.s===cur)&&stems.every(function(w){return e._t.indexOf(w)>=0})});
+    res.sort(function(a,b){var sa=stems.filter(function(w){return nz(a.a+' '+a.h).indexOf(w)>=0}).length,sb=stems.filter(function(w){return nz(b.a+' '+b.h).indexOf(w)>=0}).length;return sb-sa});
+    out.innerHTML='<section><h2>🔍 Найдено: '+res.length+'</h2>'+(res.length?res.slice(0,limit).map(function(e){return item(e,stems,true)}).join(''):'<div class="empty">Ничего не нашлось. Попробуйте другие слова или загляните в <a href="templates.html">📋 Шаблоны</a> и <a href="helper.html">🤖 Помощник</a>.</div>')+
+      (res.length>limit?'<button class="more" type="button" id="more">Показать ещё ('+(res.length-limit)+')</button>':'')+'</section>';
+    var m=$('more');if(m)m.onclick=function(){limit+=60;render()};
+    return}
+  out.innerHTML=SECS.filter(function(s){return !cur||s===cur}).map(function(s){
+    return '<section id="s'+SECS.indexOf(s)+'"><h2>'+esc(s)+'</h2>'+BYS[s].map(function(id){
+      return '<details class="art" id="a'+id+'" data-id="'+id+'"><summary><span>'+esc(BYA[id][0].a)+'</span><span class="cnt">'+BYA[id].length+' шабл.</span></summary><div class="in"></div></details>'}).join('')+'</section>'}).join('');
+}
+// содержимое статьи рисуем только при раскрытии — так страница не тормозит
+document.addEventListener('toggle',function(ev){var d=ev.target;if(d.classList&&d.classList.contains('art')&&d.open){var i=d.querySelector('.in');if(!i.innerHTML)i.innerHTML=artBody(d.getAttribute('data-id'))}},true);
+document.addEventListener('click',function(ev){var b=ev.target.closest('.copy');if(!b)return;var e=D[+b.getAttribute('data-n')];
+  var done=function(){b.textContent='Скопировано ✓';b.classList.add('done');setTimeout(function(){b.textContent='Копировать';b.classList.remove('done')},1500)};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(e.x).then(done,fb);else fb();
+  function fb(){var t=document.createElement('textarea');t.value=e.x;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove();done()}});
+var tm;$('q').addEventListener('input',function(){clearTimeout(tm);tm=setTimeout(render,150)});
+var p=new URLSearchParams(location.search).get('q');if(p)$('q').value=p;
+render();
+function openHash(){var h=location.hash.slice(1);if(!h)return;
+  if(/^n\d+$/.test(h)){var e=D[+h.slice(1)];if(!e)return;$('q').value='';render();var d=$('a'+e.id);if(d){d.open=true;var i=d.querySelector('.in');if(!i.innerHTML)i.innerHTML=artBody(e.id);var t=$(h);if(t)t.scrollIntoView()}}
+  else if(/^a\d+$/.test(h)){var d2=$(h);if(d2){d2.open=true;d2.scrollIntoView()}}}
+openHash();window.addEventListener('hashchange',openHash);
+})();
+</script>
+<script>(function(){var r=document.documentElement,b=document.createElement('button');b.type='button';b.className='theme-btn';
+function dark(){var t=r.getAttribute('data-theme');return t?t==='dark':(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)}
+function upd(){var d=dark();b.textContent=d?'☀️':'🌙';b.title=d?'Светлая тема':'Тёмная тема';b.setAttribute('aria-label',b.title)}
+b.onclick=function(){var n=dark()?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}upd()};
+if(window.matchMedia)matchMedia('(prefers-color-scheme: dark)').addEventListener('change',upd);
+document.body.appendChild(b);upd()})();</script>
+<script src="site.js?v=21" defer></script>
+</body>
+</html>

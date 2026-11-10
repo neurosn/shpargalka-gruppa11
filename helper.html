@@ -85,11 +85,14 @@ details.extra summary{cursor:pointer;color:var(--accent);font-weight:600;font-si
 </main>
 <div class="toast" id="toast"></div>
 <script src="kb.js?v=1"></script>
+<script src="bz-data.js?v=1"></script>
 <script>
 (function(){
 var KB=(window.G11_KB||[]).slice();
 // шаблоны от наставников (кабинет редактора) — из кеша контента, если он уже загружен на этом устройстве
 try{var c=JSON.parse(localStorage.getItem('g11_content_cache')||'null');(c&&c.items||[]).forEach(function(x){if(x.type!=='template')return;var tx=window.G11Rich?G11Rich.toText(x.text):String(x.text||'');KB.push({k:'tpl',sec:'✏️ От наставников',sit:'',lbl:x.title,x:tx,p:'📋 Шаблоны',u:'templates.html#c-'+x.id,keys:'',note:'',src:[],id:'c'+x.id})})}catch(e){}
+// все остальные шаблоны из Базы знаний КЦ (страница bz.html) — чуть ниже по весу, чем шаблоны шпаргалки
+(window.G11_BZ||[]).forEach(function(e){KB.push({k:'tpl',sec:'📚 БЗ · '+e.s,sit:e.h||e.a,lbl:e.c?(e.c.length>110?e.c.slice(0,107)+'…':e.c):e.a,x:e.x,p:'📚 Шаблоны БЗ',u:'bz.html#a'+e.id,keys:e.a,note:'',src:[{t:'Статья БЗ: '+e.a,u:'https://callcenter.wildberries.ru/KNOWLEDGE_BASE/PATH/base/ID/'+e.id}],id:'b'+e.n,wt:.85})});
 
 /* ---------- текст: нормализация, стоп-слова, основы слов ---------- */
 function nz(s){return String(s||'').toLowerCase().replace(/ё/g,'е')}
@@ -147,7 +150,7 @@ var FW={lbl:3.5,sit:3.5,sec:1.6,keys:1.2,x:1.3,note:.4};
 var DOCS=KB.map(function(e){var f={};for(var k in FW)f[k]=words(e[k]||'').map(stem);return {e:e,f:f}});
 var DF={};function df(t){if(DF[t]!=null)return DF[t];var n=0;DOCS.forEach(function(d){for(var k in d.f){if(d.f[k].some(function(w){return same(w,t)})){n++;break}}});return DF[t]=n}
 function idf(t){var n=DOCS.length;return Math.log(1+(n-df(t)+.5)/(df(t)+.5))}
-function scoreDoc(d,terms){var s=0,matched=[];terms.forEach(function(q){var best=0;for(var k in FW){var arr=d.f[k],tf=0;for(var i=0;i<arr.length;i++)if(same(arr[i],q.t))tf++;if(tf)best=Math.max(best,FW[k]*(1+Math.log(tf)))}if(best){s+=q.w*idf(q.t)*best;matched.push(q.t)}});return {s:s,m:matched}}
+function scoreDoc(d,terms){var s=0,matched=[];terms.forEach(function(q){var best=0;for(var k in FW){var arr=d.f[k],tf=0;for(var i=0;i<arr.length;i++)if(same(arr[i],q.t))tf++;if(tf)best=Math.max(best,FW[k]*(1+Math.log(tf)))}if(best){s+=q.w*idf(q.t)*best;matched.push(q.t)}});return {s:s*(d.e.wt||1),m:matched}}
 
 /* ---------- поиск и группировка по ситуациям ---------- */
 var state={tone:'auto',kind:'all'};
