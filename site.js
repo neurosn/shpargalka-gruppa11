@@ -24,5 +24,5 @@
   var ij=document.createElement('script');ij.src='icons.js?v=11';ij.async=false;document.body.appendChild(ij);
   var rj=document.createElement('script');rj.src='rte.js?v=8';rj.async=false;document.body.appendChild(rj);
   var cj=document.createElement('script');cj.src='content.js?v=8';cj.async=false;document.body.appendChild(cj);
-  var sj=document.createElement('script');sj.src='search.js?v=2';document.body.appendChild(sj);
+  var sj=document.createElement('script');sj.src='search.js?v=3';document.body.appendChild(sj);
 })();
