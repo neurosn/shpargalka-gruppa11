@@ -3,7 +3,7 @@
 import re, json, html, os
 os.chdir(os.path.join(os.path.dirname(__file__), '..'))
 PAGES = [('index.html','🏠 Главная'),('work.html','💼 Работа'),('templates.html','📋 Шаблоны'),('sv.html','🧑‍💼 Передача СВ'),
-         ('tools.html','🧰 Инструменты'),('calc.html','🧮 Калькулятор премии'),('salary.html','💵 Калькулятор зарплаты'),('check.html','📶 Проверка связи'),
+         ('tools.html','🧰 Инструменты'),('helper.html','🤖 Помощник оператора'),('calc.html','🧮 Калькулятор премии'),('salary.html','💵 Калькулятор зарплаты'),('check.html','📶 Проверка связи'),
          ('team.html','👥 Команда'),('vacation.html','🌴 Отпуск 2027'),('zp.html','💰 Как вывести зарплату'),
          ('account.html','🏠 Мой кабинет'),('editor.html','✏️ Кабинет редактора'),('admin.html','🛡 Панель руководителя'),('logins.html','🔑 Журнал входов')]
 def txt(s):
