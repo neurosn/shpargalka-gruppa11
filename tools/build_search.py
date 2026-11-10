@@ -3,7 +3,7 @@
 import re, json, html, os
 os.chdir(os.path.join(os.path.dirname(__file__), '..'))
 PAGES = [('index.html','🏠 Главная'),('work.html','💼 Работа'),('templates.html','📋 Шаблоны'),('sv.html','🧑‍💼 Передача СВ'),
-         ('tools.html','🧰 Инструменты'),('helper.html','🤖 Помощник оператора'),('calc.html','🧮 Калькулятор премии'),('salary.html','💵 Калькулятор зарплаты'),('check.html','📶 Проверка связи'),
+         ('tools.html','🧰 Инструменты'),('helper.html','🤖 Помощник оператора'),('bz.html','📚 Все шаблоны БЗ'),('calc.html','🧮 Калькулятор премии'),('salary.html','💵 Калькулятор зарплаты'),('check.html','📶 Проверка связи'),
          ('team.html','👥 Команда'),('vacation.html','🌴 Отпуск 2027'),('zp.html','💰 Как вывести зарплату'),
          ('account.html','🏠 Мой кабинет'),('editor.html','✏️ Кабинет редактора'),('admin.html','🛡 Панель руководителя'),('logins.html','🔑 Журнал входов')]
 def txt(s):
@@ -39,6 +39,14 @@ for f, pname in PAGES:
             if lt: idx.append({'t': lt, 'p': pname + ' → ' + title, 'u': href, 'k': 'link', 'x': txt(lk.group(3))[:140], 'ext': href.startswith('http')})
     for g in re.finditer(r'<div><b>([^<]+)</b>\s*—\s*(.*?)</div>', body, re.S):
         idx.append({'t': txt(g.group(1)), 'p': pname + ' → 📖 Сокращения', 'u': f + '#gloss', 'k': 'term', 'x': txt(g.group(2))[:160]})
+# статьи Базы знаний КЦ со страницы «Все шаблоны БЗ» (bz.html) — по записи на статью
+if os.path.exists('bz-data.js'):
+    bz = json.loads(open('bz-data.js', encoding='utf-8').read().split('window.G11_BZ=', 1)[1].rstrip().rstrip(';'))
+    arts = {}
+    for e in bz: arts.setdefault(e['id'], []).append(e)
+    for aid, es in arts.items():
+        idx.append({'t': es[0]['a'], 'p': '📚 Шаблоны БЗ → ' + es[0]['s'], 'u': 'bz.html#a' + str(aid), 'k': 'tpl',
+                    'x': str(len(es)) + ' шабл.: ' + es[0]['x'][:110], 'w': ' '.join(x['h'] for x in es)[:400]})
 seen=set(); out=[]
 for e in idx:
     key=(e['t'],e['u'])
