@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"><link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#5b0fa8">
+<title>Помощник оператора · Группа 11</title>
+<script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<style>
+:root{--bg:#f6f4fb;--card:#fff;--ink:#1d1730;--muted:#6b6480;--line:#e6e1f2;--accent:#7b2cbf;--accent2:#cb11ab;--soft:#f1e8fb;--ok:#1f9d6b;--warn:#d9480f;--mark:#fff1b8;--markink:#5c4400}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#141020;--card:#1e182d;--ink:#eee9f8;--muted:#a59cbd;--line:#30284a;--accent:#b57bee;--accent2:#ee5fd2;--soft:#2a2140;--ok:#4cd39b;--warn:#ff8a5c;--mark:#4a3d12;--markink:#ffe28a}}
+:root[data-theme=dark]{--bg:#141020;--card:#1e182d;--ink:#eee9f8;--muted:#a59cbd;--line:#30284a;--accent:#b57bee;--accent2:#ee5fd2;--soft:#2a2140;--ok:#4cd39b;--warn:#ff8a5c;--mark:#4a3d12;--markink:#ffe28a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{background:linear-gradient(120deg,var(--accent),var(--accent2));color:#fff;padding:28px 16px 22px}
+header .w{max-width:960px;margin:0 auto}
+header h1{margin:0 0 4px;font-size:26px}
+header p{margin:0;opacity:.9}
+main{max-width:960px;margin:0 auto;padding:20px 16px 60px}
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px}
+textarea#q{width:100%;min-height:96px;resize:vertical;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit;font-size:16px;outline:0}
+textarea#q:focus{border-color:var(--accent)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.row .sp{flex:1}
+.btn{border:0;background:var(--accent);color:#fff;border-radius:10px;padding:9px 16px;font:inherit;font-weight:600;cursor:pointer}
+.btn.ghost{background:var(--soft);color:var(--accent)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:transparent;color:var(--muted);padding:7px 11px;font:inherit;font-size:13px;cursor:pointer}
+.seg button.on{background:var(--accent);color:#fff}
+.lbl2{font-size:12px;color:var(--muted);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chips button{border:1px solid var(--line);background:var(--soft);color:var(--accent);border-radius:999px;padding:5px 11px;font:inherit;font-size:13px;cursor:pointer}
+.privacy{font-size:13px;color:var(--muted);margin-top:12px}
+.masked{display:none;margin-top:10px;font-size:13px;border-radius:10px;padding:8px 12px;background:var(--soft);border:1px solid var(--warn)}
+.status{color:var(--muted);font-size:13px;margin:0 0 12px}
+.tone{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;background:var(--soft);color:var(--accent)}
+.tone.neg{background:var(--warn);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 18px 8px;margin-bottom:14px}
+.card.top{border-color:var(--accent);box-shadow:0 8px 24px rgba(123,44,191,.12)}
+.card .path{font-size:12px;color:var(--muted)}
+.card h2{margin:2px 0 6px;font-size:18px;line-height:1.3}
+.conf{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:middle}
+.conf.hi{background:var(--ok);color:#fff}.conf.mid{background:var(--soft);color:var(--accent)}.conf.lo{border:1px dashed var(--line);color:var(--muted)}
+.why{font-size:12px;color:var(--muted);margin-bottom:8px}.why b{color:var(--ink);font-weight:600}
+.rule{border-radius:10px;padding:10px 14px;background:var(--soft);border:1px solid var(--line);margin:8px 0;font-size:14px}
+.rule.warn{border-color:var(--warn)}
+.tpl{position:relative;border-left:4px solid var(--accent);background:var(--soft);border-radius:10px;padding:12px 14px;margin:10px 0;white-space:pre-wrap}
+.tpl.sv{border-left-color:var(--accent2)}
+.tpl.pref{outline:2px solid var(--accent);outline-offset:1px}
+.tpl .lbl{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px;padding-right:110px;white-space:normal}
+.tpl mark{background:var(--mark);color:var(--markink);border-radius:4px;padding:0 3px}
+.copy{position:absolute;top:8px;right:8px;border:0;background:var(--accent);color:#fff;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer}
+.copy.done{background:var(--ok)}
+.more{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;margin:6px 0 10px}
+.more a{color:var(--accent);font-weight:600}
+details.extra summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:13px;margin:6px 0 10px}
+.empty{text-align:center;color:var(--muted);padding:26px 10px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1d1730;color:#fff;border-radius:10px;padding:10px 16px;font-size:14px;opacity:0;transition:.2s;pointer-events:none;z-index:60;max-width:calc(100% - 32px)}
+.toast.on{opacity:1}
+.theme-btn{position:fixed;right:16px;bottom:16px;z-index:50;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:20px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.18);display:grid;place-items:center}
+@media(max-width:560px){.card h2{font-size:16px}.row .sp{display:none}}
+</style>
+</head>
+<body data-space="tools">
+<header><div class="w">
+<h1>🤖 Помощник оператора</h1>
+<p>Опишите ситуацию или вставьте вопрос клиента — подберём шаблон, правило и формат передачи из шпаргалки</p>
+</div></header>
+<main>
+<section>
+<textarea id="q" placeholder="Например: клиент пишет, что заказ не пришёл уже неделю и он хочет вернуть деньги" autofocus></textarea>
+<div class="row">
+  <span class="lbl2">Тон клиента:</span>
+  <div class="seg" id="tone"><button data-v="auto" class="on">Авто</button><button data-v="neu">Спокойный</button><button data-v="neg">Недоволен</button></div>
+  <span class="sp"></span>
+  <span class="lbl2">Показать:</span>
+  <div class="seg" id="kind"><button data-v="all" class="on">Всё</button><button data-v="tpl">Ответы</button><button data-v="sv">Передача СВ</button><button data-v="rule">Правила</button></div>
+</div>
+<div class="chips" id="ex"></div>
+<div class="masked" id="masked"></div>
+<p class="privacy">🔒 Поиск работает только в вашем браузере — текст никуда не отправляется и не сохраняется. ФИО, телефоны и номера заказов вставлять не нужно: они скрываются автоматически и для поиска не важны.</p>
+</section>
+<div id="out"></div>
+<p class="privacy" style="text-align:center">Не нашли подходящее или сомневаетесь — сначала к наставнику (стрим с наставниками / «Флудилка»), и только после подтверждения наставника — в СВ.</p>
+</main>
+<div class="toast" id="toast"></div>
+<script src="kb.js?v=1"></script>
+<script>
+(function(){
+var KB=(window.G11_KB||[]).slice();
+// шаблоны от наставников (кабинет редактора) — из кеша контента, если он уже загружен на этом устройстве
+try{var c=JSON.parse(localStorage.getItem('g11_content_cache')||'null');(c&&c.items||[]).forEach(function(x){if(x.type!=='template')return;var tx=window.G11Rich?G11Rich.toText(x.text):String(x.text||'');KB.push({k:'tpl',sec:'✏️ От наставников',sit:'',lbl:x.title,x:tx,p:'📋 Шаблоны',u:'templates.html#c-'+x.id,keys:'',note:'',src:[],id:'c'+x.id})})}catch(e){}
+
+/* ---------- текст: нормализация, стоп-слова, основы слов ---------- */
+function nz(s){return String(s||'').toLowerCase().replace(/ё/g,'е')}
+var STOP={};('и в во не на но а я мы вы он она они оно мне меня мой моя мое мои мою наш ваш вас вам нам нас их его ее у к ко с со о об от до по за из для что чтобы как так же ли бы то это этот эта эти тот там тут уже еще все всё вот был была были было быть есть будет можно нужно надо очень просто только тоже или если почему зачем какой какая какие который которая здравствуйте добрый день вечер утро привет спасибо пожалуйста подскажите скажите помогите хочу хотела хотел клиент клиента клиенту пишет пишут спрашивает говорит просит вопрос вопросы ситуация меня сегодня вчера сейчас вообще сколько большое огромное там пожалуйста которые свой свою своего мой').split(' ').forEach(function(w){STOP[w]=1});
+STOP['спасибо']=0; // «спасибо» важно для запроса оценки — оставляем, если оно одно
+var ENDS=['ированн','ировать','ировал','иями','ями','ами','ией','иях','ого','его','ему','ому','ыми','ими','ешь','ете','ите','ает','яет','ают','яют','ует','уют','ала','яла','ила','ыла','ела','али','яли','или','ыли','ели','ость','ться','тся','ние','ния','нию','ный','ная','ное','ные','ной','ным','ную','ую','юю','ая','яя','ое','ее','ые','ие','ый','ий','ой','ом','ем','ам','ям','ах','ях','ов','ев','ей','ию','ия','ть','ла','ли','ло','ет','ут','ют','ит','ат','ят','ул','ил','ал','ел','а','я','о','е','ы','и','у','ю','ь','й'];
+function stem(w){if(w.length>6&&/(ся|сь)$/.test(w))w=w.slice(0,-2);if(w.length<=4)return w;for(var i=0;i<ENDS.length;i++){var e=ENDS[i];if(w.length-e.length>=4&&w.slice(-e.length)===e)return w.slice(0,-e.length)}return w}
+function words(s){return nz(s).replace(/[^a-zа-я0-9]+/g,' ').split(' ').filter(Boolean)}
+// «не пришёл» → «непришел»: отрицание меняет смысл, склеиваем его со следующим словом
+function qtokens(s){var w=words(s),out=[];for(var i=0;i<w.length;i++){if((w[i]==='не'||w[i]==='нет')&&w[i+1]){out.push('не'+stem(w[i+1]));out.push(stem(w[i+1]));i++;continue}if(STOP[w[i]]||(/^\d+$/.test(w[i])&&(w[i].length>2||w[i].length<2)))continue;out.push(stem(w[i]))}return out}
+function same(a,b){if(a===b)return true;var m=Math.min(a.length,b.length);return m>=4&&(a.indexOf(b)===0||b.indexOf(a)===0)}
+
+/* ---------- словарь смыслов: как клиенты говорят → как написано в шпаргалке ---------- */
+var INTENTS=[
+ [['задерж','опозд','опазд','долг','просроч','неприш','непривез','недостав','недоех','едет','ехат','где','приш','когд','посылк','недел','жду','ждат'],['задерж','доставк','дат','привез','приедет']],
+ [['неотвеч','молч','игнор','отвеч'],['ответ','чат','дней']],
+ [['недел','месяц'],['дней']],
+ [['отмен','отказ','ненуж','передума','расхот'],['отмен','отказ']],
+ [['деньг','средств','верн','возвра','возмещ','компенс'],['возврат','деньг','верн']],
+ [['спис','снял','сня','лишн','двойн','дважд','оплатил'],['спис','платн','деньг']],
+ [['брак','сломан','разби','порва','нерабо','дефект','испорч','повреж','бит'],['брак','некомплект','проблем']],
+ [['некомпл','неполн','недолож','нехват','пуст','недоста'],['некомплект','брак']],
+ [['пвз','пункт','выдач','закры','переех','перенес','перенос'],['пвз','пункт','выдач','перенос','перенесл']],
+ [['клуб','подпис','автопрод','vip','привилег'],['клуб','подписк','автопрод']],
+ [['номер','телеф','смс','код','войт','вход','доступ','аккаун'],['номер','телефон','доступ']],
+ [['паспорт','госуслуг','кошел','заблок','блокир','банк'],['госуслуг','паспорт','кошел','блокир']],
+ [['страхов','защит','полис'],['защит','страхов']],
+ [['пошлин','тамож'],['пошлин','тамож']],
+ [['кита','зарубеж','заграниц','трек','турци','ташкент'],['зарубеж','трек']],
+ [['рассроч','кредит','частя','сплит'],['рассроч','кредит']],
+ [['спасиб','благодар','помогл','разобрал'],['оценк']],
+ [['ускор','быстр','рассмотр','дней','проблем','нереш'],['ускор','проблем','срок','рассмотр']],
+ [['прилож','обнов','верси','выле','глюч','висн','зависа'],['приложен','верси']],
+ [['корзин','избран','пропа','исчез'],['корзин','избран','пропа']],
+ [['продав','селлер','магазин'],['продав']],
+ [['ягод','баллы','бонус'],['ягод','компенсац']],
+ [['сертиф','подарочн'],['сертификат']],
+ [['кеш','куки','тормоз','веб','кц'],['кеш','куки']],
+ [['обратн','транспорт','вернул','сдал'],['обратн','доставк','спис']]
+];
+var XM={};function expand(toks){var ex=[];XM={};toks.forEach(function(t){XM[t]=[]});INTENTS.forEach(function(g){toks.forEach(function(t){if(g[0].some(function(p){return t.indexOf(p)===0||(p.length>=5&&p.indexOf(t)===0&&t.length>=4)}))g[1].forEach(function(a){XM[t].push(a);if(toks.indexOf(a)<0&&ex.indexOf(a)<0)ex.push(a)})})});return ex}
+
+/* ---------- тон клиента ---------- */
+var NEG=['ужас','безобраз','сколько можно','надоел','обман','мошен','жалоб','позор','кошмар','издева','бесит','отврат','хамств','суд','роспотреб','прокурат','никогда больше','верните мои','достали','возмут','!!'];
+function isNeg(s){var t=nz(s);return NEG.some(function(w){return t.indexOf(w)>-1})||(/[А-ЯЁ]{6,}/.test(s))}
+
+/* ---------- персональные данные: скрываем до поиска ---------- */
+function mask(s){var hit={};s=s.replace(/[\w.+-]+@[\w-]+\.[\w.]+/g,function(){hit['email']=1;return ' '})
+ .replace(/(?:\+7|\b8|\b7)[\s\-()]*\d{3}[\s\-()]*\d{3}[\s\-]*\d{2}[\s\-]*\d{2}\b/g,function(){hit['телефон']=1;return ' '})
+ .replace(/\b(?:\d[ -]?){16}\b/g,function(){hit['номер карты']=1;return ' '})
+ .replace(/\b\d{6,}\b/g,function(){hit['номера (заказ, ЛК, РИД)']=1;return ' '});return {s:s,hit:Object.keys(hit)}}
+
+/* ---------- индекс: поля с весами, IDF ---------- */
+var FW={lbl:3.5,sit:3.5,sec:1.6,keys:1.2,x:1.3,note:.4};
+var DOCS=KB.map(function(e){var f={};for(var k in FW)f[k]=words(e[k]||'').map(stem);return {e:e,f:f}});
+var DF={};function df(t){if(DF[t]!=null)return DF[t];var n=0;DOCS.forEach(function(d){for(var k in d.f){if(d.f[k].some(function(w){return same(w,t)})){n++;break}}});return DF[t]=n}
+function idf(t){var n=DOCS.length;return Math.log(1+(n-df(t)+.5)/(df(t)+.5))}
+function scoreDoc(d,terms){var s=0,matched=[];terms.forEach(function(q){var best=0;for(var k in FW){var arr=d.f[k],tf=0;for(var i=0;i<arr.length;i++)if(same(arr[i],q.t))tf++;if(tf)best=Math.max(best,FW[k]*(1+Math.log(tf)))}if(best){s+=q.w*idf(q.t)*best;matched.push(q.t)}});return {s:s,m:matched}}
+
+/* ---------- поиск и группировка по ситуациям ---------- */
+var state={tone:'auto',kind:'all'};
+function search(raw){var toks=qtokens(raw);toks=toks.filter(function(t,i){return toks.indexOf(t)===i});if(!toks.length)return {groups:[],toks:[]};
+ var ex=expand(toks),terms=toks.map(function(t){return {t:t,w:1}}).concat(ex.map(function(t){return {t:t,w:.5}}));
+ var totalIdf=toks.reduce(function(a,t){return a+idf(t)},0)||1;
+ var G={},order=[];
+ DOCS.forEach(function(d){if(state.kind!=='all'&&d.e.k!==state.kind)return;var r=scoreDoc(d,terms);if(r.s<=0)return;
+   var key=d.e.u+'|'+d.e.sit;if(!G[key]){G[key]={key:key,items:[],score:0,m:{},sec:d.e.sec,sit:d.e.sit,p:d.e.p,u:d.e.u};order.push(key)}
+   var g=G[key];g.items.push({e:d.e,s:r.s});r.m.forEach(function(t){g.m[t]=1})});
+ var groups=order.map(function(k){var g=G[k];g.items.sort(function(a,b){return b.s-a.s});var top=g.items[0].s,rest=g.items.slice(1,4).reduce(function(a,x){return a+x.s},0);
+   var cov=toks.reduce(function(a,t){return a+(g.m[t]?idf(t):(XM[t]||[]).some(function(x){return g.m[x]})?idf(t)*.7:0)},0)/totalIdf;g.cov=cov;g.score=(top+.15*rest)*(.35+cov);g.shown=toks.filter(function(t){return g.m[t]}).concat(Object.keys(g.m).filter(function(t){return toks.indexOf(t)<0}).map(function(t){return t+'*'}));return g});
+ groups.sort(function(a,b){return b.score-a.score});return {groups:groups.slice(0,5),toks:toks,ex:ex}}
+
+/* ---------- отрисовка ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function hl(s){return esc(s).replace(/\[[^\]\n]{1,80}\]/g,function(m){return '<mark>'+m+'</mark>'})}
+var out=document.getElementById('out'),q=document.getElementById('q'),masked=document.getElementById('masked');
+var TPLS={},OM={};
+function tplHTML(e,pref){TPLS[e.id]=e.x;return '<div class="tpl'+(e.k==='sv'?' sv':'')+(pref?' pref':'')+'"><span class="lbl">'+(e.k==='sv'?'✉️ Формат СВ · ':'')+esc(e.lbl)+(pref?' · подходит по тону':'')+'</span>'+hl(e.x)+'<button class="copy" data-id="'+esc(e.id)+'">Копировать</button></div>'}
+function draw(){
+ var raw=q.value,mk=mask(raw);
+ masked.style.display=mk.hit.length?'block':'none';masked.innerHTML=mk.hit.length?'🙈 Скрыли из запроса: <b>'+mk.hit.join(', ')+'</b>. Для поиска они не нужны — в шаблоны их подставляете вы сами.':'';
+ if(!raw.trim()){out.innerHTML='';return}
+ var r=search(mk.s);OM={};var ww=words(mk.s);ww.forEach(function(w,i){OM[stem(w)]=w;if((w==='не'||w==='нет')&&ww[i+1])OM['не'+stem(ww[i+1])]='не '+ww[i+1]});
+ var neg=state.tone==='neg'||(state.tone==='auto'&&isNeg(raw));
+ if(!r.groups.length){out.innerHTML='<section class="empty">Ничего не нашлось 🤔<br>Попробуйте описать иначе: <i>«списали за доставку»</i>, <i>«нет кнопки отмены»</i> — или спросите наставника во «Флудилке».</section>';return}
+ var h='<p class="status">Тон клиента: <span class="tone'+(neg?' neg':'')+'">'+(neg?'недоволен':'спокойный')+'</span>'+(state.tone==='auto'?' (определён автоматически)':'')+' · найдено ситуаций: '+r.groups.length+'</p>';
+ r.groups.forEach(function(g,gi){
+   var conf=g.cov>=.6?['hi','точно подходит']:g.cov>=.34?['mid','похоже']:['lo','возможно'];
+   var tp=g.items.filter(function(x){return x.e.k!=='rule'}).map(function(x){return x.e});
+   var rules=g.items.filter(function(x){return x.e.k==='rule'}).map(function(x){return x.e});
+   // шаблоны с нужным тоном — первыми
+   function toneOf(e){var l=nz(e.lbl);return l.indexOf('негатив')>-1?'neg':l.indexOf('нейтрал')>-1?'neu':''}
+   tp.sort(function(a,b){var ta=toneOf(a),tb=toneOf(b),w=neg?'neg':'neu';return (tb===w)-(ta===w)});
+   var note=(tp[0]&&tp[0].note)||'';
+   h+='<div class="card'+(gi===0?' top':'')+'"><div class="path">'+esc(g.p)+' → '+esc(g.sec)+'</div><h2>'+esc(g.sit||g.sec)+'<span class="conf '+conf[0]+'">'+conf[1]+'</span></h2>';
+   var mw=g.shown.filter(function(t){return t.slice(-1)!=='*'}).map(function(t){return OM[t]||t});if(mw.length)h+='<div class="why">Нашли по словам: <b>'+mw.slice(0,8).map(esc).join(', ')+'</b>'+(g.shown.length>mw.length?' + похожие по смыслу':'')+'</div>';
+   rules.slice(0,2).forEach(function(e){h+='<div class="rule'+(/⚠|⛔/.test(e.x)?' warn':'')+'">📌 '+esc(e.x.length>420?e.x.slice(0,420)+'…':e.x)+'</div>'});
+   if(note&&!rules.length)h+='<div class="rule'+(/⚠/.test(note)?' warn':'')+'">📌 '+esc(note.length>420?note.slice(0,420)+'…':note)+'</div>';
+   var show=tp.slice(0,2),hide=tp.slice(2,8);
+   show.forEach(function(e,i){h+=tplHTML(e,i===0&&toneOf(e)===(neg?'neg':'neu'))});
+   if(hide.length)h+='<details class="extra"><summary>Ещё шаблоны в этой ситуации ('+hide.length+')</summary>'+hide.map(function(e){return tplHTML(e,false)}).join('')+'</details>';
+   var src=(tp[0]&&tp[0].src)||[];
+   h+='<div class="more"><a href="'+esc(g.u)+'">Открыть в шпаргалке →</a>'+src.slice(0,2).map(function(s){return '<a href="'+esc(s.u)+'" target="_blank" rel="noopener">📚 '+esc(s.t)+' ↗</a>'}).join('')+'</div></div>';
+ });
+ out.innerHTML=h;
+}
+var tm;q.addEventListener('input',function(){clearTimeout(tm);tm=setTimeout(draw,180)});
+function seg(id,key){var el=document.getElementById(id);el.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;[].forEach.call(el.children,function(x){x.classList.toggle('on',x===b)});state[key]=b.getAttribute('data-v');draw()})}
+seg('tone','tone');seg('kind','kind');
+var EX=['заказ не пришёл уже неделю, где он?','списали деньги за обратную доставку','хочу отменить заказ в рассрочку','нет доступа к старому номеру телефона','прошло 10 дней, проблема не решена','привезли бракованный товар','ПВЗ закрылся, как забрать заказ','списали за защиту товара'];
+document.getElementById('ex').innerHTML=EX.map(function(x){return '<button type="button">'+esc(x)+'</button>'}).join('');
+document.getElementById('ex').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;q.value=b.textContent;draw();q.focus()});
+var toast=document.getElementById('toast'),tt;function say(m){toast.textContent=m;toast.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){toast.classList.remove('on')},2600)}
+function fb(t){var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(e){}a.remove()}
+out.addEventListener('click',function(e){var b=e.target.closest('.copy');if(!b)return;var t=TPLS[b.getAttribute('data-id')]||'';
+ function ok(){b.textContent='Скопировано ✓';b.classList.add('done');setTimeout(function(){b.textContent='Копировать';b.classList.remove('done')},1500);if(/\[[^\]]+\]/.test(t))say('Не забудьте заполнить поля в [квадратных скобках] 🙂')}
+ if(navigator.clipboard){navigator.clipboard.writeText(t).then(ok,function(){fb(t);ok()})}else{fb(t);ok()}});
+// ?q=... — можно открыть помощника сразу с запросом (например, из общего поиска)
+try{var pq=new URLSearchParams(location.search).get('q');if(pq){q.value=pq;draw()}}catch(e){}
+window.G11Helper={search:search,qtokens:qtokens,mask:mask};
+})();
+</script>
+<script>(function(){var r=document.documentElement,b=document.createElement('button');b.type='button';b.className='theme-btn';
+function dark(){var t=r.getAttribute('data-theme');return t?t==='dark':(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)}
+function upd(){var d=dark();b.textContent=d?'☀️':'🌙';b.title=d?'Светлая тема':'Тёмная тема';b.setAttribute('aria-label',b.title)}
+b.onclick=function(){var n=dark()?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}upd()};
+if(window.matchMedia)matchMedia('(prefers-color-scheme: dark)').addEventListener('change',upd);
+document.body.appendChild(b);upd()})();</script>
+<script src="site.js?v=21" defer></script>
+</body>
+</html>

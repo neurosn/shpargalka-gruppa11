@@ -2,7 +2,7 @@
 (function(){
   if(window.__g11site)return;window.__g11site=1;
   var MAP={'index.html':'home','':'home','work.html':'work','templates.html':'work','sv.html':'work',
-    'tools.html':'tools','calc.html':'tools','salary.html':'tools','check.html':'tools',
+    'tools.html':'tools','helper.html':'tools','calc.html':'tools','salary.html':'tools','check.html':'tools',
     'team.html':'team','vacation.html':'team','zp.html':'team','account.html':'team','admin.html':'team','editor.html':'team','logins.html':'team','article.html':'work'};
   var file=(location.pathname.split('/').pop()||'');
   var cur=document.body.getAttribute('data-space')||MAP[file]||'';
