@@ -13,6 +13,8 @@
 .hrs em{display:block;font-style:normal;font-size:11px;color:var(--muted)}.hrs div.empty b{color:var(--muted);opacity:.5}
 .hrs i{position:absolute;left:0;bottom:0;height:4px;background:var(--accent);opacity:.55}
 .hrsum{display:flex;flex-wrap:wrap;gap:10px 22px;margin:0 0 6px}.hrsum b{font-size:20px}
+.hrs div.ok b{color:var(--ok)}.hrs div.ok i{background:var(--ok)}.hrs div.low b{color:var(--warn)}.hrs div.low i{background:var(--warn)}
+.hrt td.ok{color:var(--ok);font-weight:700}.hrt td.low{color:var(--warn)}
 .hrt td,.hrt th{padding:6px 5px;text-align:center;font-size:13px;border-bottom:1px solid var(--line)}.hrt td:first-child,.hrt th:first-child{text-align:left;width:auto;white-space:nowrap}
 
 :root{--bg:#f6f4fb;--card:#fff;--ink:#1d1730;--muted:#6b6480;--line:#e6e1f2;--accent:#7b2cbf;--accent2:#cb11ab;--soft:#f1e8fb;--ok:#1f9d6b;--warn:#d9480f}
@@ -206,18 +208,20 @@ $('salb').onclick=function(){var m=$('salm');m.className='msg';G11.api('setSalar
 
 // чаты по часам (лист «Текущая смена»)
 function hrLabel(h){var m=String(h).match(/^(\d{1,2}):/);if(!m)return h;var e=+m[1],b=(e+23)%24;return b+'–'+e}
+var HR_NORM=10;function hrCls(n){return n==null?'':n>=HR_NORM?'ok':'low'}
 function hrNum(x){return x==null?'—':String(x).replace('.',',')}
 function loadHourly(){G11.api('myHourly').then(function(j){var box=$('hr-body');$('hr-sec').hidden=false;box.className='';
   var me=j.me,g=j.group,html='';
   if(me){var mx=Math.max.apply(null,me.hours.map(function(x){return x.n||0}).concat([1]));
     var done=me.hours.filter(function(x){return x.n!=null}),avg=done.length?Math.round(done.reduce(function(a,x){return a+x.n},0)/done.length*10)/10:null;
-    html+='<div class="hrsum"><div><small>Всего за смену</small><br><b>'+hrNum(me.total)+'</b></div><div><small>В среднем за час</small><br><b>'+hrNum(avg)+'</b></div>'+(g&&g.total!=null?'<div><small>В среднем по группе за смену</small><br><b>'+hrNum(g.total)+'</b></div>':'')+'</div>';
-    html+='<div class="hrs">'+me.hours.map(function(x,i){var gv=g&&g.hours[i]?g.hours[i].n:null;return '<div'+(x.n==null?' class="empty"':'')+'><small>'+esc(hrLabel(x.h))+'</small><b>'+hrNum(x.n)+'</b><em>'+(gv!=null?'группа '+hrNum(gv):'&nbsp;')+'</em>'+(x.n?'<i style="width:'+Math.round(x.n/mx*100)+'%"></i>':'')+'</div>'}).join('')+'</div>';}
+    var inN=done.filter(function(x){return x.n>=HR_NORM}).length;
+    html+='<div class="hrsum"><div><small>Всего за смену</small><br><b>'+hrNum(me.total)+'</b></div><div><small>В среднем за час</small><br><b style="color:var('+(avg==null?'--ink':avg>=HR_NORM?'--ok':'--warn')+')">'+hrNum(avg)+'</b></div><div><small>Часов в норме ('+HR_NORM+'+ чатов)</small><br><b>'+inN+' из '+done.length+'</b></div>'+'</div>';
+    html+='<div class="hrs">'+me.hours.map(function(x,i){var gv=g&&g.hours[i]?g.hours[i].n:null;return '<div class="'+(x.n==null?'empty':hrCls(x.n))+'"><small>'+esc(hrLabel(x.h))+'</small><b>'+hrNum(x.n)+'</b><em>из '+HR_NORM+'</em>'+(x.n?'<i style="width:'+Math.min(100,Math.round(x.n/Math.max(mx,HR_NORM)*100))+'%"></i>':'')+'</div>'}).join('')+'</div>';}
   else if(!j.people)html+='<p style="margin:0;color:var(--muted)">Вас пока нет в листе текущей смены.</p>';
   if(j.people){html+='<div class="scroll" style="margin-top:10px"><table class="hrt"><thead><tr><th>Сотрудник</th>'+j.hours.map(function(h){return '<th>'+esc(hrLabel(h))+'</th>'}).join('')+'<th>Итого</th></tr></thead><tbody>'+
-    j.people.map(function(p){return '<tr><td>'+esc(p.name.split(' ').slice(0,2).join(' '))+'</td>'+p.hours.map(function(x){return '<td>'+hrNum(x.n)+'</td>'}).join('')+'<td><b>'+hrNum(p.total)+'</b></td></tr>'}).join('')+
+    j.people.map(function(p){return '<tr><td>'+esc(p.name.split(' ').slice(0,2).join(' '))+'</td>'+p.hours.map(function(x){return '<td class="'+hrCls(x.n)+'">'+hrNum(x.n)+'</td>'}).join('')+'<td><b>'+hrNum(p.total)+'</b></td></tr>'}).join('')+
     (g?'<tr><td>Группа, в среднем</td>'+g.hours.map(function(x){return '<td>'+hrNum(x.n)+'</td>'}).join('')+'<td><b>'+hrNum(g.total)+'</b></td></tr>':'')+'</tbody></table></div>'}
-  html+='<p style="margin:8px 0 0;color:var(--muted);font-size:13px">Данные вносит руководитель раз в час · обновлено в '+esc(j.updated)+' МСК</p>';
+  html+='<p style="margin:8px 0 0;color:var(--muted);font-size:13px">Норма — '+HR_NORM+' чатов в час: зелёным — в норме, оранжевым — ниже нормы · данные вносит руководитель раз в час · обновлено в '+esc(j.updated)+' МСК</p>';
   box.innerHTML=html}).catch(function(x){$('hr-sec').hidden=false;$('hr-body').className='';$('hr-body').textContent=x.message})}
 setInterval(function(){if(window.G11&&G11.user()&&!document.hidden&&show.loaded)loadHourly()},300000);
 function loadShift(){if(!window.G11Shift){setTimeout(loadShift,200);return}if(!loadShift.w)loadShift.w=G11Shift($('shift-sec'),'real');else loadShift.w.reload()}
