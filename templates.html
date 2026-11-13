@@ -724,6 +724,38 @@ repBox().addEventListener('click',function(ev){var x=ev.target.closest('button')
   if(x.dataset.rall){REP.slice().filter(function(r){return r.k==='adj'||r.k==='dup'}).forEach(function(r){repFix(r)});REPLAST=null;repCheck();return}
   var r=REP[+(x.dataset.ri!=null?x.dataset.ri:x.dataset.rx)];if(!r)return;
   if(x.dataset.ri!=null){if(x.dataset.rs!=null)repFix(r,r.syn[+x.dataset.rs]);else repFix(r)}else REPIGN[r.k+':'+(r.word||r.text).toLowerCase()]=1;REPLAST=null;repCheck()});
+// пунктуация: пробелы у знаков, запятые перед «что/чтобы/если/почему/который/но», вводные слова, «пожалуйста», точка в конце, заглавная после точки, тире
+var PUN=[],PUNIGN={},PUNLAST=null;
+function punFind(t){var res=[],C='А-Яа-яЁё',W='A-Za-z'+C;
+  function add(i,len,rep,msg){if(t.substr(i,len)===rep)return;for(var k=0;k<res.length;k++){var r=res[k];if(i<r.i+r.len&&r.i<i+len)return}var key=msg+':'+t.substr(Math.max(0,i-12),len+24);if(PUNIGN[key])return;res.push({i:i,len:len,rep:rep,msg:msg,key:key})}
+  function each(re,fn){var m;re.lastIndex=0;while((m=re.exec(t))){fn(m);if(m[0]==='')re.lastIndex++}}
+  each(/(^|\n)(Здравствуйте|Добрый день|Добрый вечер|Доброе утро|Доброй ночи)(?=[ \t]*(\n|$)|[ \t]+[А-ЯЁ])/g,function(m){var i=m.index+m[1].length;add(i,m[2].length,m[2]+'!','после приветствия нужен знак')});
+  each(/[ \t]+([,.!?;:])(?![)(])/g,function(m){add(m.index,m[0].length,m[1],'лишний пробел перед знаком')});
+  each(new RegExp('([,;:])(?=['+W+'])','g'),function(m){if(/\d/.test(t[m.index-1]||'')&&/\d/.test(t[m.index+1]||''))return;add(m.index,1,m[1]+' ','нет пробела после знака')});
+  each(/([.!?])(?=[А-ЯЁ])/g,function(m){add(m.index,1,m[1]+' ','нет пробела после точки')});
+  each(/,{2,}|(?<!\.)\.\.(?!\.)|([!?])\./g,function(m){add(m.index,m[0].length,m[0][0]===','?',':m[1]||'.','двойной знак')});
+  each(/(\S)[ \t]{2,}(?=\S)/g,function(m){add(m.index+1,m[0].length-1,' ','двойной пробел')});
+  each(/(\S) - (?=\S)/g,function(m){add(m.index+1,3,' — ','вместо дефиса нужно тире')});
+  var EXC={'потому':1,'так':1,'то':1,'тот':1,'того':1,'тем':1,'ли':1,'не':1,'ни':1,'лишь':1,'только':1,'и':1,'а':1,'или':1,'либо':1,'чем':1,'да':1,'даже':1,'именно':1,'хотя':1,'после':1,'перед':1,'прежде':1,'раньше':1,'вместо':1,'кроме':1,'будто':1,'словно':1,'почти':1,'всё':1,'все':1,'при':1,'в':1,'на':1,'о':1,'об':1,'по':1,'с':1,'со':1,'у':1,'к':1,'за':1,'для':1,'из':1,'от':1,'до':1,'без':1,'про':1,'над':1,'под':1,'через':1,'том':1,'тех':1,'той':1,'теми':1,'это':1,'вот':1,'зато':1};
+  each(new RegExp('(['+C+'-]+)([ \\t]+)(что|чтобы|если|когда|почему|зачем|откуда|куда|где|сколько|который|которая|которое|которые|которых|которым|которой|которого|но|однако|поэтому|потому что|так как)(?=[\\s,.!?;:]|$)','gi'),function(m){
+    if(EXC[m[1].toLowerCase()])return;var i=m.index+m[1].length;add(i,m[2].length,', ','перед «'+m[3].toLowerCase()+'» нужна запятая')});
+  each(/(^|[.!?…][ \t]+|\n)(К сожалению|К счастью|Пожалуйста|Например|Конечно|Кстати|Однако|Во-первых|Во-вторых|В-третьих|Возможно|Действительно|Безусловно|Разумеется|Кроме того|Тем не менее|Таким образом|В таком случае|Со своей стороны|С моей стороны|Со стороны компании)[ \t]+(?=[а-яё])/g,function(m){var i=m.index+m[1].length+m[2].length;add(i,m[0].length-m[1].length-m[2].length,', ','после вводного слова нужна запятая')});
+  each(new RegExp('(['+W+'])[ \\t]+(пожалуйста)(?=[ \\t]+[а-яё])','g'),function(m){add(m.index+1,m[0].length-1,', пожалуйста,','«пожалуйста» выделяется запятыми')});
+  each(new RegExp('(['+W+'])[ \\t]+(пожалуйста)(?=[.!?])','g'),function(m){add(m.index+1,m[0].length-1,', пожалуйста','перед «пожалуйста» нужна запятая')});
+  each(/(,[ \t]*пожалуйста)[ \t]+(?=[а-яё])/g,function(m){add(m.index+m[1].length,m[0].length-m[1].length,', ','после «пожалуйста» нужна запятая')});
+  each(/([.!?][ \t]+)([а-яё])/g,function(m){var pre=t.slice(Math.max(0,m.index-6),m.index);if(/(^|[\s(])(т\.е|т\.д|т\.п|т\.к|др|руб|шт|ул|д|г|см|стр|мин|сек|ч)$/i.test(pre))return;add(m.index+m[1].length,1,m[2].toUpperCase(),'после точки — с заглавной')});
+  var pos=0;t.split('\n').forEach(function(line){var s=line.replace(/\s+$/,'');if(s&&!/^\s*(\d+[.)]|[—–\-•*])/.test(s)&&(s.match(/\S+/g)||[]).length>=3&&!/[.!?…:;,)»"]$/.test(s)&&!/\p{Extended_Pictographic}$/u.test(s)&&!/https?:\/\/\S+$/.test(s))add(pos+s.length,0,'.','в конце предложения нет точки');pos+=line.length+1});
+  return res.sort(function(a,b){return a.i-b.i})}
+function punBox(){var b=document.getElementById('ecPun');if(!b){b=document.createElement('div');b.id='ecPun';b.className='ec-spell';b.hidden=true;var a=repBox();a.parentNode.insertBefore(b,a.nextSibling)}return b}
+function punSnip(t,r){var a=Math.max(0,r.i-18),z=Math.min(t.length,r.i+r.len+18);var L=t.slice(a,r.i).replace(/\n/g,' ⏎ '),M=t.substr(r.i,r.len).replace(/\n/g,' ⏎ '),Z=t.slice(r.i+r.len,z).replace(/\n/g,' ⏎ ');return (a>0?'…':'')+escH(L)+(M.trim()?'<s>'+escH(M)+'</s>':'')+'<b style="color:var(--ok)">'+escH(r.rep.replace(/ /g,' '))+'</b>'+escH(Z)+(z<t.length?'…':'')}
+function punRender(){var b=punBox(),t=$('ecOut').value;if(!PUN.length){b.hidden=true;b.innerHTML='';return}b.hidden=false;
+  b.innerHTML='<b>✍️ Пунктуация ('+PUN.length+'):</b> '+PUN.map(function(r,i){return '<span class="sp" title="'+escH(r.msg)+'"><small style="opacity:.75">'+escH(r.msg)+':</small> '+punSnip(t,r)+' <button type="button" data-pi="'+i+'">исправить</button><button type="button" class="ign" data-px="'+i+'" title="Оставить как есть">✕</button></span>'}).join('')+(PUN.length>1?'<button type="button" class="all" data-pall="1">✅ Исправить всё</button>':'')}
+function punApply(list){var o=$('ecOut'),t=o.value;list.slice().sort(function(a,b){return b.i-a.i}).forEach(function(r){t=t.slice(0,r.i)+r.rep+t.slice(r.i+r.len)});o.value=t;o.dataset.touched=1}
+function punCheck(){var v=$('ecOut').value;if(v===PUNLAST)return;PUNLAST=v;PUN=v.trim()?punFind(v):[];punRender()}
+setInterval(punCheck,700);$('ecOut').addEventListener('input',function(){clearTimeout(punCheck.t);punCheck.t=setTimeout(punCheck,300)});
+punBox().addEventListener('click',function(ev){var x=ev.target.closest('button');if(!x)return;
+  if(x.dataset.pall){for(var n=0;n<4&&PUN.length;n++){punApply(PUN);PUNLAST=null;punCheck()}return}
+  var r=PUN[+(x.dataset.pi!=null?x.dataset.pi:x.dataset.px)];if(!r)return;if(x.dataset.pi!=null)punApply([r]);else PUNIGN[r.key]=1;PUNLAST=null;punCheck()});
 $('ecOut').addEventListener('keyup',function(e){if(/Arrow|Home|End/.test(e.key))phSug()});$('ecOut').addEventListener('blur',function(){setTimeout(function(){$('ecSug').hidden=true},200)});
 function phKey(s){return String(s).replace(/\s+/g,' ').trim().toLowerCase().replace(/[.!?…,;:—–\s]+$/,'')}
 function phSplit(t){return String(t||'').replace(/([.!?…])\s+/g,'$1\n').split(/\n+/).map(function(s){return s.replace(/\s+/g,' ').trim()}).filter(Boolean)}
