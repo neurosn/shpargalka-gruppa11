@@ -691,30 +691,35 @@ $('ecSpellRes').addEventListener('click',function(ev){var x=ev.target.closest('b
 $('ecOut').addEventListener('input',function(){if(SP.length){SP=[];spRender()}});
 // повторы: «пожалуйста, пожалуйста», одно слово дважды в предложении, одинаковые предложения
 var REP=[],REPIGN={},REPLAST=null;
+var REPSYN={'спасибо':['благодарю'],'благодарю':['спасибо'],'понимаю':['мне понятно'],'проверила':['посмотрела','уточнила'],'проверил':['посмотрел','уточнил'],'проверил/а':['посмотрел/а','уточнил/а'],'обязательно':['непременно'],'пожалуйста':[],'сейчас':['в данный момент'],'вопрос':['обращение'],'ситуацию':['обстоятельства'],'заказ':['покупку'],'товар':['покупку'],'помочь':['подсказать'],'необходимо':['нужно'],'нужно':['необходимо'],'можете':['сможете'],'сможете':['можете'],'отлично':['хорошо'],'хорошо':['отлично']};
 function repFind(t){var res=[],L='A-Za-zА-Яа-яЁё0-9',seen={};
   var re=new RegExp('(^|[^'+L+'-])(['+L+'-]+)(\\s*[,;]?\\s+)(\\2)(?![\\-'+L+'])','gi'),m;
   while((m=re.exec(t))){var p=m.index+m[1].length;res.push({k:'adj',word:m[2],pos:p,len:m[2].length+m[3].length+m[4].length});seen[m[2].toLowerCase()]=1;re.lastIndex=p+m[2].length}
   var SKIP={'чтобы':1,'также':1,'может':1,'можно':1,'будет':1,'этого':1,'после':1,'через':1,'более':1,'очень':1,'вашего':1,'вашей':1,'вашим':1,'ваших':1,'ваша':1,'ваше':1,'ваши':1,'если':1,'когда':1,'которые':1,'который':1,'которая':1};
-  var sents=t.split(/(?<=[.!?…])\s+|\n+/),cnt={};
-  sents.forEach(function(s){var c={};(s.toLowerCase().match(new RegExp('['+L+'-]{5,}','g'))||[]).forEach(function(w){if(!SKIP[w])c[w]=(c[w]||0)+1});Object.keys(c).forEach(function(w){if(c[w]>1&&!seen[w]){seen[w]=1;res.push({k:'sent',word:w,n:c[w]})}});
+  var sents=t.split(/(?<=[.!?…])\s+|\n+/).filter(function(x){return x.trim()}),cnt={},W=new RegExp('['+L+'/-]{5,}','g');
+  var words=sents.map(function(s){var c={};(s.toLowerCase().match(W)||[]).forEach(function(w){if(!SKIP[w])c[w]=(c[w]||0)+1});return c});
+  sents.forEach(function(s,i){var c=words[i];Object.keys(c).forEach(function(w){if(c[w]>1&&!seen[w]){seen[w]=1;res.push({k:'sent',word:w,n:c[w]})}});
     var key=s.toLowerCase().replace(/[^а-яёa-z0-9]+/g,' ').trim();if(key.length>=12){if(cnt[key]&&!seen['§'+key]){seen['§'+key]=1;res.push({k:'dup',text:s.trim()})}cnt[key]=1}});
+  for(var i=0;i<sents.length;i++)for(var j=i+1;j<=i+3&&j<sents.length;j++)Object.keys(words[i]).forEach(function(w){if(words[j][w]&&!seen[w]){seen[w]=1;res.push({k:'near',word:w,syn:REPSYN[w]||[]})}});
   return res.filter(function(r){return !REPIGN[r.k+':'+(r.word||r.text).toLowerCase()]})}
 function repBox(){var b=document.getElementById('ecRep');if(!b){b=document.createElement('div');b.id='ecRep';b.className='ec-spell';b.hidden=true;var a=$('ecSpellRes');a.parentNode.insertBefore(b,a.nextSibling)}return b}
 function repRender(){var b=repBox();if(!REP.length){b.hidden=true;b.innerHTML='';return}b.hidden=false;
   b.innerHTML='<b>🔁 Повторы ('+REP.length+'):</b> '+REP.map(function(r,i){var x='<button type="button" class="ign" data-rx="'+i+'" title="Оставить как есть">✕</button>';
     if(r.k==='adj')return '<span class="sp"><s>'+escH(r.word)+', '+escH(r.word)+'</s> → <button type="button" data-ri="'+i+'">'+escH(r.word)+'</button>'+x+'</span>';
     if(r.k==='dup')return '<span class="sp">предложение два раза: <s>'+escH(r.text.length>60?r.text.slice(0,60)+'…':r.text)+'</s> <button type="button" data-ri="'+i+'">убрать второе</button>'+x+'</span>';
-    return '<span class="sp">«'+escH(r.word)+'» '+r.n+' раза в одном предложении — замените синонимом'+x+'</span>'}).join('')+(REP.some(function(r){return r.k!=='sent'})?'<button type="button" class="all" data-rall="1">✅ Убрать все повторы</button>':'')}
-function repFix(r){var o=$('ecOut'),t=o.value;
+    if(r.k==='near')return '<span class="sp">«'+escH(r.word)+'» повторяется рядом'+(r.syn&&r.syn.length?' → '+r.syn.map(function(v,j){return '<button type="button" data-ri="'+i+'" data-rs="'+j+'">'+escH(v)+'</button>'}).join(''):' — замените синонимом')+x+'</span>';
+    return '<span class="sp">«'+escH(r.word)+'» '+r.n+' раза в одном предложении — замените синонимом'+x+'</span>'}).join('')+(REP.some(function(r){return r.k==='adj'||r.k==='dup'})?'<button type="button" class="all" data-rall="1">✅ Убрать все повторы</button>':'')}
+function repFix(r,syn){var o=$('ecOut'),t=o.value;
+  if(r.k==='near'&&syn!=null){var rx=new RegExp('(^|[^A-Za-zА-Яа-яЁё0-9/-])('+r.word.replace(/[\/\-]/g,'\\$&')+')(?![A-Za-zА-Яа-яЁё0-9/-])','gi'),n=0;t=t.replace(rx,function(a,pre,w){n++;if(n!==2)return a;var v=syn;if(w[0]!==w[0].toLowerCase())v=v.charAt(0).toUpperCase()+v.slice(1);return pre+v})}
   if(r.k==='adj'){var re=new RegExp('(^|[^A-Za-zА-Яа-яЁё0-9-])('+r.word.replace(/[-]/g,'\\-')+')(\\s*[,;]?\\s+)('+r.word.replace(/[-]/g,'\\-')+')(?![\\-A-Za-zА-Яа-яЁё0-9])','i');t=t.replace(re,'$1$2')}
   else if(r.k==='dup'){var i=t.indexOf(r.text),j=t.indexOf(r.text,i+r.text.length);if(j>-1)t=(t.slice(0,j)+t.slice(j+r.text.length)).replace(/[ \t]{2,}/g,' ').replace(/[ \t]+(\n|$)/g,'$1').replace(/\n{3,}/g,'\n\n')}
   o.value=t;o.dataset.touched=1}
 function repCheck(){var v=$('ecOut').value;if(v===REPLAST)return;REPLAST=v;REP=v.trim()?repFind(v):[];repRender()}
 setInterval(repCheck,700);$('ecOut').addEventListener('input',function(){clearTimeout(repCheck.t);repCheck.t=setTimeout(repCheck,300)});
 repBox().addEventListener('click',function(ev){var x=ev.target.closest('button');if(!x)return;
-  if(x.dataset.rall){REP.slice().filter(function(r){return r.k!=='sent'}).forEach(repFix);REPLAST=null;repCheck();return}
+  if(x.dataset.rall){REP.slice().filter(function(r){return r.k==='adj'||r.k==='dup'}).forEach(function(r){repFix(r)});REPLAST=null;repCheck();return}
   var r=REP[+(x.dataset.ri!=null?x.dataset.ri:x.dataset.rx)];if(!r)return;
-  if(x.dataset.ri!=null)repFix(r);else REPIGN[r.k+':'+(r.word||r.text).toLowerCase()]=1;REPLAST=null;repCheck()});
+  if(x.dataset.ri!=null){if(x.dataset.rs!=null)repFix(r,r.syn[+x.dataset.rs]);else repFix(r)}else REPIGN[r.k+':'+(r.word||r.text).toLowerCase()]=1;REPLAST=null;repCheck()});
 $('ecOut').addEventListener('keyup',function(e){if(/Arrow|Home|End/.test(e.key))phSug()});$('ecOut').addEventListener('blur',function(){setTimeout(function(){$('ecSug').hidden=true},200)});
 function phKey(s){return String(s).replace(/\s+/g,' ').trim().toLowerCase().replace(/[.!?…,;:—–\s]+$/,'')}
 function phSplit(t){return String(t||'').replace(/([.!?…])\s+/g,'$1\n').split(/\n+/).map(function(s){return s.replace(/\s+/g,' ').trim()}).filter(Boolean)}
