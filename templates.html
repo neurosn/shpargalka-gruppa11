@@ -86,6 +86,7 @@ main a:not(.link){color:var(--accent);font-weight:600}
 .btn.alt{background:var(--card);color:var(--accent)}
 .btn.done{background:var(--ok);border-color:var(--ok);color:#fff}
 .ec-warn{color:var(--warn);font-size:13px;font-weight:600;margin-top:6px}
+.ec-spell{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:8px 0 0;font-size:13.5px}.ec-spell>b{font-size:12.5px;color:var(--muted)}.ec-spell .sp{display:inline-flex;gap:4px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:4px 6px;background:var(--soft)}.ec-spell s{color:var(--warn)}.ec-spell button{border:1px solid var(--accent);background:var(--card);color:var(--ink);border-radius:6px;padding:2px 8px;font:inherit;font-size:13px;cursor:pointer}.ec-spell button.ign{border:0;background:none;color:var(--muted);padding:0 4px}.ec-spell button.all{background:var(--accent);color:#fff;font-weight:600}
 .ec-sug{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0 0}.ec-sug b{font-size:12.5px;color:var(--muted);font-weight:600}.ec-sug button{border:1px dashed var(--accent);background:var(--soft);color:var(--ink);border-radius:8px;padding:6px 10px;font:inherit;font-size:13.5px;cursor:pointer;text-align:left;max-width:100%}
 .ec-myph{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px}.ec-myph button{border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:8px;padding:7px 10px;font:inherit;font-size:13.5px;cursor:pointer;text-align:left;max-width:100%}.ec-myph button:hover{border-color:var(--accent)}.ec-myph small{color:var(--muted);margin-left:6px}
 .ec-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
@@ -172,11 +173,12 @@ section{scroll-margin-top:150px}
 </div>
 <div class="ec-btns"><button type="button" class="btn" id="ecGen">✨ Собрать ответ</button><button type="button" class="btn alt" id="ecAgain">🔄 Другой вариант</button></div>
 <label class="ec-l">5. Готовый ответ — проверьте и при необходимости поправьте</label>
-<textarea id="ecOut" rows="8" placeholder="Здесь появится ответ. Можно кликать по фразам ниже — они вставятся туда, где стоит курсор."></textarea>
+<textarea id="ecOut" rows="8" spellcheck="true" lang="ru" placeholder="Здесь появится ответ. Можно кликать по фразам ниже — они вставятся туда, где стоит курсор."></textarea>
 <div id="ecSug" class="ec-sug" hidden></div>
+<div id="ecSpellRes" class="ec-spell" hidden></div>
 <div id="ecWarn" class="ec-warn"></div>
 <div class="note" style="margin-bottom:0">⭐ Добавили в ответ запрос оценки — <b>не забудьте после отправки нажать в чате с клиентом кнопку «Завершить чат и запросить оценку»</b>. Иначе опрос клиенту не придёт.</div>
-<div class="ec-btns"><button type="button" class="btn" id="ecCopy">📋 Копировать ответ</button><button type="button" class="btn alt" id="ecClear">Очистить</button></div>
+<div class="ec-btns"><button type="button" class="btn" id="ecCopy">📋 Копировать ответ</button><button type="button" class="btn alt" id="ecSpell">🔤 Проверить орфографию</button><button type="button" class="btn alt" id="ecClear">Очистить</button></div>
 </div>
 </div>
 
@@ -672,7 +674,19 @@ if(window.G11)phLoad();else document.addEventListener('g11:ready',phLoad,{once:t
 var SUG=[];function phFrag(){var o=$('ecOut'),v=o.value.slice(0,o.selectionStart),m=v.match(/(?:^|[.!?…\n])([^.!?…\n]*)$/);return m?m[1]:''}
 function phSug(){var b=$('ecSug'),f=phFrag(),k=f.replace(/\s+/g,' ').trim().toLowerCase();SUG=k.length<2||!MYPH.length?[]:MYPH.filter(function(p){var t=p.text.toLowerCase();return t.indexOf(k)===0&&t.length>k.length}).slice(0,4);b.hidden=!SUG.length;b.innerHTML=SUG.length?'<b>💡 Ваши фразы:</b>'+SUG.map(function(p,i){return '<button type="button" data-i="'+i+'">'+escH(p.text)+'</button>'}).join(''):''}
 $('ecSug').addEventListener('mousedown',function(e){var x=e.target.closest('button');if(!x)return;e.preventDefault();var p=SUG[+x.dataset.i],o=$('ecOut'),c=o.selectionStart,v=o.value,f=phFrag(),lead=f.match(/^\s*/)[0],st=c-f.length;o.value=v.slice(0,st)+lead+p.text+v.slice(c);var pos=st+lead.length+p.text.length;o.focus();o.setSelectionRange(pos,pos);o.dataset.touched=1;SUG=[];$('ecSug').hidden=true});
-$('ecOut').addEventListener('input',phSug);$('ecOut').addEventListener('keyup',function(e){if(/Arrow|Home|End/.test(e.key))phSug()});$('ecOut').addEventListener('blur',function(){setTimeout(function(){$('ecSug').hidden=true},200)});
+$('ecOut').addEventListener('input',phSug);
+// кавычки: "текст" → «текст» (и в готовом ответе, и при копировании)
+function qFix(t){return String(t).replace(/„([^„“”"\n]*)[“”]/g,'«$1»').replace(/“([^“”"\n]*)”/g,'«$1»').replace(/[“„]/g,'«').replace(/”/g,'»').replace(/(^|[\s(\[{—–\-\/])"(?=\S)/g,'$1«').replace(/"/g,'»')}
+$('ecOut').addEventListener('input',function(){var o=this;if(!/["“”„]/.test(o.value))return;var s=o.selectionStart,e=o.selectionEnd;o.value=qFix(o.value);o.setSelectionRange(s,e)});
+// проверка орфографии: Яндекс.Спеллер
+var SP=[];function spRender(){var b=$('ecSpellRes');if(!SP.length){b.hidden=true;return}b.hidden=false;b.innerHTML='<b>🔤 Возможные ошибки ('+SP.length+'):</b> '+SP.map(function(e,i){return '<span class="sp"><s>'+escH(e.word)+'</s> → '+(e.s.length?e.s.slice(0,3).map(function(v,j){return '<button type="button" data-i="'+i+'" data-j="'+j+'">'+escH(v)+'</button>'}).join(''):'<i>нет вариантов</i>')+'<button type="button" class="ign" data-x="'+i+'" title="Оставить как есть">✕</button></span>'}).join('')+(SP.some(function(e){return e.s.length})?'<button type="button" class="all" data-all="1">✅ Исправить все</button>':'')}
+function spApply(e,v){var o=$('ecOut'),t=o.value,i=t.indexOf(e.word,Math.max(0,e.pos-20));if(i<0)i=t.indexOf(e.word);if(i<0)return;o.value=t.slice(0,i)+v+t.slice(i+e.word.length);o.dataset.touched=1}
+$('ecSpell').onclick=function(){var b=this,t=$('ecOut').value.trim();if(!t)return;b.disabled=true;b.textContent='Проверяю…';
+ fetch('https://speller.yandex.net/services/spellservice.json/checkText',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'lang=ru,en&options=14&text='+encodeURIComponent($('ecOut').value)}).then(function(r){return r.json()}).then(function(j){SP=(j||[]).filter(function(e){return e.word});spRender();if(!SP.length){$('ecSpellRes').hidden=false;$('ecSpellRes').innerHTML='<b style="color:var(--ok)">✅ Ошибок не нашлось</b>'}})
+ .catch(function(){$('ecSpellRes').hidden=false;$('ecSpellRes').innerHTML='<b style="color:var(--warn)">Сервис проверки сейчас недоступен — ошибки подчёркивает и сам браузер (правый клик по слову → варианты)</b>'}).then(function(){b.disabled=false;b.textContent='🔤 Проверить орфографию'})};
+$('ecSpellRes').addEventListener('click',function(ev){var x=ev.target.closest('button');if(!x)return;if(x.dataset.all){SP.slice().reverse().forEach(function(e){if(e.s.length)spApply(e,e.s[0])});SP=[];spRender();return}var i=+(x.dataset.i||x.dataset.x),e=SP[i];if(!e)return;if(x.dataset.j!=null)spApply(e,e.s[+x.dataset.j]);SP.splice(i,1);spRender()});
+$('ecOut').addEventListener('input',function(){if(SP.length){SP=[];spRender()}});
+$('ecOut').addEventListener('keyup',function(e){if(/Arrow|Home|End/.test(e.key))phSug()});$('ecOut').addEventListener('blur',function(){setTimeout(function(){$('ecSug').hidden=true},200)});
 function phKey(s){return String(s).replace(/\s+/g,' ').trim().toLowerCase().replace(/[.!?…,;:—–\s]+$/,'')}
 function phSplit(t){return String(t||'').replace(/([.!?…])\s+/g,'$1\n').split(/\n+/).map(function(s){return s.replace(/\s+/g,' ').trim()}).filter(Boolean)}
 var PHKNOWN=null;function phKnown(){if(PHKNOWN)return PHKNOWN;PHKNOWN={};function add(p){['f','m'].forEach(function(sx){var s=String(p).replace(/\{([^}|]*)\|?([^}]*)\}/g,function(_,f,m){return sx==='f'?f:m});phSplit(s).forEach(function(x){PHKNOWN[phKey(x)]=1})})}COLS.forEach(function(c){c.p.forEach(add)});Object.keys(P).forEach(function(k){[].concat(P[k]||[]).forEach(function(x){if(typeof x==='string')add(x)})});return PHKNOWN}
@@ -750,12 +764,12 @@ function gen(){
  if(mood==='angry'&&!$('ecFault').checked&&!$('ecWait').checked&&!inc)w.push('💡 Клиент негативит: если есть вина компании — отметьте галочку, добавится извинение.');
  if(inc&&mood!=='calm')w.push('📰 Инцидент: эмоциональные фразы не добавлены — отвечаем нейтрально и по существу.');
  var txt=out.join('\n');if(inc)txt=noEmoji(txt);
- $('ecOut').value=txt;window.__genTxt=txt;$('ecOut').dataset.touched='';$('ecWarn').innerHTML=w.join('<br>');
+ txt=qFix(txt);$('ecOut').value=txt;window.__genTxt=txt;$('ecOut').dataset.touched='';$('ecWarn').innerHTML=w.join('<br>');
 }
 $('ecGen').onclick=function(){gen()};
 $('ecAgain').onclick=function(){seed++;gen()};
 $('ecClear').onclick=function(){$('ecOut').value='';$('ecWarn').textContent='';$('ecOut').dataset.touched=''};
-$('ecCopy').onclick=function(){var b=this,t=$('ecOut').value.trim();if(!t)return;phTrack(t);function ok(){b.textContent='Скопировано ✓';b.classList.add('done');setTimeout(function(){b.textContent='📋 Копировать ответ';b.classList.remove('done')},1500)}
+$('ecCopy').onclick=function(){var b=this;$('ecOut').value=qFix($('ecOut').value);var t=$('ecOut').value.trim();if(!t)return;phTrack(t);function ok(){b.textContent='Скопировано ✓';b.classList.add('done');setTimeout(function(){b.textContent='📋 Копировать ответ';b.classList.remove('done')},1500)}
  if(navigator.clipboard){navigator.clipboard.writeText(t).then(ok,function(){fb(t);ok()})}else{fb(t);ok()}};
 // Примеры
 var EX=[
