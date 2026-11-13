@@ -137,7 +137,7 @@
   /* красивые выпадающие списки вместо системных (системный остаётся внутри и работает как раньше) */
   var openSel=null;
   function label(o){return o?o.textContent:''}
-  function optHTML(o){var t=o.textContent,m=t.match(RE),n=m&&(E[m[1]]||E[m[1].replace(/\uFE0F/g,'')]);return (n?'<span class="g11iw">'+svg(n)+'</span>':'')+'<span>'+(n?t.slice(m[0].length):t).replace(/</g,'&lt;')+'</span>'}
+  function optHTML(o){var t=o.textContent,m=t.match(RE),di=o.getAttribute('data-ico'),n=di&&P[di]?di:m&&(E[m[1]]||E[m[1].replace(/\uFE0F/g,'')]);if(di&&!m)m=['',''];return (n?'<span class="g11iw">'+svg(n)+'</span>':'')+'<span>'+(n?t.slice(m[0].length):t).replace(/</g,'&lt;')+'</span>'}
   function closeSel(){if(openSel){openSel.w.classList.remove('open');openSel=null}}
   function enhance(sel){if(sel.__cs||sel.multiple||sel.closest('.g11menu,.g11modal,.g11s')||sel.size>1)return;sel.__cs=1;
     var w=document.createElement('div');w.className='g11sel';sel.parentNode.insertBefore(w,sel);w.appendChild(sel);
