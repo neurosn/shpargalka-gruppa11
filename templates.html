@@ -86,6 +86,7 @@ main a:not(.link){color:var(--accent);font-weight:600}
 .btn.alt{background:var(--card);color:var(--accent)}
 .btn.done{background:var(--ok);border-color:var(--ok);color:#fff}
 .ec-warn{color:var(--warn);font-size:13px;font-weight:600;margin-top:6px}
+.ec-myph{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px}.ec-myph button{border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:8px;padding:7px 10px;font:inherit;font-size:13.5px;cursor:pointer;text-align:left;max-width:100%}.ec-myph button:hover{border-color:var(--accent)}.ec-myph small{color:var(--muted);margin-left:6px}
 .ec-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
 .ec-col{border:1px solid var(--line);border-radius:12px;padding:12px;border-top:4px solid var(--c)}
 .ec-col b{display:block;margin-bottom:2px}
@@ -177,6 +178,7 @@ section{scroll-margin-top:150px}
 </div>
 </div>
 
+<div id="myPh" hidden><h3>⭐ Мои частые фразы <a class="tag" href="account.html#phrases">настроить</a></h3><div class="note">Фразы, которые вы чаще всего оставляете в ответах, и ваши закреплённые 📌. Кликните — фраза вставится в ответ. Список пополняется, когда вы копируете ответ кнопкой «📋 Копировать ответ».</div><div id="myPhList" class="ec-myph"></div></div>
 <h3>🧩 Конструктор фраз (кликните — фраза вставится в ответ)</h3>
 <div class="note">[В КВАДРАТНЫХ СКОБКАХ] — то, что нужно заменить своими словами. «…» — фразу нужно продолжить.</div>
 <div id="ecCols" class="ec-cols"></div>
@@ -657,6 +659,16 @@ function seg(id,cb){var w=$(id);w.addEventListener('click',function(e){var b=e.t
 seg('ecMood',function(v){mood=v});seg('ecSex',function(v){sex=v;renderCols();renderEx()});
 function renderCols(){var h='';COLS.forEach(function(c){h+='<div class="ec-col" style="--c:'+c.c+'"><b>'+c.t+'</b><small>'+c.s+'</small>';c.p.forEach(function(p){h+='<button type="button">'+g(p)+'</button>'});h+='</div>'});$('ecCols').innerHTML=h}
 $('ecCols').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;ins(b.textContent)});
+// мои частые фразы (из личного кабинета)
+var MYPH=[];function phOn(){return !!(window.G11&&G11.user&&G11.user())}
+function escH(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function phLoad(){if(!phOn()){MYPH=[];phRender();return}G11.api('myPhrases').then(function(j){MYPH=j.items||[];phRender()}).catch(function(){})}
+function phRender(){$('myPh').hidden=!MYPH.length;$('myPhList').innerHTML=MYPH.map(function(p,i){return '<button type="button" data-i="'+i+'">'+(p.own?'📌 ':'')+escH(p.text)+(p.count?'<small>×'+p.count+'</small>':'')+'</button>'}).join('')}
+$('myPhList').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;ins(MYPH[+b.dataset.i].text)});
+if(window.G11)phLoad();else document.addEventListener('g11:ready',phLoad,{once:true});document.addEventListener('g11:login',phLoad);document.addEventListener('g11:logout',phLoad);
+function phTrack(t){if(!phOn())return;var fact=$('ecFact').value.replace(/\s+/g,' ').toLowerCase(),seen={},out=[];
+ t.replace(/([.!?…])\s+/g,'$1\n').split(/\n+/).forEach(function(s){s=s.replace(/\s+/g,' ').trim();var k=s.toLowerCase();if(s.length<8||s.length>300||seen[k]||/\d|https?:|@|\[|\]/.test(s)||fact.indexOf(k)>-1)return;seen[k]=1;out.push(s)});
+ if(out.length)G11.api('phraseUse',{phrases:out.slice(0,30)}).then(function(){setTimeout(phLoad,500)}).catch(function(){})}
 function ins(t){var o=$('ecOut'),s=o.selectionStart,en=o.selectionEnd,v=o.value;if(/^\s*(здравствуйте|добр(ый|ое)\s|доброй\s+ночи)/i.test(t)&&/(^|\n)\s*(здравствуйте|добр(ый|ое)\s+(день|вечер|утро)|доброй\s+ночи)/i.test(v)){$('ecWarn').innerHTML='👋 Приветствие уже есть в ответе — второй раз не добавляем.';return}if(document.activeElement!==o&&!o.dataset.touched){s=en=v.length}
 var pre=v.slice(0,s),post=v.slice(en),sep=pre&&!/\s$/.test(pre)?' ':'';o.value=pre+sep+t+(post&&!/^\s/.test(post)?' ':'')+post;var p=(pre+sep+t).length;o.focus();o.setSelectionRange(p,p);o.dataset.touched=1}
 $('ecOut').addEventListener('click',function(){this.dataset.touched=1});
@@ -732,7 +744,7 @@ function gen(){
 $('ecGen').onclick=function(){gen()};
 $('ecAgain').onclick=function(){seed++;gen()};
 $('ecClear').onclick=function(){$('ecOut').value='';$('ecWarn').textContent='';$('ecOut').dataset.touched=''};
-$('ecCopy').onclick=function(){var b=this,t=$('ecOut').value.trim();if(!t)return;function ok(){b.textContent='Скопировано ✓';b.classList.add('done');setTimeout(function(){b.textContent='📋 Копировать ответ';b.classList.remove('done')},1500)}
+$('ecCopy').onclick=function(){var b=this,t=$('ecOut').value.trim();if(!t)return;phTrack(t);function ok(){b.textContent='Скопировано ✓';b.classList.add('done');setTimeout(function(){b.textContent='📋 Копировать ответ';b.classList.remove('done')},1500)}
  if(navigator.clipboard){navigator.clipboard.writeText(t).then(ok,function(){fb(t);ok()})}else{fb(t);ok()}};
 // Примеры
 var EX=[
