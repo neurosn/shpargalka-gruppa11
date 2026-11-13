@@ -701,18 +701,22 @@ function repFind(t){var res=[],L='A-Za-zА-Яа-яЁё0-9',seen={};
   sents.forEach(function(s,i){var c=words[i];Object.keys(c).forEach(function(w){if(c[w]>1&&!seen[w]){seen[w]=1;res.push({k:'sent',word:w,n:c[w]})}});
     var key=s.toLowerCase().replace(/[^а-яёa-z0-9]+/g,' ').trim();if(key.length>=12){if(cnt[key]&&!seen['§'+key]){seen['§'+key]=1;res.push({k:'dup',text:s.trim()})}cnt[key]=1}});
   for(var i=0;i<sents.length;i++)for(var j=i+1;j<=i+3&&j<sents.length;j++)Object.keys(words[i]).forEach(function(w){if(words[j][w]&&!seen[w]){seen[w]=1;res.push({k:'near',word:w,syn:REPSYN[w]||[]})}});
+  var WS=sents.map(function(s){return s.toLowerCase().match(new RegExp('['+L+'/-]+','g'))||[]});
+  for(var i=0;i<sents.length;i++)for(var j=i+1;j<sents.length;j++){var A=WS[i],B=WS[j];if(A.length<5||B.length<5)continue;var eq=0;for(var q=0;q<6;q++)if(A[q]&&A[q]===B[q])eq++;
+    var sa={},sb={},it=0,un=0;A.forEach(function(x){if(x.length>2)sa[x]=1});B.forEach(function(x){if(x.length>2)sb[x]=1});Object.keys(sa).forEach(function(x){un++;if(sb[x])it++});Object.keys(sb).forEach(function(x){if(!sa[x])un++});
+    var key='§'+sents[j].toLowerCase().replace(/[^а-яёa-z0-9]+/g,' ').trim();if((eq>=4||(un&&it/un>=0.6))&&!seen[key]&&sents[i].trim()!==sents[j].trim()){seen[key]=1;res.push({k:'dup',sim:1,text:sents[j].trim()})}}
   return res.filter(function(r){return !REPIGN[r.k+':'+(r.word||r.text).toLowerCase()]})}
 function repBox(){var b=document.getElementById('ecRep');if(!b){b=document.createElement('div');b.id='ecRep';b.className='ec-spell';b.hidden=true;var a=$('ecSpellRes');a.parentNode.insertBefore(b,a.nextSibling)}return b}
 function repRender(){var b=repBox();if(!REP.length){b.hidden=true;b.innerHTML='';return}b.hidden=false;
   b.innerHTML='<b>🔁 Повторы ('+REP.length+'):</b> '+REP.map(function(r,i){var x='<button type="button" class="ign" data-rx="'+i+'" title="Оставить как есть">✕</button>';
     if(r.k==='adj')return '<span class="sp"><s>'+escH(r.word)+', '+escH(r.word)+'</s> → <button type="button" data-ri="'+i+'">'+escH(r.word)+'</button>'+x+'</span>';
-    if(r.k==='dup')return '<span class="sp">предложение два раза: <s>'+escH(r.text.length>60?r.text.slice(0,60)+'…':r.text)+'</s> <button type="button" data-ri="'+i+'">убрать второе</button>'+x+'</span>';
+    if(r.k==='dup')return '<span class="sp">'+(r.sim?'похожие предложения':'предложение два раза')+': <s>'+escH(r.text.length>60?r.text.slice(0,60)+'…':r.text)+'</s> <button type="button" data-ri="'+i+'">убрать второе</button>'+x+'</span>';
     if(r.k==='near')return '<span class="sp">«'+escH(r.word)+'» повторяется рядом'+(r.syn&&r.syn.length?' → '+r.syn.map(function(v,j){return '<button type="button" data-ri="'+i+'" data-rs="'+j+'">'+escH(v)+'</button>'}).join(''):' — замените синонимом')+x+'</span>';
     return '<span class="sp">«'+escH(r.word)+'» '+r.n+' раза в одном предложении — замените синонимом'+x+'</span>'}).join('')+(REP.some(function(r){return r.k==='adj'||r.k==='dup'})?'<button type="button" class="all" data-rall="1">✅ Убрать все повторы</button>':'')}
 function repFix(r,syn){var o=$('ecOut'),t=o.value;
   if(r.k==='near'&&syn!=null){var rx=new RegExp('(^|[^A-Za-zА-Яа-яЁё0-9/-])('+r.word.replace(/[\/\-]/g,'\\$&')+')(?![A-Za-zА-Яа-яЁё0-9/-])','gi'),n=0;t=t.replace(rx,function(a,pre,w){n++;if(n!==2)return a;var v=syn;if(w[0]!==w[0].toLowerCase())v=v.charAt(0).toUpperCase()+v.slice(1);return pre+v})}
   if(r.k==='adj'){var re=new RegExp('(^|[^A-Za-zА-Яа-яЁё0-9-])('+r.word.replace(/[-]/g,'\\-')+')(\\s*[,;]?\\s+)('+r.word.replace(/[-]/g,'\\-')+')(?![\\-A-Za-zА-Яа-яЁё0-9])','i');t=t.replace(re,'$1$2')}
-  else if(r.k==='dup'){var i=t.indexOf(r.text),j=t.indexOf(r.text,i+r.text.length);if(j>-1)t=(t.slice(0,j)+t.slice(j+r.text.length)).replace(/[ \t]{2,}/g,' ').replace(/[ \t]+(\n|$)/g,'$1').replace(/\n{3,}/g,'\n\n')}
+  else if(r.k==='dup'){var i=t.indexOf(r.text),j=r.sim?i:t.indexOf(r.text,i+r.text.length);if(j>-1){var e=j+r.text.length;if((j===0||t[j-1]==='\n')&&t[e]==='\n')e++;t=(t.slice(0,j)+t.slice(e)).replace(/[ \t]{2,}/g,' ').replace(/[ \t]+(\n|$)/g,'$1').replace(/\n{3,}/g,'\n\n')}}
   o.value=t;o.dataset.touched=1}
 function repCheck(){var v=$('ecOut').value;if(v===REPLAST)return;REPLAST=v;REP=v.trim()?repFind(v):[];repRender()}
 setInterval(repCheck,700);$('ecOut').addEventListener('input',function(){clearTimeout(repCheck.t);repCheck.t=setTimeout(repCheck,300)});
@@ -766,6 +770,16 @@ function gen(){
  // повторное «Здравствуйте» внутри шаблона тоже убираем
  fact=fact.replace(/(^|\n)\s*здравствуйте[!.,]?\s*(?=\n|$)/gi,'$1').replace(/^\n+/,'');
  if(fact)fact=fact.charAt(0).toUpperCase()+fact.slice(1);
+ // в шаблоне часто уже есть вступление («Спасибо, что написали», «Понимаю…») и концовка — убираем их, генератор ставит свои
+ var stripped=0;if(fact){var OPR=[/^(спасибо|благодарю|благодарим)[^.!?\n]*?(написали|обратились|обращение|подождали|ожидани|терпени)[^.!?\n]*[.!?]*\s*/i,/^понима(ю|ем)[^.!?\n]*[.!?]+\s*/i,/^(мне|нам)?\s*(очень\s+)?жаль[^.!?\n]*[.!?]+\s*/i,/^(приношу|примите)[^.!?\n]*извинени[^.!?\n]*[.!?]+\s*/i],ch=true;
+  while(ch&&fact){ch=false;OPR.forEach(function(r){var m=fact.match(r);if(m&&m[0].length<fact.length){fact=fact.slice(m[0].length).replace(/^\s+/,'');ch=true;stripped++}})}
+  var CLR=/^(надеюсь|рад[аы]?\b|рад\/а|буду рад|будем рады|хорошего|всего доброго|всего хорошего|обращайтесь|если (у вас )?(останутся|возникнут|появятся)|спасибо за обращение|благодарю за обращение|оцените)/i,LN=fact.split('\n');
+  while(LN.length>1||(LN.length===1&&stripped>=0)){var last=LN[LN.length-1].trim();if(!last){LN.pop();continue}var parts=last.split(/(?<=[.!?…])\s+/);while(parts.length>1&&CLR.test(parts[parts.length-1].trim())){parts.pop();stripped++}
+   if(parts.length===1&&CLR.test(parts[0])&&LN.length>1){LN.pop();stripped++;continue}LN[LN.length-1]=parts.join(' ');break}
+  fact=LN.join('\n').trim()}
+ if(stripped)w.push('✂️ Из шаблона убраны вступление/концовка — генератор поставил свои, чтобы фразы не повторялись.');
+ var selfLink=/^я\s+(всё\s+|все\s+)?(проверил|посмотрел|уточнил|изучил)\S*\s+(и\s+)?(вижу|увидел)/i.test(fact);
+ if(fact&&fact.replace(/\s/g,'').length<25)w.push('⚠️ Фактура очень короткая — вставьте объяснение из шаблона или БЗ, иначе ответ получится неестественным.');
  var open=[];
  if(inc){
   if($('ecWait').checked)open.push('Спасибо, что подождали.');
@@ -784,6 +798,7 @@ function gen(){
   var f=noEmoji(fact).trim();if(inc)fact=f;
   var lines=fact.split(/\n/),first=lines[0],startsList=/^\s*(\d+[.)]|[—–-])/.test(first);
   if(inc){out.push(fact)}
+  else if(selfLink){out.push(fact)}
   else if(!startsList&&seed%2===0&&/^[А-ЯЁ]/.test(first)&&!/^(Я|Вы|Вам|Ваш|Мы|Нам|Мне)\s/.test(first)){
    lines[0]=g(pick(P.linkLow))+' '+low(first);out.push(lines.join('\n'))}
   else{out.push(g(pick(P.linkCol))+'\n'+fact)}
