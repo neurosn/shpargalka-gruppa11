@@ -29,12 +29,12 @@
   function isRich(s){return /<(figure|b|strong|i|em|u|s|mark|a|br|p|div|ul|ol|li|hr|h3|h4|blockquote|small|sup)\b/i.test(String(s||''))}
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
   function sanitize(html){if(!isRich(html))return esc(sc(html)).replace(/\n/g,'<br>');var doc=document.implementation.createHTMLDocument('x');var box=doc.createElement('div');box.innerHTML=String(html);var res=doc.createElement('div');res.appendChild(clean(box,doc));return res.innerHTML}
-  function toText(html){if(!isRich(html))return String(html||'');var d=document.createElement('div');d.innerHTML=sanitize(html);d.querySelectorAll('figure.g11m').forEach(function(f){f.replaceWith(f.getAttribute('data-k')==='img'?'':'\n'+(f.getAttribute('data-n')||'файл')+': https://drive.google.com/file/d/'+f.getAttribute('data-id')+'/view\n')});d.querySelectorAll('i[data-i]').forEach(function(i){var m={arrowr:'→',arrowl:'←',arrowu:'↑',arrowd:'↓',tick:'✓',check:'✓',xmark:'✗',star:'★',dot:'•'}[i.getAttribute('data-i')];i.replaceWith(m?m+' ':'')});
+  function toText(html){if(!isRich(html))return String(html||'');var d=document.createElement('div');d.innerHTML=sanitize(html);var tw=document.createTreeWalker(d,4),tn,tl=[];while((tn=tw.nextNode()))tl.push(tn);tl.forEach(function(n){if(!(n.parentNode&&n.parentNode.closest&&n.parentNode.closest('pre')))n.nodeValue=n.nodeValue.replace(/[ \t]*\r?\n[ \t]*/g,' ')});d.querySelectorAll('figure.g11m').forEach(function(f){f.replaceWith(f.getAttribute('data-k')==='img'?'':'\n'+(f.getAttribute('data-n')||'файл')+': https://drive.google.com/file/d/'+f.getAttribute('data-id')+'/view\n')});d.querySelectorAll('i[data-i]').forEach(function(i){var m={arrowr:'→',arrowl:'←',arrowu:'↑',arrowd:'↓',tick:'✓',check:'✓',xmark:'✗',star:'★',dot:'•'}[i.getAttribute('data-i')];i.replaceWith(m?m+' ':'')});
     d.querySelectorAll('hr').forEach(function(h){h.replaceWith('\n———\n')});d.querySelectorAll('br').forEach(function(b){b.replaceWith('\n')});
     d.querySelectorAll('li').forEach(function(l){l.insertAdjacentText('afterbegin',l.parentNode&&l.parentNode.tagName==='OL'?'':'• ');l.insertAdjacentText('beforeend','\n')});
     d.querySelectorAll('ol').forEach(function(o){var i=1;o.querySelectorAll(':scope>li').forEach(function(l){l.insertAdjacentText('afterbegin',(i++)+'. ')})});
     d.querySelectorAll('p,div,h3,h4,blockquote').forEach(function(p){p.insertAdjacentText('beforeend','\n')});
-    return d.textContent.replace(/\n{3,}/g,'\n\n').trim()}
+    return d.textContent.replace(/[ \t]+\n/g,'\n').replace(/\n[ \t]+/g,'\n').replace(/\n{3,}/g,'\n\n').trim()}
   var EMOS=[['Часто','😊 🙂 😉 🤗 🙏 👍 👏 💪 🎉 🔥 ⭐ 💜 ❤️ ✅ ❌ ⚠️ ❗ ❓ 💡 📌 🚀 ✨ 💯 🆕'],
    ['Эмоции','😀 😃 😄 😁 😅 😂 🙂 😊 😇 🥰 😍 🤩 😘 😋 😎 🤓 🧐 🤔 🤨 😐 😶 🙄 😏 😌 😴 🥳 🤯 😮 😲 😳 🥺 😢 😭 😤 😡 🤬 😱 😨 😰 🤝 🫶 💖 💕 💔 💙 💚 💛 🧡 🤍 🖤'],
    ['Жесты','👋 🤚 ✋ 🖐 👌 🤌 ✌️ 🤞 🤟 🤘 🤙 👈 👉 👆 👇 ☝️ 👍 👎 ✊ 👊 👏 🙌 👐 🤲 🙏 💪 🫡 🤷 🙋 🙅 🙆 💁 🧑‍💻 👩‍💻 👨‍💻 🦸'],
