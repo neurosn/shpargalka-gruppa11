@@ -153,6 +153,7 @@ section{scroll-margin-top:150px}
 <div class="ec">
 <label class="ec-l">1. Вставьте шаблон из БЗ (фактура — решение или объяснение)</label>
 <textarea id="ecFact" rows="4" placeholder="Например: Статус заказа будет скорректирован в течение 24 часов. Деньги вернутся тем же способом, которым вы оплачивали."></textarea>
+<div id="ecSugF" class="ec-sug" hidden></div>
 <div class="ec-row">
 <div><label class="ec-l">2. Настроение клиента</label>
 <div class="seg" id="ecMood"><button type="button" data-v="calm" class="on">🙂 Спокоен / просто спрашивает</button><button type="button" data-v="worry">😟 Переживает</button><button type="button" data-v="angry">😠 Негативит</button></div></div>
@@ -671,10 +672,12 @@ function phRender(){$('myPh').hidden=!MYPH.length;$('myPhList').innerHTML=MYPH.m
 $('myPhList').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;ins(MYPH[+b.dataset.i].text)});
 if(window.G11)phLoad();else document.addEventListener('g11:ready',phLoad,{once:true});document.addEventListener('g11:login',phLoad);document.addEventListener('g11:logout',phLoad);
 // подсказки при наборе: начало фразы → предлагаем свою частую фразу
-var SUG=[];function phFrag(){var o=$('ecOut'),v=o.value.slice(0,o.selectionStart),m=v.match(/(?:^|[.!?…\n])([^.!?…\n]*)$/);return m?m[1]:''}
-function phSug(){var b=$('ecSug'),f=phFrag(),k=f.replace(/\s+/g,' ').trim().toLowerCase();SUG=k.length<2||!MYPH.length?[]:MYPH.filter(function(p){var t=p.text.toLowerCase();return t.indexOf(k)===0&&t.length>k.length}).slice(0,4);b.hidden=!SUG.length;b.innerHTML=SUG.length?'<b>💡 Ваши фразы:</b>'+SUG.map(function(p,i){return '<button type="button" data-i="'+i+'">'+escH(p.text)+'</button>'}).join(''):''}
-$('ecSug').addEventListener('mousedown',function(e){var x=e.target.closest('button');if(!x)return;e.preventDefault();var p=SUG[+x.dataset.i],o=$('ecOut'),c=o.selectionStart,v=o.value,f=phFrag(),lead=f.match(/^\s*/)[0],st=c-f.length;o.value=v.slice(0,st)+lead+p.text+v.slice(c);var pos=st+lead.length+p.text.length;o.focus();o.setSelectionRange(pos,pos);o.dataset.touched=1;SUG=[];$('ecSug').hidden=true});
-$('ecOut').addEventListener('input',phSug);
+var SUG=[],SUGT=null;function phFrag(o){o=o||$('ecOut');var v=o.value.slice(0,o.selectionStart),m=v.match(/(?:^|[.!?…\n])([^.!?…\n]*)$/);return m?m[1]:''}
+function phBox(o){return $(o&&o.id==='ecFact'?'ecSugF':'ecSug')}
+function phSug(ev){var o=ev&&ev.target&&(ev.target.id==='ecFact'||ev.target.id==='ecOut')?ev.target:$('ecOut'),b=phBox(o),k=phFrag(o).replace(/\s+/g,' ').trim().toLowerCase();SUGT=o;SUG=k.length<2||!MYPH.length?[]:MYPH.filter(function(p){var t=p.text.toLowerCase();return t.indexOf(k)===0&&t.length>k.length}).slice(0,4);['ecSug','ecSugF'].forEach(function(id){if($(id)!==b)$(id).hidden=true});b.hidden=!SUG.length;b.innerHTML=SUG.length?'<b>💡 Ваши фразы:</b>'+SUG.map(function(p,i){return '<button type="button" data-i="'+i+'">'+escH(p.text)+'</button>'}).join(''):''}
+function phPick(e){var x=e.target.closest('button');if(!x)return;e.preventDefault();var p=SUG[+x.dataset.i],o=SUGT||$('ecOut');if(!p)return;var c=o.selectionStart,v=o.value,f=phFrag(o),lead=f.match(/^\s*/)[0],st=c-f.length;o.value=v.slice(0,st)+lead+p.text+v.slice(c);var pos=st+lead.length+p.text.length;o.focus();o.setSelectionRange(pos,pos);if(o.id==='ecOut')o.dataset.touched=1;SUG=[];$('ecSug').hidden=true;$('ecSugF').hidden=true}
+$('ecSug').addEventListener('mousedown',phPick);$('ecSugF').addEventListener('mousedown',phPick);
+$('ecOut').addEventListener('input',phSug);$('ecFact').addEventListener('input',phSug);$('ecFact').addEventListener('blur',function(){setTimeout(function(){$('ecSugF').hidden=true},200)});document.addEventListener('g11:phrases',phLoad);
 // кавычки: "текст" → «текст» (и в готовом ответе, и при копировании)
 function qFix(t){return String(t).replace(/„([^„“”"\n]*)[“”]/g,'«$1»').replace(/“([^“”"\n]*)”/g,'«$1»').replace(/[“„]/g,'«').replace(/”/g,'»').replace(/(^|[\s(\[{—–\-\/])"(?=\S)/g,'$1«').replace(/"/g,'»')}
 $('ecOut').addEventListener('input',function(){var o=this;if(!/["“”„]/.test(o.value))return;var s=o.selectionStart,e=o.selectionEnd;o.value=qFix(o.value);o.setSelectionRange(s,e)});
