@@ -8,6 +8,8 @@
 <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 <style>
 .phr{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0;background:var(--soft)}.phr span{flex:1}.phr small{color:var(--muted);white-space:nowrap}.phx{border:0;background:none;color:var(--muted);cursor:pointer;font-size:15px;padding:2px 6px}.phx:hover{color:var(--warn)}
+#ph-new{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit}#ph-new:focus{outline:2px solid var(--accent);border-color:transparent}
+#genHost #gen{margin:0}#genHost>h3{margin:18px 0 6px}
 .hrs{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:8px;margin-top:6px}
 .hrs div{border:1px solid var(--line);border-radius:10px;padding:8px 6px 6px;background:var(--soft);text-align:center;position:relative;overflow:hidden}
 .hrs small{display:block;color:var(--muted);font-size:11px}.hrs b{display:block;font-size:22px;line-height:1.2;color:var(--accent)}
@@ -110,7 +112,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 <section id="gate" class="gate"><div class="ic">🔐</div><h2 style="justify-content:center">Нужно войти</h2><p>Войдите по ID сотрудника и паролю — кнопка «Войти» вверху справа.</p><button class="btn" type="button" onclick="G11&&G11.login()">Войти</button></section>
 <div id="app" hidden>
 <section id="shift-sec"></section>
-<section id="phrases"><h2>💬 Генератор ответа: мои фразы</h2><p style="margin-top:0;color:var(--muted)">Фразы, которые вы <b>сами пишете</b> в ответах в <a href="templates.html#gen">генераторе ответа</a> чаще всего, и ваши закреплённые. Фразы из конструктора и шаблоны из БЗ сюда не попадают. Генератор показывает ваши фразы в блоке «⭐ Мои частые фразы» и подсказывает их, когда вы начинаете печатать ответ. Фраза появляется здесь, когда вы написали её хотя бы в 2 ответах и скопировали ответ кнопкой «📋 Копировать ответ».</p><div id="ph-list" class="loading">Загружаю…</div><div class="row" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><input id="ph-new" type="text" maxlength="300" placeholder="Своя фраза, например: Спасибо, что дождались ответа!" style="flex:1;min-width:220px"><button class="btn" type="button" id="ph-add">📌 Закрепить</button></div><p id="ph-msg" style="margin:6px 0 0;font-size:13px"></p></section>
+<section id="phrases"><h2>💬 Генератор ответа: мои фразы</h2><p style="margin-top:0;color:var(--muted)">Фразы, которые вы <b>сами пишете</b> в ответах в <a href="templates.html#gen">генераторе ответа</a> чаще всего, и ваши закреплённые. Фразы из конструктора и шаблоны из БЗ сюда не попадают. Генератор показывает ваши фразы в блоке «⭐ Мои частые фразы» и подсказывает их, когда вы начинаете печатать ответ. Фраза появляется здесь, когда вы написали её хотя бы в 2 ответах и скопировали ответ кнопкой «📋 Копировать ответ».</p><div id="ph-list" class="loading">Загружаю…</div><div class="row" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><input id="ph-new" type="text" maxlength="300" placeholder="Своя фраза, например: Спасибо, что дождались ответа!" style="flex:1;min-width:220px"><button class="btn" type="button" id="ph-add">📌 Закрепить</button></div><p id="ph-msg" style="margin:6px 0 0;font-size:13px"></p><div id="genHost" class="loading" style="margin-top:18px">Загружаю генератор ответа…</div></section>
 <section id="hr-sec" hidden><h2>💬 Чаты по часам · текущая смена</h2><div id="hr-body" class="loading">Загружаю…</div></section>
 <section><h2>👤 <span id="nm"></span></h2>
 <div class="kv"><div><small>ID</small><b id="uid"></b></div><div><small>Роль</small><b id="urole"></b></div><div><small>Вход</small><b>сохранён на этом устройстве</b></div></div>
@@ -167,7 +169,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 function $(i){return document.getElementById(i)}
 function whenReady(cb){if(window.G11)cb();else document.addEventListener('g11:ready',cb,{once:true})}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function show(){var u=G11.user();$('gate').hidden=!!u;$('app').hidden=!u;if(!u)return;if(!show.loaded){show.loaded=1;loadData();loadHourly();loadPhrases();if(u.role==='admin'){$('shift-sec').innerHTML='<h2>⏱ Смены</h2><p style="margin:0;color:var(--muted)">Руководителю отмечаться не нужно — все смены по графику с 1 ноября засчитываются автоматически как полные (21:00–09:00).</p>'}else loadShift()}$('nm').textContent=u.name;$('uid').textContent=u.id;$('urole').textContent=G11.roleName(u.role)}
+function show(){var u=G11.user();$('gate').hidden=!!u;$('app').hidden=!u;if(!u)return;if(!show.loaded){show.loaded=1;loadData();loadHourly();loadPhrases();mountGen();if(u.role==='admin'){$('shift-sec').innerHTML='<h2>⏱ Смены</h2><p style="margin:0;color:var(--muted)">Руководителю отмечаться не нужно — все смены по графику с 1 ноября засчитываются автоматически как полные (21:00–09:00).</p>'}else loadShift()}$('nm').textContent=u.name;$('uid').textContent=u.id;$('urole').textContent=G11.roleName(u.role)}
 
 function plural(n,a,b,c){n=Math.abs(n)%100;var m=n%10;if(n>10&&n<20)return c;if(m===1)return a;if(m>1&&m<5)return b;return c}
 // НДФЛ 13%: галочка запоминается на этом устройстве; все суммы на странице считаются «на руки»
@@ -231,6 +233,20 @@ var PH=[];function phShow(j){PH=j.items||[];$('ph-list').className='';$('ph-list
 function loadPhrases(){G11.api('myPhrases').then(function(j){phShow(j);if(location.hash==='#phrases'&&!loadPhrases.s){loadPhrases.s=1;$('phrases').scrollIntoView()}}).catch(function(x){$('ph-list').className='';$('ph-list').textContent=x.message})}
 $('ph-list').addEventListener('click',function(e){var b=e.target.closest('[data-i]');if(!b)return;var p=PH[+b.dataset.i];if(!p||!confirm('Убрать фразу из моих фраз?\n\n'+p.text))return;G11.api('phraseHide',{text:p.text}).then(phShow).catch(function(x){alert(x.message)})});
 $('ph-add').onclick=function(){var t=$('ph-new').value.trim(),m=$('ph-msg');if(!t)return;this.disabled=true;var b=this;G11.api('phraseAdd',{text:t}).then(function(j){phShow(j);$('ph-new').value='';m.style.color='var(--ok)';m.textContent='✅ Фраза закреплена — она появится в генераторе ответа'}).catch(function(x){m.style.color='var(--warn)';m.textContent=x.message}).then(function(){b.disabled=false})};
+// генератор ответа с эмпатией прямо в кабинете: берём его со страницы «Шаблоны», чтобы был один источник
+function mountGen(){var host=$('genHost');if(!host||mountGen.d)return;mountGen.d=1;
+ fetch('templates.html',{cache:'no-cache'}).then(function(r){return r.text()}).then(function(html){var d=new DOMParser().parseFromString(html,'text/html'),gen=d.getElementById('gen');if(!gen)throw new Error('Не нашла генератор на странице «Шаблоны»');
+  var css='',tmp=document.createElement('style');tmp.textContent=[].map.call(d.querySelectorAll('style'),function(s){return s.textContent}).join('\n');document.head.appendChild(tmp);
+  [].forEach.call(tmp.sheet.cssRules,function(r){if(r.type===7&&/^genflash$/.test(r.name)){css+=r.cssText+'\n';return}if(r.type!==1)return;var sel=r.selectorText;if(!/(^|[\s,>+~])(\.ec|#gen|\.seg|\.btn|\.ex\b|\.note|\.tag)/.test(sel))return;css+=sel.split(',').map(function(s){return '#genHost '+s.trim()}).join(',')+r.cssText.slice(r.cssText.indexOf('{'))+'\n'});tmp.remove();
+  var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
+  host.className='';host.innerHTML='';host.appendChild(document.importNode(gen,true));
+  var ph=d.getElementById('myPh');if(ph)host.appendChild(document.importNode(ph,true));
+  var cols=d.getElementById('ecCols');if(cols){var h=document.createElement('h3');h.textContent='🧩 Конструктор фраз (кликните — фраза вставится в ответ)';host.appendChild(h);var n=cols.previousElementSibling;if(n&&n.classList.contains('note'))host.appendChild(document.importNode(n,true));host.appendChild(document.importNode(cols,true))}
+  var ex=document.createElement('div');ex.id='ecEx';ex.hidden=true;host.appendChild(ex);
+  var code=[].map.call(d.querySelectorAll('script:not([src])'),function(s){return s.textContent}).filter(function(t){return t.indexOf('var COLS=[')>-1})[0];if(!code)throw new Error('Не нашла код генератора');
+  var sc=document.createElement('script');sc.textContent=code;document.body.appendChild(sc);
+  host.addEventListener('click',function(e){if(e.target.closest('#ecCopy'))setTimeout(loadPhrases,1500)})
+ }).catch(function(x){host.className='';host.textContent='Генератор не загрузился: '+x.message+'. Откройте его на странице «Шаблоны».'})}
 function loadShift(){if(!window.G11Shift){setTimeout(loadShift,200);return}if(!loadShift.w)loadShift.w=G11Shift($('shift-sec'),'real');else loadShift.w.reload()}
 whenReady(show);document.addEventListener('g11:login',show);document.addEventListener('g11:user',show);document.addEventListener('g11:logout',show);
 $('pwf').onsubmit=function(e){e.preventDefault();var m=$('pwm');m.className='msg';if($('np').value!==$('np2').value){m.textContent='Новые пароли не совпадают';m.classList.add('bad');return}
