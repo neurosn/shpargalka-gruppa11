@@ -214,8 +214,13 @@ $('salb').onclick=function(){var m=$('salm');m.className='msg';G11.api('setSalar
 function hrLabel(h){var m=String(h).match(/^(\d{1,2}):/);if(!m)return h;var e=+m[1],b=(e+23)%24;return b+'–'+e}
 var HR_NORM=10;function hrCls(n){return n==null?'':n>=HR_NORM?'ok':'low'}
 function hrNum(x){return x==null?'—':String(x).replace('.',',')}
-function loadHourly(){G11.api('myHourly').then(function(j){var box=$('hr-body');$('hr-sec').hidden=false;box.className='';
-  var me=j.me,g=j.group,html='';
+function hrKey(){var u=window.G11&&G11.user&&G11.user();return 'g11_hr_'+(u&&u.id||'')}
+function hrHas(j){function f(h){return (h||[]).some(function(x){return x&&x.n!=null&&x.n!==''})}return !!j&&((j.me&&f(j.me.hours))||(j.people||[]).some(function(p){return f(p.hours)}))}
+function hrSave(j){try{localStorage.setItem(hrKey(),JSON.stringify({j:j,at:Date.now()}))}catch(e){}}
+function hrLoad(){try{return JSON.parse(localStorage.getItem(hrKey())||'null')}catch(e){return null}}
+function hrWhen(t){var d=new Date(t);function p(n){return (n<10?'0':'')+n}return p(d.getDate())+'.'+p(d.getMonth()+1)+' '+p(d.getHours())+':'+p(d.getMinutes())}
+function hrRender(j,note){var box=$('hr-body');$('hr-sec').hidden=false;box.className='';
+var me=j.me,g=j.group,html='';
   if(me){var mx=Math.max.apply(null,me.hours.map(function(x){return x.n||0}).concat([1]));
     var done=me.hours.filter(function(x){return x.n!=null}),avg=done.length?Math.round(done.reduce(function(a,x){return a+x.n},0)/done.length*10)/10:null;
     var inN=done.filter(function(x){return x.n>=HR_NORM}).length;
@@ -226,7 +231,19 @@ function loadHourly(){G11.api('myHourly').then(function(j){var box=$('hr-body');
     j.people.map(function(p){return '<tr><td>'+esc(p.name.split(' ').slice(0,2).join(' '))+'</td>'+p.hours.map(function(x){return '<td class="'+hrCls(x.n)+'">'+hrNum(x.n)+'</td>'}).join('')+'<td><b>'+hrNum(p.total)+'</b></td></tr>'}).join('')+
     (g?'<tr><td>Группа, в среднем</td>'+g.hours.map(function(x){return '<td>'+hrNum(x.n)+'</td>'}).join('')+'<td><b>'+hrNum(g.total)+'</b></td></tr>':'')+'</tbody></table></div>'}
   html+='<p style="margin:8px 0 0;color:var(--muted);font-size:13px">Норма — '+HR_NORM+' чатов в час: зелёным — в норме, оранжевым — ниже нормы · данные вносит руководитель раз в час · обновлено в '+esc(j.updated)+' МСК</p>';
-  box.innerHTML=html+'<p style="margin:4px 0 0;font-size:13px"><a href="#" onclick="loadHourly();return false">↻ Обновить</a></p>';loadHourly.ok=1;loadHourly.n=0}).catch(function(x){$('hr-sec').hidden=false;var b=$('hr-body');b.className='';loadHourly.n=(loadHourly.n||0)+1;if(!loadHourly.ok){b.innerHTML='<p style="margin:0;color:var(--muted)">Не получилось загрузить ('+esc(x.message)+'). '+(loadHourly.n<4?'Пробую ещё раз…':'<a href="#" onclick="loadHourly.n=0;loadHourly();return false">↻ Попробовать снова</a>')+'</p>'}if(loadHourly.n<4)setTimeout(loadHourly,loadHourly.n*10000)})}
+  box.innerHTML=(note?'<p class="hrnote" style="margin:0 0 10px;padding:8px 12px;border-radius:10px;background:var(--soft);color:var(--muted);font-size:13.5px">'+note+'</p>':'')+html+'<p style="margin:4px 0 0;font-size:13px"><a href="#" onclick="loadHourly();return false">↻ Обновить</a></p>'}
+function loadHourly(){var c=hrLoad();
+  if(!loadHourly.ok&&!loadHourly.busy&&c&&hrHas(c.j))hrRender(c.j,'⏳ Обновляю данные… Пока показаны последние сохранённые ('+hrWhen(c.at)+').');
+  loadHourly.busy=1;
+  G11.api('myHourly').then(function(j){loadHourly.busy=0;loadHourly.ok=1;loadHourly.n=0;
+    if(hrHas(j)){hrSave(j);hrRender(j);return}
+    c=hrLoad();
+    if(c&&hrHas(c.j))hrRender(c.j,'🕘 Новая смена в таблице ещё не заполнена — показаны последние данные ('+hrWhen(c.at)+'). Свежие цифры появятся после первого часа смены.');
+    else hrRender(j,'🕘 Смена в таблице ещё не заполнена — цифры появятся после первого часа.');
+  }).catch(function(x){loadHourly.busy=0;loadHourly.n=(loadHourly.n||0)+1;var c=hrLoad(),retry=loadHourly.n<6;
+    if(c&&hrHas(c.j))hrRender(c.j,'⚠️ Не получилось обновить ('+esc(x.message)+') — показаны последние данные ('+hrWhen(c.at)+').'+(retry?' Пробую ещё раз…':''));
+    else if(!loadHourly.ok){$('hr-sec').hidden=false;var b=$('hr-body');b.className='';b.innerHTML='<p style="margin:0;color:var(--muted)">Таблица отвечает долго ('+esc(x.message)+'). '+(retry?'Пробую ещё раз…':'<a href="#" onclick="loadHourly.n=0;loadHourly();return false">↻ Попробовать снова</a>')+'</p>'}
+    if(retry)setTimeout(loadHourly,Math.min(30000,loadHourly.n*8000))})}
 setInterval(function(){if(window.G11&&G11.user()&&!document.hidden&&show.loaded)loadHourly()},300000);
 function loadShift(){if(!window.G11Shift){setTimeout(loadShift,200);return}if(!loadShift.w)loadShift.w=G11Shift($('shift-sec'),'real');else loadShift.w.reload()}
 whenReady(show);document.addEventListener('g11:login',show);document.addEventListener('g11:user',show);document.addEventListener('g11:logout',show);
