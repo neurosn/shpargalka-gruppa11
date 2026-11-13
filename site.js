@@ -3,7 +3,7 @@
   if(window.__g11site)return;window.__g11site=1;
   var MAP={'index.html':'home','':'home','work.html':'work','templates.html':'work','bz.html':'work','sv.html':'work',
     'tools.html':'tools','helper.html':'tools','calc.html':'tools','salary.html':'tools','check.html':'tools',
-    'team.html':'team','vacation.html':'team','zp.html':'team','account.html':'team','admin.html':'team','editor.html':'team','logins.html':'team','article.html':'work'};
+    'team.html':'team','vacation.html':'team','zp.html':'team','account.html':'team','admin.html':'team','editor.html':'team','logins.html':'team','article.html':'work','gen.html':'work'};
   var file=(location.pathname.split('/').pop()||'');
   var cur=document.body.getAttribute('data-space')||MAP[file]||'';
   var items=[['home','index.html','🏠','Главная'],['work','work.html','💼','Работа'],['tools','tools.html','🧰','Инструменты'],['team','team.html','👥','Команда']];
@@ -20,9 +20,9 @@
   items.slice(1).forEach(function(i){h+='<a href="'+i[1]+'"'+(cur===i[0]?' class="on" aria-current="page"':'')+'><span>'+i[2]+'</span><span class="lbl">'+i[3]+'</span></a>'});
   h+='<span class="sp"></span><span id="g11acc"></span></div>';
   bar.innerHTML=h;document.body.insertBefore(bar,document.body.firstChild);
-  var a=document.createElement('script');a.src='auth.js?v=6';document.body.appendChild(a);
+  var a=document.createElement('script');a.src='auth.js?v=7';document.body.appendChild(a);
   var ij=document.createElement('script');ij.src='icons.js?v=11';ij.async=false;document.body.appendChild(ij);
-  var rj=document.createElement('script');rj.src='rte.js?v=8';rj.async=false;document.body.appendChild(rj);
-  var cj=document.createElement('script');cj.src='content.js?v=8';cj.async=false;document.body.appendChild(cj);
+  var rj=document.createElement('script');rj.src='rte.js?v=9';rj.async=false;document.body.appendChild(rj);
+  var cj=document.createElement('script');cj.src='content.js?v=9';cj.async=false;document.body.appendChild(cj);
   var sj=document.createElement('script');sj.src='search.js?v=3';document.body.appendChild(sj);
 })();
