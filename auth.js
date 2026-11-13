@@ -62,7 +62,7 @@
     var u=S.user,first=String(u.name||'').split(' ')[1]||u.name;
     slot.innerHTML='<button class="g11me" type="button">👤 <span>'+esc(first)+'</span> ▾</button>';
     if(!menu){menu=document.createElement('div');menu.className='g11menu';document.body.appendChild(menu);document.addEventListener('click',function(e){if(!menu.contains(e.target)&&!e.target.closest('.g11me'))menu.classList.remove('on')})}
-    var h='<div class="who"><b>'+esc(u.name)+'</b>'+ROLE[u.role]+' · ID '+esc(u.id)+'</div><a href="account.html">🏠 Мой кабинет</a>';
+    var h='<div class="who"><b>'+esc(u.name)+'</b>'+ROLE[u.role]+' · ID '+esc(u.id)+'</div><a href="account.html">🏠 Мой кабинет</a><a href="account.html#phrases">💬 Генератор ответа: мои фразы</a>';
     if(u.role==='editor'||u.role==='admin')h+='<a href="editor.html">✏️ Кабинет редактора</a>';
     if(u.role==='admin')h+='<a href="admin.html">🛡 Панель руководителя</a><a href="logins.html">🔑 Журнал входов</a>';
     h+='<button type="button" id="g11out">🚪 Выйти</button>';menu.innerHTML=h;
