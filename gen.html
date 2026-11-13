@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"><link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#5b0fa8">
+<title>Генератор ответа · Группа 11</title>
+<script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<style>
+.phr{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0;background:var(--soft)}.phr span{flex:1}.phr small{color:var(--muted);white-space:nowrap}.phx{border:0;background:none;color:var(--muted);cursor:pointer;font-size:15px;padding:2px 6px}.phx:hover{color:var(--warn)}
+#ph-new{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit}#ph-new:focus{outline:2px solid var(--accent);border-color:transparent}
+#genHost #gen{margin:0}#genHost>h3{margin:18px 0 6px}
+.hrs{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:8px;margin-top:6px}
+.hrs div{border:1px solid var(--line);border-radius:10px;padding:8px 6px 6px;background:var(--soft);text-align:center;position:relative;overflow:hidden}
+.hrs small{display:block;color:var(--muted);font-size:11px}.hrs b{display:block;font-size:22px;line-height:1.2;color:var(--accent)}
+.hrs em{display:block;font-style:normal;font-size:11px;color:var(--muted)}.hrs div.empty b{color:var(--muted);opacity:.5}
+.hrs i{position:absolute;left:0;bottom:0;height:4px;background:var(--accent);opacity:.55}
+.hrsum{display:flex;flex-wrap:wrap;gap:10px 22px;margin:0 0 6px}.hrsum b{font-size:20px}
+.hrs div.ok b{color:var(--ok)}.hrs div.ok i{background:var(--ok)}.hrs div.low b{color:var(--warn)}.hrs div.low i{background:var(--warn)}
+.hrt td.ok{color:var(--ok);font-weight:700}.hrt td.low{color:var(--warn)}
+.hrt td,.hrt th{padding:6px 5px;text-align:center;font-size:13px;border-bottom:1px solid var(--line)}.hrt td:first-child,.hrt th:first-child{text-align:left;width:auto;white-space:nowrap}
+
+:root{--bg:#f6f4fb;--card:#fff;--ink:#1d1730;--muted:#6b6480;--line:#e6e1f2;--accent:#7b2cbf;--accent2:#cb11ab;--soft:#f1e8fb;--ok:#1f9d6b;--warn:#d9480f}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#141020;--card:#1e182d;--ink:#eee9f8;--muted:#a59cbd;--line:#30284a;--accent:#b57bee;--accent2:#ee5fd2;--soft:#2a2140;--ok:#4cd39b;--warn:#ff8a5c}}
+:root[data-theme=dark]{--bg:#141020;--card:#1e182d;--ink:#eee9f8;--muted:#a59cbd;--line:#30284a;--accent:#b57bee;--accent2:#ee5fd2;--soft:#2a2140;--ok:#4cd39b;--warn:#ff8a5c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{background:linear-gradient(120deg,var(--accent),var(--accent2));color:#fff;padding:28px 16px 22px}
+header .w{max-width:960px;margin:0 auto}
+header h1{margin:0 0 4px;font-size:26px}
+header p{margin:0;opacity:.9}
+nav{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
+nav .w{max-width:960px;margin:0 auto;display:flex;gap:6px;overflow-x:auto;padding:10px 16px}
+nav a{white-space:nowrap;text-decoration:none;color:var(--accent);background:var(--soft);padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600}
+main{max-width:960px;margin:0 auto;padding:20px 16px 60px}
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px}
+h2{margin:0 0 14px;font-size:20px;display:flex;align-items:center;gap:8px}
+h3{margin:18px 0 8px;font-size:15px;color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.link{display:block;text-decoration:none;color:inherit;border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--soft);transition:.15s}
+.link:hover{border-color:var(--accent);transform:translateY(-1px)}
+.link b{display:block;color:var(--accent)}
+.hub{font-size:14px}.hub b{font-size:17px;margin-bottom:4px}.warnc{border-color:var(--warn)}
+.link small{color:var(--muted);word-break:break-all}
+.time{display:inline-block;background:var(--accent);color:#fff;border-radius:8px;padding:2px 8px;font-weight:700;font-size:13px}
+ul.rules{list-style:none;padding:0;margin:0}
+ul.rules li{padding:10px 0;border-bottom:1px dashed var(--line)}
+ul.rules li:last-child{border:0}
+.tpl{position:relative;border-left:4px solid var(--accent);background:var(--soft);border-radius:10px;padding:12px 14px 12px 14px;margin:10px 0;white-space:pre-wrap}
+.tpl .lbl{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px;padding-right:96px}
+.copy{position:absolute;top:8px;right:8px;border:0;background:var(--accent);color:#fff;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer}
+.copy.done{background:var(--ok)}
+.note{border-radius:10px;padding:10px 14px;background:var(--soft);border:1px solid var(--line);margin:10px 0}
+.note.warn{border-color:var(--warn)}
+code{background:var(--soft);padding:1px 6px;border-radius:6px}
+footer{text-align:center;color:var(--muted);font-size:12px}
+table{width:100%;border-collapse:collapse}
+td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+td:first-child{font-weight:700;width:38%;color:var(--accent)}
+.gl{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px}
+.gl div{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--soft)}
+.gl b{color:var(--accent)}
+#glq{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit;margin-bottom:10px}
+main a:not(.link){color:var(--accent);font-weight:600}
+.theme-btn{position:fixed;right:16px;bottom:16px;z-index:50;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--card,var(--paper));color:var(--ink);font-size:20px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.18);display:grid;place-items:center}
+.theme-btn:hover{border-color:var(--accent)}
+/* chips: без полос прокрутки, на широком экране — в несколько строк */
+nav .w,.chips,.hot{scrollbar-width:none;-ms-overflow-style:none}
+nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{display:none}
+@media (min-width:700px){nav .w,.chips,.hot{flex-wrap:wrap;overflow:visible;white-space:normal}nav a,.chips a{padding:5px 11px}}
+@media (max-width:699px){nav .w,.chips,.hot{-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}}
+.space-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.space{display:block;text-decoration:none;color:inherit;border:1px solid var(--line);border-radius:16px;padding:18px;background:var(--card);transition:.15s}
+.space:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 24px rgba(123,44,191,.12)}
+.space .ic{font-size:30px;line-height:1}.space b{display:block;font-size:19px;margin:8px 0 4px;color:var(--accent)}
+.space ul{margin:8px 0 0;padding-left:18px;color:var(--muted);font-size:14px}.space li{margin:2px 0}
+.gsearch{display:flex;gap:8px}.gsearch input{flex:1;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit;min-width:0}
+.gsearch button{border:0;background:var(--accent);color:#fff;border-radius:12px;padding:0 16px;font:inherit;font-weight:600;cursor:pointer}
+.lead{color:var(--muted);margin:-6px 0 14px}
+.soon{display:inline-block;font-size:11px;font-weight:700;color:var(--muted);border:1px dashed var(--line);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:middle}
+.gate{text-align:center;padding:40px 20px}.gate .ic{font-size:44px}.gate p{color:var(--muted)}
+.btn{border:0;background:var(--accent);color:#fff;border-radius:10px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer}.btn.alt{background:var(--soft);color:var(--accent);border:1px solid var(--line)}.btn:disabled{opacity:.6}
+.f label{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin:12px 0 4px}
+.f input,.f select{width:100%;max-width:360px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+.msg{font-weight:600;margin-top:10px;min-height:20px}.msg.ok{color:var(--ok)}.msg.bad{color:var(--warn)}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}.kv div{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px}.kv small{display:block;color:var(--muted);font-size:12px}.kv b{font-size:17px}
+.ut{width:100%;border-collapse:collapse;font-size:14px}.ut th{text-align:left;color:var(--muted);font-size:12px;padding:8px;border-bottom:1px solid var(--line)}.ut td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}.ut td:first-child{font-weight:400;width:auto;color:inherit}
+.ut select{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+.pill{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;background:var(--soft);color:var(--accent)}
+.scroll{overflow-x:auto}
+.newpw{font:700 18px/1.4 ui-monospace,Menlo,monospace;background:var(--soft);border:1px dashed var(--accent);border-radius:10px;padding:10px 14px;display:inline-block;margin:6px 0;user-select:all}
+.mbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 14px}.mbar select{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit}
+.stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}.stat div{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:12px 14px}.stat small{display:block;color:var(--muted);font-size:12px}.stat b{font-size:24px;line-height:1.2}.stat .bad b{color:var(--warn)}.stat .good b{color:var(--ok)}
+.money{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}.money div{border-radius:14px;padding:14px;background:linear-gradient(140deg,var(--accent),var(--accent2));color:#fff}.money small{opacity:.85;display:block;font-size:12px}.money b{font-size:26px}.money em{font-style:normal;font-size:12px;opacity:.85}
+.mt{width:100%;border-collapse:collapse;font-size:14px}.mt th{text-align:left;font-size:12px;color:var(--muted);padding:8px;border-bottom:1px solid var(--line);white-space:nowrap}.mt td{padding:8px;border-bottom:1px solid var(--line)}.mt td:first-child{width:auto;font-weight:600;color:inherit}
+.tag{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700}.t-ok{background:rgba(31,157,107,.12);color:var(--ok)}.t-bad{background:rgba(217,72,15,.12);color:var(--warn)}.t-mid{background:var(--soft);color:var(--muted)}
+.tips{list-style:none;margin:0;padding:0}.tips li{display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}.tips li:last-child{border:0}.tips .i{font-size:20px}.tips b{display:block}
+.loading{color:var(--muted);padding:12px 0}
+.sal{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}.sal input{width:180px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+
+.headline{border-radius:16px;padding:16px 18px;margin-bottom:14px;background:linear-gradient(140deg,var(--accent),var(--accent2));color:#fff;font-size:16px;line-height:1.6}.headline b{font-size:20px}.headline .big{font-size:30px;font-weight:800;display:block;margin-top:4px}.headline small{opacity:.9;display:block;font-size:13px;margin-top:4px}
+.headline ul{margin:8px 0 0;padding-left:18px;font-size:14px}.pay0{color:var(--warn);font-weight:700}
+.ndfl{display:inline-flex;align-items:center;gap:10px;padding:9px 14px;border:1px solid var(--line);border-radius:12px;background:var(--soft);color:var(--ink);font-weight:600;font-size:14px;cursor:pointer;margin:0 0 14px;user-select:none}.ndfl input{width:18px!important;height:18px;margin:0;padding:0;flex:none;accent-color:var(--accent)}.ndfl small{display:block;font-weight:500;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body data-space="work">
+<header><div class="w">
+<h1>💬 Генератор ответа</h1>
+<p>Ответ с эмпатией + ваши частые фразы. Фразы видны только вам</p>
+</div></header>
+<main>
+<section id="gate" class="gate"><div class="ic">🔐</div><h2 style="justify-content:center">Нужно войти</h2><p>Генератор с вашими фразами работает после входа — кнопка «Войти» вверху справа. Без входа генератор доступен на странице <a href="templates.html#gen">«Шаблоны»</a>.</p><button class="btn" type="button" onclick="G11&&G11.login()">Войти</button></section>
+<div id="app" hidden>
+<section id="phrases"><h2>⭐ Мои фразы</h2><p style="margin-top:0;color:var(--muted)">Фразы, которые вы <b>сами пишете</b> в ответах в <a href="templates.html#gen">генераторе ответа</a> чаще всего, и ваши закреплённые. Фразы из конструктора и шаблоны из БЗ сюда не попадают. Генератор показывает ваши фразы в блоке «⭐ Мои частые фразы» и подсказывает их, когда вы начинаете печатать ответ. Фраза появляется здесь, когда вы написали её хотя бы в 2 ответах и скопировали ответ кнопкой «📋 Копировать ответ».</p><div id="ph-list" class="loading">Загружаю…</div><div class="row" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><input id="ph-new" type="text" maxlength="300" placeholder="Своя фраза, например: Спасибо, что дождались ответа!" style="flex:1;min-width:220px"><button class="btn" type="button" id="ph-add">📌 Закрепить</button></div><p id="ph-msg" style="margin:6px 0 0;font-size:13px"></p><div id="genHost" class="loading" style="margin-top:18px">Загружаю генератор ответа…</div></section>
+</div>
+</main>
+<script src="site.js?v=21" defer></script>
+<script>
+function $(i){return document.getElementById(i)}
+function whenReady(cb){if(window.G11)cb();else document.addEventListener('g11:ready',cb,{once:true})}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+// мои фразы для генератора ответа
+var PH=[];function phShow(j){PH=j.items||[];try{document.dispatchEvent(new Event('g11:phrases'))}catch(e){}$('ph-list').className='';$('ph-list').innerHTML=PH.length?PH.map(function(p,i){return '<div class="phr"><span>'+(p.own?'📌 ':'')+esc(p.text)+'</span><small>'+(p.own?'закреплена':'×'+p.count)+'</small><button type="button" class="phx" data-i="'+i+'" title="Убрать из моих фраз">✕</button></div>'}).join(''):'<p style="margin:0;color:var(--muted)">Пока пусто. Собирайте ответы в генераторе и копируйте их кнопкой «📋 Копировать ответ» — частые фразы появятся здесь. Или закрепите свою фразу ниже.</p>'}
+function loadPhrases(){G11.api('myPhrases').then(function(j){phShow(j);if(location.hash==='#phrases'&&!loadPhrases.s){loadPhrases.s=1;$('phrases').scrollIntoView()}}).catch(function(x){$('ph-list').className='';$('ph-list').textContent=x.message})}
+$('ph-list').addEventListener('click',function(e){var b=e.target.closest('[data-i]');if(!b)return;var p=PH[+b.dataset.i];if(!p||!confirm('Убрать фразу из моих фраз?\n\n'+p.text))return;G11.api('phraseHide',{text:p.text}).then(phShow).catch(function(x){alert(x.message)})});
+$('ph-add').onclick=function(){var t=$('ph-new').value.trim(),m=$('ph-msg');if(!t)return;this.disabled=true;var b=this;G11.api('phraseAdd',{text:t}).then(function(j){phShow(j);$('ph-new').value='';m.style.color='var(--ok)';m.textContent='✅ Фраза закреплена — она появится в генераторе ответа'}).catch(function(x){m.style.color='var(--warn)';m.textContent=x.message}).then(function(){b.disabled=false})};
+// генератор ответа с эмпатией прямо в кабинете: берём его со страницы «Шаблоны», чтобы был один источник
+function mountGen(){var host=$('genHost');if(!host||mountGen.d)return;mountGen.d=1;
+ fetch('templates.html',{cache:'no-cache'}).then(function(r){return r.text()}).then(function(html){var d=new DOMParser().parseFromString(html,'text/html'),gen=d.getElementById('gen');if(!gen)throw new Error('Не нашла генератор на странице «Шаблоны»');
+  var css='',tmp=document.createElement('style');tmp.textContent=[].map.call(d.querySelectorAll('style'),function(s){return s.textContent}).join('\n');document.head.appendChild(tmp);
+  [].forEach.call(tmp.sheet.cssRules,function(r){if(r.type===7&&/^genflash$/.test(r.name)){css+=r.cssText+'\n';return}if(r.type!==1)return;var sel=r.selectorText;if(!/(^|[\s,>+~])(\.ec|#gen|\.seg|\.btn|\.ex\b|\.note|\.tag)/.test(sel))return;css+=sel.split(',').map(function(s){return '#genHost '+s.trim()}).join(',')+r.cssText.slice(r.cssText.indexOf('{'))+'\n'});tmp.remove();
+  var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
+  host.className='';host.innerHTML='';host.appendChild(document.importNode(gen,true));
+  var ph=d.getElementById('myPh');if(ph)host.appendChild(document.importNode(ph,true));
+  var cols=d.getElementById('ecCols');if(cols){var h=document.createElement('h3');h.textContent='🧩 Конструктор фраз (кликните — фраза вставится в ответ)';host.appendChild(h);var n=cols.previousElementSibling;if(n&&n.classList.contains('note'))host.appendChild(document.importNode(n,true));host.appendChild(document.importNode(cols,true))}
+  var ex=document.createElement('div');ex.id='ecEx';ex.hidden=true;host.appendChild(ex);
+  var code=[].map.call(d.querySelectorAll('script:not([src])'),function(s){return s.textContent}).filter(function(t){return t.indexOf('var COLS=[')>-1})[0];if(!code)throw new Error('Не нашла код генератора');
+  var sc=document.createElement('script');sc.textContent=code;document.body.appendChild(sc);
+  host.addEventListener('click',function(e){if(e.target.closest('#ecCopy'))setTimeout(loadPhrases,1500)})
+ }).catch(function(x){host.className='';host.textContent='Генератор не загрузился: '+x.message+'. Откройте его на странице «Шаблоны».'})}
+function show(){var u=G11.user();$('gate').hidden=!!u;$('app').hidden=!u;if(!u)return;if(!show.loaded){show.loaded=1;loadPhrases();mountGen()}}
+whenReady(show);document.addEventListener('g11:login',show);document.addEventListener('g11:user',show);document.addEventListener('g11:logout',show);
+</script>
+<script>(function(){var r=document.documentElement,b=document.createElement('button');b.type='button';b.className='theme-btn';
+function dark(){var t=r.getAttribute('data-theme');return t?t==='dark':(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)}
+function upd(){var d=dark();b.textContent=d?'☀️':'🌙';b.title=d?'Светлая тема':'Тёмная тема';b.setAttribute('aria-label',b.title)}
+b.onclick=function(){var n=dark()?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}upd()};
+if(window.matchMedia)matchMedia('(prefers-color-scheme: dark)').addEventListener('change',upd);
+document.body.appendChild(b);upd()})();</script>
+</body>
+</html>
