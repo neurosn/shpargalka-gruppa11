@@ -7,6 +7,7 @@
 <title>Мой кабинет · Группа 11</title>
 <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 <style>
+.phr{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0;background:var(--soft)}.phr span{flex:1}.phr small{color:var(--muted);white-space:nowrap}.phx{border:0;background:none;color:var(--muted);cursor:pointer;font-size:15px;padding:2px 6px}.phx:hover{color:var(--warn)}
 .hrs{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:8px;margin-top:6px}
 .hrs div{border:1px solid var(--line);border-radius:10px;padding:8px 6px 6px;background:var(--soft);text-align:center;position:relative;overflow:hidden}
 .hrs small{display:block;color:var(--muted);font-size:11px}.hrs b{display:block;font-size:22px;line-height:1.2;color:var(--accent)}
@@ -109,6 +110,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 <section id="gate" class="gate"><div class="ic">🔐</div><h2 style="justify-content:center">Нужно войти</h2><p>Войдите по ID сотрудника и паролю — кнопка «Войти» вверху справа.</p><button class="btn" type="button" onclick="G11&&G11.login()">Войти</button></section>
 <div id="app" hidden>
 <section id="shift-sec"></section>
+<section id="phrases"><h2>💬 Генератор ответа: мои фразы</h2><p style="margin-top:0;color:var(--muted)">Фразы, которые вы чаще всего оставляете в ответах из <a href="templates.html#gen">генератора ответа</a>, и ваши закреплённые. Они показываются в генераторе в блоке «⭐ Мои частые фразы». Фраза попадает сюда, когда вы использовали её хотя бы 2 раза и скопировали ответ кнопкой «📋 Копировать ответ».</p><div id="ph-list" class="loading">Загружаю…</div><div class="row" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><input id="ph-new" type="text" maxlength="300" placeholder="Своя фраза, например: Спасибо, что дождались ответа!" style="flex:1;min-width:220px"><button class="btn" type="button" id="ph-add">📌 Закрепить</button></div><p id="ph-msg" style="margin:6px 0 0;font-size:13px"></p></section>
 <section id="hr-sec" hidden><h2>💬 Чаты по часам · текущая смена</h2><div id="hr-body" class="loading">Загружаю…</div></section>
 <section><h2>👤 <span id="nm"></span></h2>
 <div class="kv"><div><small>ID</small><b id="uid"></b></div><div><small>Роль</small><b id="urole"></b></div><div><small>Вход</small><b>сохранён на этом устройстве</b></div></div>
@@ -165,7 +167,7 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 function $(i){return document.getElementById(i)}
 function whenReady(cb){if(window.G11)cb();else document.addEventListener('g11:ready',cb,{once:true})}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function show(){var u=G11.user();$('gate').hidden=!!u;$('app').hidden=!u;if(!u)return;if(!show.loaded){show.loaded=1;loadData();loadHourly();if(u.role==='admin'){$('shift-sec').innerHTML='<h2>⏱ Смены</h2><p style="margin:0;color:var(--muted)">Руководителю отмечаться не нужно — все смены по графику с 1 ноября засчитываются автоматически как полные (21:00–09:00).</p>'}else loadShift()}$('nm').textContent=u.name;$('uid').textContent=u.id;$('urole').textContent=G11.roleName(u.role)}
+function show(){var u=G11.user();$('gate').hidden=!!u;$('app').hidden=!u;if(!u)return;if(!show.loaded){show.loaded=1;loadData();loadHourly();loadPhrases();if(u.role==='admin'){$('shift-sec').innerHTML='<h2>⏱ Смены</h2><p style="margin:0;color:var(--muted)">Руководителю отмечаться не нужно — все смены по графику с 1 ноября засчитываются автоматически как полные (21:00–09:00).</p>'}else loadShift()}$('nm').textContent=u.name;$('uid').textContent=u.id;$('urole').textContent=G11.roleName(u.role)}
 
 function plural(n,a,b,c){n=Math.abs(n)%100;var m=n%10;if(n>10&&n<20)return c;if(m===1)return a;if(m>1&&m<5)return b;return c}
 // НДФЛ 13%: галочка запоминается на этом устройстве; все суммы на странице считаются «на руки»
@@ -224,6 +226,11 @@ function loadHourly(){G11.api('myHourly').then(function(j){var box=$('hr-body');
   html+='<p style="margin:8px 0 0;color:var(--muted);font-size:13px">Норма — '+HR_NORM+' чатов в час: зелёным — в норме, оранжевым — ниже нормы · данные вносит руководитель раз в час · обновлено в '+esc(j.updated)+' МСК</p>';
   box.innerHTML=html}).catch(function(x){$('hr-sec').hidden=false;$('hr-body').className='';$('hr-body').textContent=x.message})}
 setInterval(function(){if(window.G11&&G11.user()&&!document.hidden&&show.loaded)loadHourly()},300000);
+// мои фразы для генератора ответа
+var PH=[];function phShow(j){PH=j.items||[];$('ph-list').className='';$('ph-list').innerHTML=PH.length?PH.map(function(p,i){return '<div class="phr"><span>'+(p.own?'📌 ':'')+esc(p.text)+'</span><small>'+(p.own?'закреплена':'×'+p.count)+'</small><button type="button" class="phx" data-i="'+i+'" title="Убрать из моих фраз">✕</button></div>'}).join(''):'<p style="margin:0;color:var(--muted)">Пока пусто. Собирайте ответы в генераторе и копируйте их кнопкой «📋 Копировать ответ» — частые фразы появятся здесь. Или закрепите свою фразу ниже.</p>'}
+function loadPhrases(){G11.api('myPhrases').then(function(j){phShow(j);if(location.hash==='#phrases'&&!loadPhrases.s){loadPhrases.s=1;$('phrases').scrollIntoView()}}).catch(function(x){$('ph-list').className='';$('ph-list').textContent=x.message})}
+$('ph-list').addEventListener('click',function(e){var b=e.target.closest('[data-i]');if(!b)return;var p=PH[+b.dataset.i];if(!p||!confirm('Убрать фразу из моих фраз?\n\n'+p.text))return;G11.api('phraseHide',{text:p.text}).then(phShow).catch(function(x){alert(x.message)})});
+$('ph-add').onclick=function(){var t=$('ph-new').value.trim(),m=$('ph-msg');if(!t)return;this.disabled=true;var b=this;G11.api('phraseAdd',{text:t}).then(function(j){phShow(j);$('ph-new').value='';m.style.color='var(--ok)';m.textContent='✅ Фраза закреплена — она появится в генераторе ответа'}).catch(function(x){m.style.color='var(--warn)';m.textContent=x.message}).then(function(){b.disabled=false})};
 function loadShift(){if(!window.G11Shift){setTimeout(loadShift,200);return}if(!loadShift.w)loadShift.w=G11Shift($('shift-sec'),'real');else loadShift.w.reload()}
 whenReady(show);document.addEventListener('g11:login',show);document.addEventListener('g11:user',show);document.addEventListener('g11:logout',show);
 $('pwf').onsubmit=function(e){e.preventDefault();var m=$('pwm');m.className='msg';if($('np').value!==$('np2').value){m.textContent='Новые пароли не совпадают';m.classList.add('bad');return}
