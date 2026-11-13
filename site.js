@@ -22,7 +22,7 @@
   bar.innerHTML=h;document.body.insertBefore(bar,document.body.firstChild);
   var a=document.createElement('script');a.src='auth.js?v=7';document.body.appendChild(a);
   var ij=document.createElement('script');ij.src='icons.js?v=11';ij.async=false;document.body.appendChild(ij);
-  var rj=document.createElement('script');rj.src='rte.js?v=9';rj.async=false;document.body.appendChild(rj);
+  var rj=document.createElement('script');rj.src='rte.js?v=10';rj.async=false;document.body.appendChild(rj);
   var cj=document.createElement('script');cj.src='content.js?v=9';cj.async=false;document.body.appendChild(cj);
   var sj=document.createElement('script');sj.src='search.js?v=3';document.body.appendChild(sj);
 })();
