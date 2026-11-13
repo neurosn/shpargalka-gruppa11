@@ -25,7 +25,7 @@
     var h=[].filter.call(sec.querySelectorAll('h3'),function(x){return subKey(x.textContent)===k})[0];if(!h)return null;
     var n=h.nextElementSibling;while(n&&!(n.tagName==='H3'||n.tagName==='H2'||(n.classList&&n.classList.contains('src'))))n=n.nextElementSibling;
     return {p:h.parentNode,b:n||null}}
-  var CATS=[],TSECS=[],TICO={};function artCat(){}
+  var CATS=[],TSECS=[],TICO={};function ticon(n){var v=TICO[n]||'clipboard';return /^[a-z0-9]+$/.test(v)?'<i data-i="'+v+'"></i>':esc(v)}function artCat(){}
   function render(items,cats,ts,ti){if(cats)CATS=cats;if(ts)TSECS=ts;if(ti)TICO=ti;
     if(artCat.v==null){artCat.v='';try{artCat.v=sessionStorage.getItem('g11_acat_'+(file==='team.html'?'team':'work'))||''}catch(_){}}
     document.querySelectorAll('[data-g11c]').forEach(function(n){n.remove()});
@@ -40,9 +40,9 @@
       // свои разделы наставников: отдельные блоки в конце страницы + кнопка в верхнем меню разделов
       var names=(TSECS||[]).filter(function(n){return own[n]});Object.keys(own).forEach(function(n){if(names.indexOf(n)<0)names.push(n)});
       var chips=document.querySelector('.chips'),last=[].slice.call(main.querySelectorAll(':scope>section')).pop();
-      names.forEach(function(n){var id='u-'+n.toLowerCase().replace(/[^0-9a-zа-яё]+/g,'-').replace(/^-|-$/g,'');var s0=document.createElement('section');s0.id=id;s0.setAttribute('data-g11c','1');s0.setAttribute('data-keys',n.toLowerCase()+' наставники');s0.innerHTML='<h2>'+esc(TICO[n]||'📋')+' '+esc(n)+'</h2>';own[n].forEach(function(e){s0.appendChild(e)});
+      names.forEach(function(n){var id='u-'+n.toLowerCase().replace(/[^0-9a-zа-яё]+/g,'-').replace(/^-|-$/g,'');var s0=document.createElement('section');s0.id=id;s0.setAttribute('data-g11c','1');s0.setAttribute('data-keys',n.toLowerCase()+' наставники');s0.innerHTML='<h2>'+ticon(n)+' '+esc(n)+'</h2>';own[n].forEach(function(e){s0.appendChild(e)});
         last&&last.nextSibling?main.insertBefore(s0,last.nextSibling):main.appendChild(s0);last=s0;
-        if(chips){var a=document.createElement('a');a.href='#'+id;a.setAttribute('data-g11c','1');a.textContent=(TICO[n]||'📋')+' '+n;chips.appendChild(a)}});
+        if(chips){var a=document.createElement('a');a.href='#'+id;a.setAttribute('data-g11c','1');a.innerHTML=ticon(n)+' '+esc(n);chips.appendChild(a)}});
       if(loose.length){var s=document.createElement('section');s.id='mentors';s.setAttribute('data-g11c','1');s.setAttribute('data-keys','новое наставники добавлено');s.innerHTML='<h2>✏️ Новое от наставников</h2>';loose.forEach(function(e){s.appendChild(e)});
         var after=document.getElementById('empathy');after&&after.nextSibling?main.insertBefore(s,after.nextSibling):main.insertBefore(s,main.firstChild)}
     }
