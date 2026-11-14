@@ -21,7 +21,7 @@
   h+='<span class="sp"></span><span id="g11acc"></span></div>';
   bar.innerHTML=h;document.body.insertBefore(bar,document.body.firstChild);
   var a=document.createElement('script');a.src='auth.js?v=7';document.body.appendChild(a);
-  var ij=document.createElement('script');ij.src='icons.js?v=12';ij.async=false;document.body.appendChild(ij);
+  var ij=document.createElement('script');ij.src='icons.js?v=13';ij.async=false;document.body.appendChild(ij);
   var rj=document.createElement('script');rj.src='rte.js?v=13';rj.async=false;document.body.appendChild(rj);
   var cj=document.createElement('script');cj.src='content.js?v=10';cj.async=false;document.body.appendChild(cj);
   if(/(templates|gen)\.html$/.test(location.pathname)){var mj=document.createElement('script');mj.src='markers.js?v=2';mj.async=false;document.body.appendChild(mj)}
