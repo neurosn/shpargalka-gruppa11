@@ -8,7 +8,7 @@
   function when(cb){if(window.G11)cb();else document.addEventListener('g11:ready',cb,{once:true})}
   function d(s){try{var x=new Date(s);return x.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'})}catch(e){return ''}}
   function R(s){return window.G11Rich?G11Rich.sanitize(s):esc(s)}
-  function copyBtn(el,raw){var b=document.createElement('button');b.className='copy';b.type='button';b.textContent='Копировать';b.onclick=function(){var t=raw!=null&&window.G11Rich?G11Rich.toText(raw):(function(){var c=el.cloneNode(true);c.querySelectorAll('.lbl,.copy,.by').forEach(function(x){x.remove()});return c.textContent.trim()})();
+  function copyBtn(el,raw){var b=document.createElement('button');b.className='copy';b.type='button';b.textContent='Копировать';b.onclick=function(){var t=raw!=null&&window.G11Rich?G11Rich.toText(raw):(function(){var c=el.cloneNode(true);c.querySelectorAll('.lbl,.copy,.by,.favb,.mkb,.mkp,.cpb').forEach(function(x){x.remove()});return c.textContent.trim()})();
     var ok=function(){b.textContent='Скопировано ✓';b.classList.add('done');setTimeout(function(){b.textContent='Копировать';b.classList.remove('done')},1500)};
     if(navigator.clipboard)navigator.clipboard.writeText(t).then(ok,function(){fb(t);ok()});else{fb(t);ok()}};el.appendChild(b)}
   function fb(t){var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(e){}a.remove()}
