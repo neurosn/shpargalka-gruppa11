@@ -34,7 +34,7 @@
   var F={mk:{},fav:false,sec:'',grp:false};try{var sv=JSON.parse(sessionStorage.getItem('g11_tplf')||'null');if(sv)F=Object.assign(F,sv)}catch(_){}
   function keep(){try{sessionStorage.setItem('g11_tplf',JSON.stringify(F))}catch(_){}}
   function secs(){return [].filter.call(document.querySelectorAll('main>section[id]'),function(s){return !/^(mkbar|favsec|mkgroup)$/.test(s.id)&&s.querySelector('.tpl')})}
-  var IMAP=null;function icoOf(s){var i=s.querySelector('h2 i[data-i]');if(i)return i.getAttribute('data-i');var g=s.querySelector('h2 svg');if(!g||!window.G11Icons||!G11Icons.P)return '';if(!IMAP){IMAP={};var d=document.createElement('div');Object.keys(G11Icons.P).forEach(function(n){d.innerHTML=G11Icons.svg(n);var sv=d.querySelector('svg');if(sv)IMAP[sv.innerHTML]=n})}return IMAP[g.innerHTML]||''}
+  var IMAP=null,IMT=0;function icoOf(s){var i=s.querySelector('h2 i[data-i]');if(i)return i.getAttribute('data-i');var g=s.querySelector('h2 svg');if(!g||!window.G11Icons||!G11Icons.P)return '';if(!IMAP||(!IMAP[g.innerHTML]&&Date.now()-IMT>1500)){IMT=Date.now();IMAP={};var d=document.createElement('div');Object.keys(G11Icons.P).forEach(function(n){d.innerHTML=G11Icons.svg(n);var sv=d.querySelector('svg');if(sv)IMAP[sv.innerHTML]=n})}return IMAP[g.innerHTML]||''}
   function secTitle(s){var h=s.querySelector('h2');return h?h.textContent.replace(/\s+/g,' ').trim():s.id}
   function bar(){var main=document.querySelector('main');if(!main)return;var b=document.getElementById('mkbar');if(!b){b=document.createElement('section');b.id='mkbar';b.setAttribute('aria-label','Фильтры шаблонов');var first=main.querySelector(':scope>section');first?main.insertBefore(b,first):main.appendChild(b)}
     var M=window.G11Mark,u=window.G11&&G11.user(),defs=M?M.data.defs:[];Object.keys(F.mk).forEach(function(id){if(!M||!M.def(id))delete F.mk[id]});
@@ -61,7 +61,7 @@
   document.addEventListener('g11:marks',function(){deco()});
   function load(){if(!window.G11||!G11.user()){set([]);return}G11.api('favList').then(function(j){set(j.items)}).catch(function(){deco()})}
   var t0;new MutationObserver(function(){clearTimeout(t0);t0=setTimeout(deco,200)}).observe(document.querySelector('main')||document.body,{childList:true,subtree:true});
-  function go(){deco();load()}
+  function go(){deco();load();setTimeout(deco,2500)}
   if(window.G11)go();else document.addEventListener('g11:ready',go,{once:true});
   document.addEventListener('g11:login',load);document.addEventListener('g11:logout',function(){set([])});
 })();
