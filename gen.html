@@ -134,6 +134,9 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 .newsec{border:1px dashed var(--line,#3a3350);border-radius:10px;padding:8px 12px;margin-top:8px;background:var(--card)}
 .icos{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}.icos button{display:inline-grid;place-items:center;width:34px;height:34px;border:1px solid var(--line,#3a3350);border-radius:8px;background:var(--soft);color:var(--accent);cursor:pointer;padding:0}.icos button.on{border-color:var(--accent);background:var(--accent);color:#fff}.icos button i[data-i]{width:18px;height:18px}
 .mt-card .meta i[data-i]{width:14px;height:14px;vertical-align:-2px}
+.icos button.on i[data-i]{background:#fff}
+.mt-card .mkp{margin:6px 0 0}.mt-card .mkp:empty{display:none}
+.mkbar2{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 10px}.mkbar2 .lb{font-size:13px;color:var(--muted)}
 </style>
 </head>
 <body data-space="work">
@@ -211,7 +214,7 @@ function tab(t,noHash){TAB=t;document.querySelectorAll('#gtabs button').forEach(
 $('gtabs').addEventListener('click',function(e){var b=e.target.closest('button[data-t]');if(b)tab(b.dataset.t)});
 // избранное
 function favShow(){$('favN').textContent=FV.length||'';var b=$('fav-list');b.className='';
-  b.innerHTML=FV.length?FV.map(function(x,i){return '<div class="mt-card fv" data-i="'+i+'"><div class="hd"><b>'+esc(x.title)+'</b></div><div class="tx">'+esc(x.text)+'</div>'+(longTx(x.text)?'<button type="button" class="more">показать полностью</button>':'')+'<div class="act"><button type="button" class="sb pr" data-a="cp">📋 Копировать</button><button type="button" class="sb" data-a="gen">➡️ В генератор</button><a class="sb" href="templates.html#'+esc(x.key)+'">🔗 К шаблону</a><button type="button" class="sb wr" data-a="un">✕ Убрать</button></div></div>'}).join(''):'<p class="empty">Пока пусто. Откройте <a href="templates.html">«Шаблоны»</a> и нажмите ☆ у нужных шаблонов.</p>'}
+  b.innerHTML=FV.length?mkBar()+FV.map(function(x,i){if(!mkOk(x.key))return '';return '<div class="mt-card fv" data-i="'+i+'" style="'+mkBorder(x.key)+'"><div class="hd"><b>'+esc(x.title)+'</b></div><div class="mkp">'+mkPills(x.key)+'</div><div class="tx">'+esc(x.text)+'</div>'+(longTx(x.text)?'<button type="button" class="more">показать полностью</button>':'')+'<div class="act"><button type="button" class="sb pr" data-a="cp">📋 Копировать</button><button type="button" class="sb" data-a="gen">➡️ В генератор</button><button type="button" class="sb" data-mkopen="1" data-mkey="'+esc(x.key)+'">🏷 Маркеры</button><a class="sb" href="templates.html#'+esc(x.key)+'">🔗 К шаблону</a><button type="button" class="sb wr" data-a="un">✕ Убрать</button></div></div>'}).join('')+mkNone(FV.map(function(x){return x.key})):'<p class="empty">Пока пусто. Откройте <a href="templates.html">«Шаблоны»</a> и нажмите ☆ у нужных шаблонов.</p>'}
 function loadFav(){G11.api('favList').then(function(j){FV=j.items||[];favShow()}).catch(function(x){$('fav-list').className='';$('fav-list').textContent=x.message})}
 $('fav-list').addEventListener('click',function(e){var c=e.target.closest('.mt-card');if(!c)return;var x=FV[+c.dataset.i];if(!x)return;var b=e.target.closest('[data-a]'),m=e.target.closest('.more');
   if(m){c.classList.toggle('open');m.textContent=c.classList.contains('open')?'свернуть':'показать полностью';return}if(!b)return;
@@ -220,16 +223,16 @@ $('fav-list').addEventListener('click',function(e){var c=e.target.closest('.mt-c
 function mineShow(j){if(j){MT=j.items||[];TS=j.tsections||TS;TI=j.ticons||TI;modFlag(j)}var att=MT.filter(function(x){return x.status==='revise'||x.status==='rejected'}).length;$('mineN').textContent=att||'';
   var sel=$('mt-sec');if(!sel.dataset.v||j){var cur=sel.value||'new';sel.innerHTML=secOpts(cur);sel.dataset.v=1}
   var b=$('mt-list');b.className='';
-  b.innerHTML=MT.length?MT.map(function(x,i){var a='<button type="button" class="sb pr" data-a="cp">📋 Копировать</button><button type="button" class="sb" data-a="gen">➡️ В генератор</button>';
+  b.innerHTML=MT.length?mkBar()+MT.map(function(x,i){if(!mkOk('m-'+x.id))return '';var a='<button type="button" class="sb pr" data-a="cp">📋 Копировать</button><button type="button" class="sb" data-a="gen">➡️ В генератор</button>';
     if(x.status!=='pending')a+='<button type="button" class="sb" data-a="ed">✏️ Изменить</button>';
     if(x.status==='draft'||x.status==='revise'||x.status==='rejected')a+='<button type="button" class="sb ok" data-a="send">📤 В общие</button>';
     if(x.status==='pending')a+='<button type="button" class="sb" data-a="back">↩️ Отозвать заявку</button>';
     if(x.status==='approved'&&x.pubId)a+='<a class="sb" href="templates.html#c-'+esc(x.pubId)+'">🔗 Открыть в «Шаблонах»</a>';
-    a+='<button type="button" class="sb wr" data-a="del">🗑 Удалить</button>';
-    return '<div class="mt-card" data-i="'+i+'"><div class="hd"><div><b>'+esc(x.title)+'</b><div class="meta">'+secHtml(x.section)+' · изменён '+dt(x.updated)+'</div></div><span class="st st-'+esc(x.status)+'">'+esc(x.statusText)+'</span></div>'+
+    a+='<button type="button" class="sb" data-mkopen="1" data-mkey="m-'+esc(x.id)+'">🏷 Маркеры</button><button type="button" class="sb wr" data-a="del">🗑 Удалить</button>';
+    return '<div class="mt-card" data-i="'+i+'" style="'+mkBorder('m-'+x.id)+'"><div class="hd"><div><b>'+esc(x.title)+'</b><div class="meta">'+secHtml(x.section)+' · изменён '+dt(x.updated)+'</div></div><span class="st st-'+esc(x.status)+'">'+esc(x.statusText)+'</span></div>'+
       (x.comment&&x.status!=='draft'?'<div class="cm">💬 <b>'+esc(x.reviewer||'Проверяющий')+':</b> '+esc(x.comment)+'</div>':'')+
       (x.status==='revise'?'<div class="meta" style="color:var(--warn)">Поправьте шаблон по комментарию и снова нажмите «📤 В общие».</div>':'')+
-      '<div class="tx">'+esc(x.text)+'</div>'+(longTx(x.text)?'<button type="button" class="more">показать полностью</button>':'')+'<div class="act">'+a+'</div></div>'}).join(''):'<p class="empty">Своих шаблонов пока нет — создайте первый в форме выше.</p>'}
+      '<div class="mkp">'+mkPills('m-'+x.id)+'</div><div class="tx">'+esc(x.text)+'</div>'+(longTx(x.text)?'<button type="button" class="more">показать полностью</button>':'')+'<div class="act">'+a+'</div></div>'}).join('')+mkNone(MT.map(function(x){return 'm-'+x.id})):'<p class="empty">Своих шаблонов пока нет — создайте первый в форме выше.</p>'}
 function loadMine(){G11.api('myTpl').then(mineShow).catch(function(x){$('mt-list').className='';$('mt-list').textContent=x.message})}
 function mtMsg(t,ok){var m=$('mt-msg');m.style.color=ok?'var(--ok)':'var(--warn)';m.textContent=t}
 function mtReset(){$('mt-id').value='';$('mt-title').value='';$('mt-text').value='';$('mt-sec').value='new';$('mt-cancel').hidden=true;$('mt-save').textContent='💾 Сохранить для себя'}
@@ -269,6 +272,16 @@ $('mt-secok').onclick=function(){var n=$('mt-secname').value.replace(/\s+/g,' ')
   var ex=TS.filter(function(x){return x.toLowerCase()===n.toLowerCase()})[0];if(ex){secSet('u:'+ex);$('mt-newsec').hidden=true;mtMsg('Такой раздел уже есть — выбрала его',true);return}
   if(ISMOD){btn.disabled=true;G11.api('catAdd',{kind:'template',name:n,icon:NEWICO}).then(function(j){TS=j.tsections||TS;TI[j.name||n]=NEWICO;secSet('u:'+(j.name||n));$('mt-newsec').hidden=true;$('mt-secname').value='';mtMsg('✅ Раздел «'+(j.name||n)+'» добавлен на страницу «Шаблоны»',true)}).catch(function(x){m.style.color='var(--warn)';m.textContent=x.message}).then(function(){btn.disabled=false})}
   else{NEWSEC='n:'+n+'#'+NEWICO;secSet(NEWSEC);$('mt-newsec').hidden=true;$('mt-secname').value='';mtMsg('🆕 Раздел «'+n+'» появится на странице «Шаблоны», когда наставник одобрит ваш шаблон',true)}};
+// 🏷 свои маркеры: фильтр по цветам во вкладках «Избранное» и «Мои шаблоны»
+var FMK={};function MKR(){return window.G11Mark}
+function mkOk(k){var ids=Object.keys(FMK);if(!ids.length||!MKR())return true;return ids.some(function(i){return MKR().has(k,i)})}
+function mkPills(k){return MKR()?MKR().pills(k):''}
+function mkBorder(k){var d=MKR()?MKR().of(k):[];return d.length?'border-left-color:'+d[0].c:''}
+function mkBar(){var M=MKR();if(!M)return '';Object.keys(FMK).forEach(function(i){if(!M.def(i))delete FMK[i]});var defs=M.data.defs;return '<div class="mkbar2"><span class="lb">Фильтр по маркерам:</span>'+defs.map(function(d){return M.chip(d,!!FMK[d.id]).replace('data-mk=','data-mkf=')}).join('')+'<button type="button" class="g11mk-chip" data-mkopen="1" data-mkm>🏷 Мои маркеры…</button>'+(Object.keys(FMK).length?'<button type="button" class="g11mk-chip" data-mkr>✕ Сбросить</button>':'')+'</div>'}
+function mkNone(keys){return Object.keys(FMK).length&&!keys.some(mkOk)?'<p class="empty">С выбранными маркерами шаблонов нет.</p>':''}
+document.addEventListener('click',function(e){var o=e.target.closest('[data-mkey]');if(o){MKR()&&MKR().open(o,o.dataset.mkey);return}var m=e.target.closest('[data-mkm]');if(m){MKR()&&MKR().open(m,null);return}
+  var f=e.target.closest('[data-mkf]');if(f){if(FMK[f.dataset.mkf])delete FMK[f.dataset.mkf];else FMK[f.dataset.mkf]=1;favShow();mineShow();return}if(e.target.closest('[data-mkr]')){FMK={};favShow();mineShow()}});
+document.addEventListener('g11:marks',function(){if(!$('t-fav').hidden||FV.length)favShow();if(MT.length||!$('t-mine').hidden)mineShow()});
 function tabsInit(){if(tabsInit.d)return;tabsInit.d=1;var h=(location.hash||'').slice(1);if(h==='fav'||h==='mine')tab(h,true);G11.api('myTpl').then(function(j){mineShow(j);if(h==='mod'&&ISMOD)tab('mod',true)}).catch(function(){});G11.api('favList').then(function(j){FV=j.items||[];$('favN').textContent=FV.length||''}).catch(function(){});}
 document.addEventListener('g11:login',function(){tabsInit.d=0;tabsInit()});
 (function w(){if(window.G11&&G11.user()&&!$('app').hidden)tabsInit();else setTimeout(w,400)})();
