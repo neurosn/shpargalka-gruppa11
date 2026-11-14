@@ -22,7 +22,7 @@
   bar.innerHTML=h;document.body.insertBefore(bar,document.body.firstChild);
   var a=document.createElement('script');a.src='auth.js?v=7';document.body.appendChild(a);
   var ij=document.createElement('script');ij.src='icons.js?v=12';ij.async=false;document.body.appendChild(ij);
-  var rj=document.createElement('script');rj.src='rte.js?v=12';rj.async=false;document.body.appendChild(rj);
+  var rj=document.createElement('script');rj.src='rte.js?v=13';rj.async=false;document.body.appendChild(rj);
   var cj=document.createElement('script');cj.src='content.js?v=9';cj.async=false;document.body.appendChild(cj);
   if(/templates\.html$/.test(location.pathname)){var fj=document.createElement('script');fj.src='favs.js?v=1';fj.async=false;document.body.appendChild(fj)}
   var sj=document.createElement('script');sj.src='search.js?v=3';document.body.appendChild(sj);
