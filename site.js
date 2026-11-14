@@ -25,6 +25,6 @@
   var rj=document.createElement('script');rj.src='rte.js?v=13';rj.async=false;document.body.appendChild(rj);
   var cj=document.createElement('script');cj.src='content.js?v=10';cj.async=false;document.body.appendChild(cj);
   if(/(templates|gen)\.html$/.test(location.pathname)){var mj=document.createElement('script');mj.src='markers.js?v=2';mj.async=false;document.body.appendChild(mj)}
-  if(/templates\.html$/.test(location.pathname)){var fj=document.createElement('script');fj.src='favs.js?v=5';fj.async=false;document.body.appendChild(fj)}
+  if(/templates\.html$/.test(location.pathname)){var fj=document.createElement('script');fj.src='favs.js?v=6';fj.async=false;document.body.appendChild(fj)}
   var sj=document.createElement('script');sj.src='search.js?v=3';document.body.appendChild(sj);
 })();
