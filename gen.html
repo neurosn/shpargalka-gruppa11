@@ -102,6 +102,35 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 .headline ul{margin:8px 0 0;padding-left:18px;font-size:14px}.pay0{color:var(--warn);font-weight:700}
 .ndfl{display:inline-flex;align-items:center;gap:10px;padding:9px 14px;border:1px solid var(--line);border-radius:12px;background:var(--soft);color:var(--ink);font-weight:600;font-size:14px;cursor:pointer;margin:0 0 14px;user-select:none}.ndfl input{width:18px!important;height:18px;margin:0;padding:0;flex:none;accent-color:var(--accent)}.ndfl small{display:block;font-weight:500;color:var(--muted);font-size:12px}
 </style>
+<style>
+.gtabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 16px}
+.gtabs button{border:1px solid var(--line,#3a3350);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.gtabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.gtabs .n:empty{display:none}.gtabs .n{display:inline-block;min-width:18px;padding:0 6px;border-radius:99px;background:var(--warn);color:#fff;font-size:12px;margin-left:4px;text-align:center}
+.sub2{margin-top:0;color:var(--muted)}
+.mt-card{border:1px solid var(--line,#3a3350);border-left:4px solid var(--accent);border-radius:12px;padding:12px 14px;margin:10px 0;background:var(--soft)}
+.mt-card.fv{border-left-color:#f5b301}
+.mt-card .hd{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}
+.mt-card .hd b{font-size:15px}
+.mt-card .meta{color:var(--muted);font-size:12.5px;margin-top:2px}
+.mt-card .tx{white-space:pre-wrap;margin:8px 0;font-size:14.5px;max-height:6.2em;overflow:hidden}
+.mt-card.open .tx{max-height:none}
+.mt-card .more{border:0;background:none;color:var(--accent);padding:0;font:inherit;font-size:13px;cursor:pointer;margin:-4px 0 8px}
+.mt-card .act{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.sb{border:1px solid var(--line,#3a3350);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 11px;font:inherit;font-size:13px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.sb.pr{background:var(--accent);border-color:var(--accent);color:#fff}.sb.ok{background:var(--ok);border-color:var(--ok);color:#fff}.sb.wr{color:var(--warn)}
+.sb:disabled{opacity:.6;cursor:wait}
+.st{font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.st-draft{background:var(--card);color:var(--muted);border:1px solid var(--line,#3a3350)}.st-pending{background:#3b82f6;color:#fff}.st-revise{background:#f59e0b;color:#fff}.st-rejected{background:#ef4444;color:#fff}.st-approved{background:var(--ok);color:#fff}
+.cm{margin:6px 0;padding:8px 10px;border-left:3px solid var(--accent);background:var(--card);border-radius:6px;font-size:13.5px;white-space:pre-wrap}
+.mt-form{border:1px solid var(--line,#3a3350);border-radius:12px;padding:12px 14px;background:var(--soft);margin-bottom:14px}
+.mt-form label,.md-f label{display:block;margin:8px 0;font-size:13px;color:var(--muted)}
+.mt-form input,.mt-form select,.mt-form textarea,.md-f input,.md-f select,.md-f textarea{display:block;width:100%;box-sizing:border-box;margin-top:4px;font:inherit;font-size:14.5px;color:var(--ink);background:var(--card);border:1px solid var(--line,#3a3350);border-radius:10px;padding:8px 10px}
+.mt-form textarea,.md-f textarea{resize:vertical;white-space:pre-wrap}
+.mt-form .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.msg{margin:8px 0 0;font-size:13.5px}
+.empty{color:var(--muted);margin:6px 0}
+</style>
 </head>
 <body data-space="work">
 <header><div class="w">
@@ -111,7 +140,18 @@ nav .w::-webkit-scrollbar,.chips::-webkit-scrollbar,.hot::-webkit-scrollbar{disp
 <main>
 <section id="gate" class="gate"><div class="ic">🔐</div><h2 style="justify-content:center">Нужно войти</h2><p>Генератор с вашими фразами работает после входа — кнопка «Войти» вверху справа. Без входа генератор доступен на странице <a href="templates.html#gen">«Шаблоны»</a>.</p><button class="btn" type="button" onclick="G11&&G11.login()">Войти</button></section>
 <div id="app" hidden>
+<nav class="gtabs" id="gtabs" aria-label="Разделы">
+<button type="button" data-t="gen" class="on">💬 Генератор</button>
+<button type="button" data-t="fav">⭐ Избранное <span class="n" id="favN"></span></button>
+<button type="button" data-t="mine">📝 Мои шаблоны <span class="n" id="mineN"></span></button>
+<button type="button" data-t="mod" id="modTab" hidden>✅ Заявки на публикацию <span class="n" id="modN"></span></button>
+</nav>
 <section id="phrases"><h2>⭐ Мои фразы</h2><p style="margin-top:0;color:var(--muted)">Фразы, которые вы <b>сами пишете</b> в ответах в <a href="templates.html#gen">генераторе ответа</a> чаще всего, и ваши закреплённые. Фразы из конструктора и шаблоны из БЗ сюда не попадают. Генератор показывает ваши фразы в блоке «⭐ Мои частые фразы» и подсказывает их, когда вы начинаете печатать ответ. Фраза появляется здесь, когда вы написали её хотя бы в 2 ответах и скопировали ответ кнопкой «📋 Копировать ответ».</p><div id="ph-list" class="loading">Загружаю…</div><div class="row" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><input id="ph-new" type="text" maxlength="300" placeholder="Своя фраза, например: Спасибо, что дождались ответа!" style="flex:1;min-width:220px"><button class="btn" type="button" id="ph-add">📌 Закрепить</button></div><p id="ph-msg" style="margin:6px 0 0;font-size:13px"></p><div id="genHost" class="loading" style="margin-top:18px">Загружаю генератор ответа…</div></section>
+<section id="t-fav" hidden><h2>⭐ Избранные шаблоны</h2><p class="sub2">Отмечайте шаблоны звёздочкой ☆ на странице <a href="templates.html">«Шаблоны»</a> — они соберутся здесь и вверху страницы «Шаблоны». Видны только вам.</p><div id="fav-list" class="loading">Загружаю…</div></section>
+<section id="t-mine" hidden><h2>📝 Мои шаблоны</h2><p class="sub2">Свои шаблоны видны только вам. Кнопка «📤 В общие» отправляет шаблон наставникам и руководителю: после одобрения он появится на странице «Шаблоны» у всех. Статус заявки и комментарии проверяющего — здесь же.</p>
+<div class="mt-form"><input type="hidden" id="mt-id"><label>Название<input id="mt-title" maxlength="200" placeholder="Например: Товар не прошёл верификацию"></label><label>Раздел на странице «Шаблоны»<select id="mt-sec"></select></label><label>Текст шаблона<textarea id="mt-text" rows="8" placeholder="Текст ответа клиенту…"></textarea></label><div class="row"><button class="btn" type="button" id="mt-save">💾 Сохранить для себя</button><button class="btn alt" type="button" id="mt-send">📤 Сохранить и отправить в общие</button><button class="sb" type="button" id="mt-cancel" hidden>Отменить правку</button></div><p id="mt-msg" class="msg"></p></div>
+<div id="mt-list" class="loading">Загружаю…</div></section>
+<section id="t-mod" hidden><h2>✅ Заявки на публикацию</h2><p class="sub2">Шаблоны, которые операторы отправили в общие. Можно поправить название, текст и раздел, затем опубликовать — шаблон появится на странице «Шаблоны» у всех. Или вернуть на доработку / отклонить с комментарием — оператор увидит его у себя.</p><div id="md-list" class="loading">Загружаю…</div><h3 style="margin-top:22px">🕘 Недавние решения</h3><div id="md-done"></div></section>
 </div>
 </main>
 <script src="site.js?v=21" defer></script>
@@ -147,5 +187,74 @@ function upd(){var d=dark();b.textContent=d?'☀️':'🌙';b.title=d?'Свет�
 b.onclick=function(){var n=dark()?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}upd()};
 if(window.matchMedia)matchMedia('(prefers-color-scheme: dark)').addEventListener('change',upd);
 document.body.appendChild(b);upd()})();</script>
+<script>
+// вкладки: генератор · избранное · мои шаблоны · заявки (наставникам и руководителю)
+var SEC0=[['new','✏️ Новое от наставников'],['rate','⭐ Запрос оценки'],['refund','💸 Возвраты и отмены'],['wait','⏳ Ожидание и уточнение'],['problem','🛠 Проблемы и сроки'],['cancel','🚫 Отмена заказа'],['ot','↩️ Обратная доставка (ОТ)'],['gosuslugi','🪪 Кошелёк: паспорт через Госуслуги'],['delivery','📦 Доставка и ПВЗ'],['paid','🛡 Платные услуги и страховки'],['redirect','↪️ Другие поддержки'],['app','📱 Мобильное приложение'],['club','👑 ВБ Клуб'],['phone','📵 Смена номера телефона'],['ask','🔎 Уточняющие вопросы клиенту'],['listen','👂 Активное слушание'],['forms','📝 Формы для коллег']];
+var TS=[],MT=[],FV=[],MD={pending:[],done:[]},ISMOD=false,TAB='gen';
+function secName(v){if(/^u:/.test(v||''))return '📁 '+v.slice(2);var s=SEC0.filter(function(x){return x[0]===v})[0];return s?s[1]:'✏️ Новое от наставников'}
+function secOpts(sel){var o=SEC0.map(function(x){return '<option value="'+x[0]+'"'+(x[0]===sel?' selected':'')+'>'+esc(x[1])+'</option>'});TS.forEach(function(n){o.push('<option value="u:'+esc(n)+'"'+('u:'+n===sel?' selected':'')+'>📁 '+esc(n)+'</option>')});return o.join('')}
+function dt(s){if(!s)return '';var d=new Date(s);if(isNaN(d))return '';function p(n){return (n<10?'0':'')+n}return p(d.getDate())+'.'+p(d.getMonth()+1)+' '+p(d.getHours())+':'+p(d.getMinutes())}
+function cpy(t,b){var ok=function(){var o=b.innerHTML;b.textContent='Скопировано ✓';setTimeout(function(){b.innerHTML=o},1400)};if(navigator.clipboard)navigator.clipboard.writeText(t).then(ok,function(){});else ok()}
+function toGen(t){tab('gen');var f=document.getElementById('ecFact');if(!f){alert('Генератор ещё загружается — попробуйте через пару секунд');return}f.value=t;try{f.dispatchEvent(new Event('input',{bubbles:true}))}catch(e){}f.scrollIntoView({block:'center',behavior:'smooth'});f.focus()}
+function longTx(t){return String(t).split('\n').length>4||String(t).length>320}
+function tab(t,noHash){TAB=t;document.querySelectorAll('#gtabs button').forEach(function(b){b.classList.toggle('on',b.dataset.t===t)});
+  $('phrases').hidden=t!=='gen';$('t-fav').hidden=t!=='fav';$('t-mine').hidden=t!=='mine';$('t-mod').hidden=t!=='mod';
+  if(!noHash)try{history.replaceState(null,'',t==='gen'?location.pathname:'#'+t)}catch(e){}
+  if(t==='fav')loadFav();if(t==='mine')loadMine();if(t==='mod')loadMod()}
+$('gtabs').addEventListener('click',function(e){var b=e.target.closest('button[data-t]');if(b)tab(b.dataset.t)});
+// избранное
+function favShow(){$('favN').textContent=FV.length||'';var b=$('fav-list');b.className='';
+  b.innerHTML=FV.length?FV.map(function(x,i){return '<div class="mt-card fv" data-i="'+i+'"><div class="hd"><b>'+esc(x.title)+'</b></div><div class="tx">'+esc(x.text)+'</div>'+(longTx(x.text)?'<button type="button" class="more">показать полностью</button>':'')+'<div class="act"><button type="button" class="sb pr" data-a="cp">📋 Копировать</button><button type="button" class="sb" data-a="gen">➡️ В генератор</button><a class="sb" href="templates.html#'+esc(x.key)+'">🔗 К шаблону</a><button type="button" class="sb wr" data-a="un">✕ Убрать</button></div></div>'}).join(''):'<p class="empty">Пока пусто. Откройте <a href="templates.html">«Шаблоны»</a> и нажмите ☆ у нужных шаблонов.</p>'}
+function loadFav(){G11.api('favList').then(function(j){FV=j.items||[];favShow()}).catch(function(x){$('fav-list').className='';$('fav-list').textContent=x.message})}
+$('fav-list').addEventListener('click',function(e){var c=e.target.closest('.mt-card');if(!c)return;var x=FV[+c.dataset.i];if(!x)return;var b=e.target.closest('[data-a]'),m=e.target.closest('.more');
+  if(m){c.classList.toggle('open');m.textContent=c.classList.contains('open')?'свернуть':'показать полностью';return}if(!b)return;
+  if(b.dataset.a==='cp')cpy(x.text,b);else if(b.dataset.a==='gen')toGen(x.text);else if(b.dataset.a==='un'){b.disabled=true;G11.api('favToggle',{key:x.key}).then(function(j){FV=j.items||[];favShow()}).catch(function(e){b.disabled=false;alert(e.message)})}});
+// мои шаблоны
+function mineShow(j){if(j){MT=j.items||[];TS=j.tsections||TS;modFlag(j)}var att=MT.filter(function(x){return x.status==='revise'||x.status==='rejected'}).length;$('mineN').textContent=att||'';
+  var sel=$('mt-sec');if(!sel.dataset.v||j){var cur=sel.value||'new';sel.innerHTML=secOpts(cur);sel.dataset.v=1}
+  var b=$('mt-list');b.className='';
+  b.innerHTML=MT.length?MT.map(function(x,i){var a='<button type="button" class="sb pr" data-a="cp">📋 Копировать</button><button type="button" class="sb" data-a="gen">➡️ В генератор</button>';
+    if(x.status!=='pending')a+='<button type="button" class="sb" data-a="ed">✏️ Изменить</button>';
+    if(x.status==='draft'||x.status==='revise'||x.status==='rejected')a+='<button type="button" class="sb ok" data-a="send">📤 В общие</button>';
+    if(x.status==='pending')a+='<button type="button" class="sb" data-a="back">↩️ Отозвать заявку</button>';
+    if(x.status==='approved'&&x.pubId)a+='<a class="sb" href="templates.html#c-'+esc(x.pubId)+'">🔗 Открыть в «Шаблонах»</a>';
+    a+='<button type="button" class="sb wr" data-a="del">🗑 Удалить</button>';
+    return '<div class="mt-card" data-i="'+i+'"><div class="hd"><div><b>'+esc(x.title)+'</b><div class="meta">'+esc(secName(x.section))+' · изменён '+dt(x.updated)+'</div></div><span class="st st-'+esc(x.status)+'">'+esc(x.statusText)+'</span></div>'+
+      (x.comment&&x.status!=='draft'?'<div class="cm">💬 <b>'+esc(x.reviewer||'Проверяющий')+':</b> '+esc(x.comment)+'</div>':'')+
+      (x.status==='revise'?'<div class="meta" style="color:var(--warn)">Поправьте шаблон по комментарию и снова нажмите «📤 В общие».</div>':'')+
+      '<div class="tx">'+esc(x.text)+'</div>'+(longTx(x.text)?'<button type="button" class="more">показать полностью</button>':'')+'<div class="act">'+a+'</div></div>'}).join(''):'<p class="empty">Своих шаблонов пока нет — создайте первый в форме выше.</p>'}
+function loadMine(){G11.api('myTpl').then(mineShow).catch(function(x){$('mt-list').className='';$('mt-list').textContent=x.message})}
+function mtMsg(t,ok){var m=$('mt-msg');m.style.color=ok?'var(--ok)':'var(--warn)';m.textContent=t}
+function mtReset(){$('mt-id').value='';$('mt-title').value='';$('mt-text').value='';$('mt-sec').value='new';$('mt-cancel').hidden=true;$('mt-save').textContent='💾 Сохранить для себя'}
+function mtSave(submit){var it={id:$('mt-id').value,title:$('mt-title').value.trim(),text:$('mt-text').value.trim(),section:$('mt-sec').value,submit:!!submit};
+  if(!it.title||!it.text){mtMsg('Заполните название и текст');return}if(submit&&!confirm('Отправить шаблон «'+it.title+'» наставникам на проверку? После одобрения он появится у всех на странице «Шаблоны».'))return;
+  var bs=[$('mt-save'),$('mt-send')];bs.forEach(function(b){b.disabled=true});
+  G11.api('myTplSave',{item:it}).then(function(j){mineShow(j);mtReset();mtMsg(submit?'📤 Отправлено на проверку — статус заявки виден ниже':'✅ Сохранено — шаблон виден только вам',true)}).catch(function(x){mtMsg(x.message)}).then(function(){bs.forEach(function(b){b.disabled=false})})}
+$('mt-save').onclick=function(){mtSave(false)};$('mt-send').onclick=function(){mtSave(true)};$('mt-cancel').onclick=function(){mtReset();mtMsg('',true)};
+$('mt-list').addEventListener('click',function(e){var c=e.target.closest('.mt-card');if(!c)return;var x=MT[+c.dataset.i];if(!x)return;var b=e.target.closest('[data-a]'),m=e.target.closest('.more');
+  if(m){c.classList.toggle('open');m.textContent=c.classList.contains('open')?'свернуть':'показать полностью';return}if(!b)return;var a=b.dataset.a;
+  if(a==='cp')return cpy(x.text,b);if(a==='gen')return toGen(x.text);
+  if(a==='ed'){$('mt-id').value=x.id;$('mt-title').value=x.title;$('mt-text').value=x.text;$('mt-sec').value=x.section;$('mt-cancel').hidden=false;$('mt-save').textContent='💾 Сохранить изменения';mtMsg(x.status==='approved'?'Опубликованный шаблон останется в «Шаблонах» как есть — правка сохранится у вас, её можно снова отправить в общие.':'Правите «'+x.title+'»',true);$('mt-title').scrollIntoView({block:'center',behavior:'smooth'});return}
+  var act=a==='send'?'myTplSubmit':a==='back'?'myTplWithdraw':a==='del'?'myTplDelete':'';if(!act)return;
+  if(a==='send'&&!confirm('Отправить «'+x.title+'» наставникам на проверку?'))return;if(a==='del'&&!confirm('Удалить шаблон «'+x.title+'»?'+(x.status==='approved'?' В «Шаблонах» у всех он останется.':'')))return;
+  b.disabled=true;G11.api(act,{id:x.id}).then(mineShow).catch(function(e){b.disabled=false;alert(e.message)})});
+// заявки
+function modFlag(j){if(!j||j.isMod===undefined)return;ISMOD=!!j.isMod;$('modTab').hidden=!ISMOD;if(ISMOD&&j.pending!==undefined)$('modN').textContent=j.pending||''}
+function modShow(j){if(j){MD=j;TS=j.tsections||TS}$('modN').textContent=MD.pending.length||'';var b=$('md-list');b.className='';
+  b.innerHTML=MD.pending.length?MD.pending.map(function(x,i){return '<div class="mt-card" data-i="'+i+'"><div class="hd"><div><b>'+esc(x.author)+'</b><div class="meta">отправлено '+dt(x.updated)+(x.history&&/доработк/.test(x.history)?' · повторно, после доработки':'')+'</div></div><span class="st st-pending">На проверке</span></div>'+(x.comment&&/доработк/.test(x.history)?'<div class="cm">Прошлый комментарий: '+esc(x.comment)+'</div>':'')+
+    '<div class="md-f"><label>Название<input data-f="title" value="'+esc(x.title)+'" maxlength="200"></label><label>Раздел<select data-f="section">'+secOpts(x.section)+'</select></label><label>Текст<textarea data-f="text" rows="8">'+esc(x.text)+'</textarea></label><label>Комментарий оператору<textarea data-f="comment" rows="2" placeholder="Обязательно для «На доработку» и «Отклонить»"></textarea></label></div>'+
+    '<div class="act"><button type="button" class="sb ok" data-a="approve">✅ Опубликовать для всех</button><button type="button" class="sb" data-a="revise">✏️ На доработку</button><button type="button" class="sb wr" data-a="reject">✖ Отклонить</button></div><p class="msg"></p></div>'}).join(''):'<p class="empty">Новых заявок нет 🎉</p>';
+  $('md-done').innerHTML=MD.done.length?MD.done.map(function(x){return '<div class="mt-card"><div class="hd"><div><b>'+esc(x.title)+'</b><div class="meta">'+esc(x.author)+' · '+esc(x.reviewer)+' · '+dt(x.updated)+'</div></div><span class="st st-'+esc(x.status)+'">'+esc(x.statusText)+'</span></div>'+(x.comment?'<div class="cm">'+esc(x.comment)+'</div>':'')+(x.status==='approved'&&x.pubId?'<div class="act"><a class="sb" href="templates.html#c-'+esc(x.pubId)+'">🔗 Открыть в «Шаблонах»</a></div>':'')+'</div>'}).join(''):'<p class="empty">Пока нет.</p>'}
+function loadMod(){if(!ISMOD)return;G11.api('modList').then(modShow).catch(function(x){$('md-list').className='';$('md-list').textContent=x.message})}
+$('md-list').addEventListener('click',function(e){var b=e.target.closest('[data-a]');if(!b)return;var c=b.closest('.mt-card'),x=MD.pending[+c.dataset.i];if(!x)return;
+  var f={};c.querySelectorAll('[data-f]').forEach(function(el){f[el.dataset.f]=el.value.trim()});var a=b.dataset.a,msg=c.querySelector('.msg');
+  if(a!=='approve'&&!f.comment){msg.style.color='var(--warn)';msg.textContent=a==='revise'?'Напишите оператору, что поправить':'Напишите причину отказа';c.querySelector('[data-f="comment"]').focus();return}
+  if(a==='approve'&&!confirm('Опубликовать «'+f.title+'» в разделе «'+secName(f.section)+'»? Шаблон появится у всех на странице «Шаблоны».'))return;
+  c.querySelectorAll('button').forEach(function(z){z.disabled=true});
+  G11.api('modDecide',{id:x.id,act:a,title:f.title,text:f.text,section:f.section,comment:f.comment}).then(modShow).catch(function(e){c.querySelectorAll('button').forEach(function(z){z.disabled=false});msg.style.color='var(--warn)';msg.textContent=e.message})});
+function tabsInit(){if(tabsInit.d)return;tabsInit.d=1;var h=(location.hash||'').slice(1);if(h==='fav'||h==='mine')tab(h,true);G11.api('myTpl').then(function(j){mineShow(j);if(h==='mod'&&ISMOD)tab('mod',true)}).catch(function(){});G11.api('favList').then(function(j){FV=j.items||[];$('favN').textContent=FV.length||''}).catch(function(){});}
+document.addEventListener('g11:login',function(){tabsInit.d=0;tabsInit()});
+(function w(){if(window.G11&&G11.user()&&!$('app').hidden)tabsInit();else setTimeout(w,400)})();
+</script>
 </body>
 </html>
