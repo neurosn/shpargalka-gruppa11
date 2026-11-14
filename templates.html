@@ -590,7 +590,7 @@ section{scroll-margin-top:150px}
 document.querySelectorAll('.tpl').forEach(function(el){
   var b=document.createElement('button');b.className='copy';b.textContent='Копировать';
   b.onclick=function(){
-    var c=el.cloneNode(true);c.querySelectorAll('.lbl,.copy').forEach(function(x){x.remove()});
+    var c=el.cloneNode(true);c.querySelectorAll('.lbl,.copy,.favb,.mkb,.mkp,.by,.cpb').forEach(function(x){x.remove()});
     var t=c.textContent.trim();
     function ok(){b.textContent='Скопировано ✓';b.classList.add('done');setTimeout(function(){b.textContent='Копировать';b.classList.remove('done')},1500)}
     if(navigator.clipboard){navigator.clipboard.writeText(t).then(ok,function(){fb(t);ok()})}else{fb(t);ok()}
