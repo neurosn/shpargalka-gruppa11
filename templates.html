@@ -756,6 +756,40 @@ setInterval(punCheck,700);$('ecOut').addEventListener('input',function(){clearTi
 punBox().addEventListener('click',function(ev){var x=ev.target.closest('button');if(!x)return;
   if(x.dataset.pall){for(var n=0;n<4&&PUN.length;n++){punApply(PUN);PUNLAST=null;punCheck()}return}
   var r=PUN[+(x.dataset.pi!=null?x.dataset.pi:x.dataset.px)];if(!r)return;if(x.dataset.pi!=null)punApply([r]);else PUNIGN[r.key]=1;PUNLAST=null;punCheck()});
+// он/она: окончания в тексте оператора («я проверил» ↔ «я проверила», «рад» ↔ «рада», «проверил/а» → по выбору)
+var GDIRR={'нашёл':'нашла','нашел':'нашла','пришёл':'пришла','пришел':'пришла','ушёл':'ушла','ушел':'ушла','вошёл':'вошла','перешёл':'перешла','подошёл':'подошла','смог':'смогла','мог':'могла','помог':'помогла','смогу':'смогу','учёл':'учла','учел':'учла','прочёл':'прочла','прочел':'прочла','заметил':'заметила'};
+var GDADJ={'рад':'рада','готов':'готова','должен':'должна','уверен':'уверена','благодарен':'благодарна','вынужден':'вынуждена','сам':'сама','признателен':'признательна','согласен':'согласна','обязан':'обязана','занят':'занята','рада':'рада'};
+var GDREVI={},GDREVA={};Object.keys(GDIRR).forEach(function(k){if(k!==GDIRR[k])GDREVI[GDIRR[k]]=GDREVI[GDIRR[k]]||k});Object.keys(GDADJ).forEach(function(k){if(k!==GDADJ[k])GDREVA[GDADJ[k]]=k});
+GDREVI['нашла']='нашёл';GDREVI['пришла']='пришёл';GDREVI['ушла']='ушёл';GDREVI['учла']='учёл';GDREVI['прочла']='прочёл';
+function gdCase(src,w){return src.charAt(0)!==src.charAt(0).toLowerCase()?w.charAt(0).toUpperCase()+w.slice(1):w}
+function gdWord(w,sx,verbOnly){var l=w.toLowerCase(),r=null;
+  if(sx==='f'){if(GDIRR[l])r=GDIRR[l];else if(!verbOnly&&GDADJ[l])r=GDADJ[l];else if(/^[а-яё]{2,}лся$/.test(l))r=l.slice(0,-2)+'ась';else if(/^[а-яё]{2,}[аеиоуыяю]л$/.test(l))r=l+'а'}
+  else{if(GDREVI[l])r=GDREVI[l];else if(!verbOnly&&GDREVA[l])r=GDREVA[l];else if(/^[а-яё]{2,}лась$/.test(l))r=l.slice(0,-3)+'ся';else if(/^[а-яё]{2,}[аеиоуыяю]ла$/.test(l)&&!/^(была|могла|смогла)$/.test(l)||l==='была')r=l.slice(0,-1)}
+  return r&&r!==l?gdCase(w,r):w}
+function genderize(t,sx){if(!t)return t;var Cy='А-Яа-яЁё';
+  // явные варианты: проверил/а, проверил(а), обратился/ась, рад/а
+  t=t.replace(new RegExp('(['+Cy+']+)(?:\\/|\\()(а|ла|ась|лась)\\)?(?!['+Cy+'])','g'),function(m,b,s){if(sx==='m')return b;if(/ся$/.test(b)&&/сь$/.test(s))return b.slice(0,-2)+'ась';return b+(s==='ла'&&!/л$/.test(b)?'ла':'а')});
+  // после «я»: наречия/частицы, потом глагол прошедшего времени, и однородные «и …»
+  var ADV='(?:всё|все|уже|сейчас|ещё|еще|только|лично|обязательно|тоже|также|внимательно|повторно|не|лишь|сегодня|дополнительно|дважды|сразу|быстро|подробно|ранее|вчера|недавно|очень|искренне|бы|же|бесконечно|правда)';
+  var re=new RegExp('((?:^|[^'+Cy+'])[Яя][ \\t]+(?:'+ADV+'[ \\t]+)*)(['+Cy+']+)((?:,?[ \\t]+(?:и|а также|и уже|и сразу)[ \\t]+(?:'+ADV+'[ \\t]+)*['+Cy+']+)*)','g');
+  t=t.replace(re,function(m,pre,w,rest){var nw=gdWord(w,sx,false);if(nw===w&&!/(л|ла|лся|лась|рад|рада|готов|готова|должен|должна|уверен|уверена|благодарен|благодарна|был|была)$/i.test(w))return m;
+    rest=rest.replace(new RegExp('(['+Cy+']+)$'),function(x){return gdWord(x,sx,false)});return pre+nw+rest});
+  // однородные глаголы после «и» в том же предложении: «я обратилась в отдел и передала»
+  t=t.split(/(?<=[.!?…\n])/).map(function(sn){if(!new RegExp('(^|[^'+Cy+'])[Яя][ \\t]').test(sn))return sn;return sn.replace(new RegExp('([ \\t](?:и|а также)[ \\t]+(?:'+ADV+'[ \\t]+)*)(['+Cy+']{3,}(?:л|ла|лся|лась))(?=[^'+Cy+']|$)','g'),function(m,p,w){return p+gdWord(w,sx,true)})}).join('');
+  // «я сам/сама»
+  t=t.replace(new RegExp('((?:^|[^'+Cy+'])[Яя][ \\t]+)(сама|сам)(?=[^'+Cy+']|$)','g'),function(m,p,w){return p+(sx==='f'?'сама':'сам')});
+  // «рад(а) был(а) помочь»
+  t=t.replace(new RegExp('(^|[^'+Cy+'])(рад|рада)([ \\t]+)(был|была)(?=[^'+Cy+']|$)','gi'),function(m,p,a,sp,b){return p+gdWord(a,sx,false)+sp+gdCase(b,sx==='f'?'была':'был')});
+  // «был(а) рад(а)», «буду рад(а)», «рад(а) помочь» — без подлежащего тоже от первого лица
+  t=t.replace(new RegExp('(^|[^'+Cy+'])(был|была|буду|очень|искренне|всегда)?([ \\t]*)(рад|рада|благодарен|благодарна|признателен|признательна)(?=[^'+Cy+']|$)','gi'),function(m,p,a,sp,w){var na=a?(a.toLowerCase()==='был'||a.toLowerCase()==='была'?gdCase(a,sx==='f'?'была':'был'):a):'';return p+na+sp+gdWord(w,sx,false)});
+  return t}
+function gdField(el,force){if(!el)return;var v=el.value,g=genderize(v,sex);if(g===v)return;var act=document.activeElement===el,pos=act?el.selectionStart:0;
+  if(act&&!force&&!/[\s.,!?;:…)»]$/.test(v.slice(0,pos)))return;
+  var np=act?genderize(v.slice(0,pos),sex).length:0;el.value=g;if(act)el.setSelectionRange(np,np);if(el.id==='ecOut')el.dataset.touched=1}
+$('ecSex').addEventListener('click',function(e){if(!e.target.closest('button'))return;setTimeout(function(){gdField($('ecFact'),true);gdField($('ecOut'),true)},0)});
+gen=(function(o){return function(){var f=$('ecFact');if(f)f.value=genderize(f.value,sex);return o.apply(this,arguments)}})(gen);
+var GDL={};setInterval(function(){['ecFact','ecOut'].forEach(function(id){var el=$(id);if(!el||el.value===GDL[id])return;gdField(el,false);GDL[id]=el.value})},700);
+['ecFact','ecOut'].forEach(function(id){var el=$(id);if(el)el.addEventListener('blur',function(){gdField(el,true)})});
 $('ecOut').addEventListener('keyup',function(e){if(/Arrow|Home|End/.test(e.key))phSug()});$('ecOut').addEventListener('blur',function(){setTimeout(function(){$('ecSug').hidden=true},200)});
 function phKey(s){return String(s).replace(/\s+/g,' ').trim().toLowerCase().replace(/[.!?…,;:—–\s]+$/,'')}
 function phSplit(t){return String(t||'').replace(/([.!?…])\s+/g,'$1\n').split(/\n+/).map(function(s){return s.replace(/\s+/g,' ').trim()}).filter(Boolean)}
