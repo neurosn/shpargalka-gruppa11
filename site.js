@@ -1,6 +1,7 @@
 /* Общее верхнее меню шпаргалки Группы 11: Главная · Работа · Инструменты · Команда */
 (function(){
   if(window.__g11site)return;window.__g11site=1;
+  ['https://script.google.com','https://script.googleusercontent.com'].forEach(function(u){var l=document.createElement('link');l.rel='preconnect';l.href=u;l.crossOrigin='anonymous';document.head.appendChild(l)});
   var MAP={'index.html':'home','':'home','work.html':'work','templates.html':'work','bz.html':'work','sv.html':'work',
     'tools.html':'tools','helper.html':'tools','calc.html':'tools','salary.html':'tools','check.html':'tools',
     'team.html':'team','vacation.html':'team','zp.html':'team','account.html':'team','admin.html':'team','editor.html':'team','logins.html':'team','article.html':'work','gen.html':'work'};
@@ -21,7 +22,7 @@
   h+='<span class="sp"></span><span id="g11acc"></span></div>';
   bar.innerHTML=h;document.body.insertBefore(bar,document.body.firstChild);
   var a=document.createElement('script');a.src='auth.js?v=7';document.body.appendChild(a);
-  var ij=document.createElement('script');ij.src='icons.js?v=13';ij.async=false;document.body.appendChild(ij);
+  var ij=document.createElement('script');ij.src='icons.js?v=14';ij.async=false;document.body.appendChild(ij);
   var rj=document.createElement('script');rj.src='rte.js?v=13';rj.async=false;document.body.appendChild(rj);
   var cj=document.createElement('script');cj.src='content.js?v=10';cj.async=false;document.body.appendChild(cj);
   if(/(templates|gen)\.html$/.test(location.pathname)){var mj=document.createElement('script');mj.src='markers.js?v=2';mj.async=false;document.body.appendChild(mj)}
