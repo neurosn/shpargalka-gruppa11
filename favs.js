@@ -57,6 +57,8 @@
     var o=e.target.closest('#mkbar [data-mkm]');if(o){window.G11Mark&&G11Mark.open(o,null);return}
     var gc=e.target.closest('#mkgroup [data-gc]');if(gc){var el=document.getElementById(gc.dataset.gc);if(el)copy(text(el),gc);return}
     var gj=e.target.closest('#mkgroup [data-gj]');if(gj){var id=gj.getAttribute('href').slice(1);if(F.sec||F.fav||Object.keys(F.mk).length){F={mk:{},fav:false,sec:'',grp:false};keep();bar();apply()}}});
+  // ссылка/кнопка ведёт в скрытый фильтром блок (например, «Генератор») — снимаем фильтр, чтобы переход сработал
+  document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a)return;var id=a.getAttribute('href').slice(1),t=null;if(!id)return;try{t=document.getElementById(decodeURIComponent(id))}catch(_){}if(t&&t.closest('.mk-off')){F={mk:{},fav:false,sec:'',grp:F.grp};keep();bar();apply()}},true);
   document.addEventListener('change',function(e){if(e.target.closest&&e.target.closest('#mkbar [data-fs]')){F.sec=e.target.value;keep();apply();if(F.sec){var s=document.getElementById('mkbar');s&&s.scrollIntoView({block:'start'})}}});
   document.addEventListener('g11:marks',function(){deco()});
   function load(){if(!window.G11||!G11.user()){set([]);return}G11.api('favList').then(function(j){set(j.items)}).catch(function(){deco()})}
